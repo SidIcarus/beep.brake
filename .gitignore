@@ -29,3 +29,6 @@ proguard/
 # DS_Store - Macs are dumb
 *.DS_Store
 *.ds_store
+
+#iml files
+*.iml
