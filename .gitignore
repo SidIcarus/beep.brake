@@ -30,5 +30,6 @@ proguard/
 *.DS_Store
 *.ds_store
 
-#iml files
+#IntelliJ files
 *.iml
+.idea/
