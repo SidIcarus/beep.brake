@@ -8,6 +8,16 @@
 #ifndef __BUFFER_MANAGEMENT__SEGMENT_BUFFER_H_
 #define __BUFFER_MANAGEMENT__SEGMENT_BUFFER_H_
 
+#include <list>
+
+class SegmentBuffer {
+	public:
+		SegmentBuffer();
+
+	private:
+		std::list buffer;//doubly linked list
+
+}
 
 
 #endif /*__BUFFER_MANAGEMENT__SEGMENT_BUFFER_H_*/
