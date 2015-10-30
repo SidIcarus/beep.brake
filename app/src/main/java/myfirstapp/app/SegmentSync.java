@@ -7,7 +7,8 @@ import java.util.Map;
 
 public class SegmentSync {
 
-	HashMap<String, ArrayList<Object>> collectedData;
+	HashMap<String, ArrayList<Object>> aggData;
+	HashMap<String, Object> singleData
 
 	public void MakeSegment() {
 		//I'm not certain that this is the correct way to force atomicity
@@ -43,7 +44,7 @@ public class SegmentSync {
 		//Call BufferManager add method -> Needs Kevin's stuff
 	}
 
-	public void UpdateData(HashMap<String, Object> map) {
+	public void UpdateDataAgg(HashMap<String, Object> map) {
 		Iterator it = map.entrySet().iterator();
 
 		//Iterate over all items to be added
@@ -57,6 +58,10 @@ public class SegmentSync {
 				collectedData.put(pair.getKey().toString(), a);
 			}
 		}
+	}
+
+	public void UpdateDataSingle(HashMap<String, Object> map) {
+		
 	}
 
 }
