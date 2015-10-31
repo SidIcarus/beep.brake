@@ -8,37 +8,39 @@ import java.util.Map;
 public class SegmentSync {
 
 	HashMap<String, ArrayList<Object>> aggData;
-	HashMap<String, Object> singleData
+	HashMap<String, Object> singleData;
 
 	public void MakeSegment() {
 		//I'm not certain that this is the correct way to force atomicity
 		synchronized(this){
-			HashMap<String, ArrayList<Object>> temp = collectedData;
+			HashMap<String, ArrayList<Object>> tempAgg = aggData;
 			collectedData = new HashMap<String, ArrayList<Object>>();
 		}
-
-		Iterator it = temp.entrySet().iterator();
+		synchronized(this){
+			HashMap<String, Object> tempSing = singleData;
+			singleData = new HashMap<String, Object>();
+		}
 		HashMap<String, Object> segMap = new HashMap<String, Object>();
 
-		while(it.hasNext()){
-			Map.Entry pair = (Map.Entry)it.next();
-			String name = pair.getKey()
-			ArrayList<Object> data = temp.get(pair.getKey());
+		Iterator itAgg = tempAgg.entrySet().iterator();
+		while(itAgg.hasNext()){
+			Map.Entry pair = (Map.Entry)itAgg.next();
+			String name = pair.getKey();
+			ArrayList<Object> data = tempAgg.get(pair.getKey());
+			int avgData = 0;
 
-			//This is bad, we need to improve our data management
-			//Likely should have some guarantee that numeric data is the
-			//only data where size > 1
-			if(data.size() > 1){
-				int avgData = 0;
-
-				for(int i = 0; i < data.size(); i++){
-					avgData += data.get(i);
-				}
-				avgData = avgData / data.size();
-				segMap.put(name, avgData);
-			}else{
-				segMap.out(name, data.get(0));
+			for(int i = 0; i < data.size(); i++){
+				avgData += data.get(i);
 			}
+			avgData = avgData / data.size();
+			segMap.put(name, avgData);
+		}
+
+		Iterator itSing = tempSing.entrySet().iterator();
+		while(itSing.hasNext()){
+			Map.Entry pair = (Map.Entry)it.next();
+
+			segMap.put(pair.getKey(), tempSing.get(pair.getKey()));
 		}
 		Segment seg = new Segment(segMap);
 		//Call BufferManager add method -> Needs Kevin's stuff
@@ -61,7 +63,7 @@ public class SegmentSync {
 	}
 
 	public void UpdateDataSingle(HashMap<String, Object> map) {
-		
+
 	}
 
 }

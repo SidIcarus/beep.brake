@@ -10,7 +10,6 @@ import android.os.Bundle;
 
 public class AccelerometerSensor implements SensorInterface, SensorEventListener {
 
-  private float x, y, z;
   private SensorManager manager
   private Sensor Accelerometer
 
@@ -21,8 +20,20 @@ public class AccelerometerSensor implements SensorInterface, SensorEventListener
   }
 
   @Override
-  public void send(){
+  public void send(float x, float y, float z){
+    HashMap<String, Object> data = new HashMap<String, Object>();
 
+    if(x != null){
+      data.put("XAccel", x);
+    }
+    if(y != null){
+      data.put("YAccel", y);
+    }
+    if(z != null){
+      data.put("ZAccel", z);
+    }
+
+    //Send AggData
   }
 
   protected void onResume(){
@@ -37,9 +48,11 @@ public class AccelerometerSensor implements SensorInterface, SensorEventListener
   }
 
   public void onSensorChanged(SensorEvent event){
-    x = event.values[0];
-    y = event.values[1];
-    z = event.values[2];
+    float x = event.values[0];
+    float y = event.values[1];
+    float z = event.values[2];
+
+    send(x, y, z);
   }
 
 }
