@@ -9,11 +9,11 @@ public class Segment {
 	private Segment prevSeg;
 	
 	HashMap<String, Object> calculatedData;
-	Date createdAt;
+	long createdAt;
 	
 	public Segment(HashMap<String, Object> map) {
 		calculatedData = map;
-		createdAt = new Date();
+		createdAt = new Date().getTime();
 	}
 	
 	public Segment getNextSeg() {
@@ -33,11 +33,7 @@ public class Segment {
 	}
 	
 	public Object getDataObject(String item) {
-		if (calculatedData.containsKey(item)) {
-			return calculatedData.get(item);
-		} else {
-			return null;
-		}
+		return calculatedData.get(item);
 	}
 	
 	public void addDataObject(String name, Object item) {

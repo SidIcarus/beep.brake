@@ -24,13 +24,13 @@ public class AccelerometerSensor implements SensorInterface, SensorEventListener
     HashMap<String, Object> data = new HashMap<String, Object>();
 
     if(x != null){
-      data.put("XAccel", x);
+      data.put("XAcl", x);
     }
     if(y != null){
-      data.put("YAccel", y);
+      data.put("YAcl", y);
     }
     if(z != null){
-      data.put("ZAccel", z);
+      data.put("ZAcl", z);
     }
 
     //Send AggData

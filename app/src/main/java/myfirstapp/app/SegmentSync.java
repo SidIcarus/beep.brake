@@ -1,4 +1,4 @@
-opepackage myfirstapp.app;
+	package myfirstapp.app;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,13 +13,14 @@ public class SegmentSync {
 	public void MakeSegment() {
 		//I'm not certain that this is the correct way to force atomicity
 		synchronized(this){
-			HashMap<String, ArrayList<Object>> tempAgg = aggData;
+			HashMap<String, ArrayList<Object>> tempAgg = new HashMap<>(aggData); // Proper Copy
 			collectedData = new HashMap<String, ArrayList<Object>>();
 		}
 		synchronized(this){
-			HashMap<String, Object> tempSing = singleData;
+			HashMap<String, Object> tempSing = new HashMap<>(singleData);
 			singleData = new HashMap<String, Object>();
 		}
+		
 		HashMap<String, Object> segMap = new HashMap<String, Object>();
 
 		Iterator itAgg = tempAgg.entrySet().iterator();
@@ -52,18 +53,23 @@ public class SegmentSync {
 		//Iterate over all items to be added
 		while(it.hasNext()) {
 			Map.Entry pair = (Map.Entry)it.next();
-			if (collectedData.containsKey(pair.getKey())) {
-				collectedData.get(pair.getKey()).add(pair.getValue());
+			if (aggData.containsKey(pair.getKey())) {
+				aggData.get(pair.getKey()).add(pair.getValue());
 			} else {
 				ArrayList<Object> a = new ArrayList<Object>();
 				a.add(pair.getValue());
-				collectedData.put(pair.getKey().toString(), a);
+				aggData.put(pair.getKey().toString(), a);
 			}
 		}
 	}
 
 	public void UpdateDataSingle(HashMap<String, Object> map) {
-
+		Iterator it = map.entrySet().iterator();
+		
+		while(it.hasNext()) {
+			Map.Entry pair = (Map.Entry)it.next();
+			aggData.put(pair.getKey(), pair.getValue());
+		}
 	}
 
 }

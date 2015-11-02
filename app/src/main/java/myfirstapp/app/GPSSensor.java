@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.util.Log;
 import android.view.View;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public class GPSSensor implements SensorInterface, LocationListener {
 
     private double lat;
     private double lng;
-    private double speed;
+    private float speed;
     private String provider;
     private TextView longitudeField;
 
@@ -39,7 +40,20 @@ public class GPSSensor implements SensorInterface, LocationListener {
 
     @Override
     public void send() {
-
+    	HashMap<String, Object> d = new HashMap<String, Object>();
+    	
+    	if (lat != null) {
+    		d.put("lat", lat);
+    	}
+    	if (lng != null) {
+    		d.put("lng", lng);
+    	}
+    	if (speed != null) {
+    		d.put("spd", speed);
+    	}
+    	
+    	//Send Aggdata
+    	
     }
 
     @Override
