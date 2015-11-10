@@ -1,5 +1,12 @@
 package util;
  
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+
+import org.opencv.core.Scalar;
+
 /*
  * SliderDemo.java requires all the files in the images/doggy
  * directory.

@@ -1,5 +1,18 @@
 package main;
 
+import java.io.IOException;
+
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
+import Algo.DetectCar;
+import util.VideoReader;
+
 public class TestCarTrackingAlgorithm {
 	
 	/* ***************** CASCADES *****************	

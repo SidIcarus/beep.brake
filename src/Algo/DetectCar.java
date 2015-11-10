@@ -1,5 +1,11 @@
 package Algo;
 
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.objdetect.CascadeClassifier;
+
 public class DetectCar {
 
 	static CascadeClassifier mCascadeClassifier;

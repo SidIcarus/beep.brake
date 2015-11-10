@@ -1,5 +1,13 @@
 package main;
 
+import java.io.IOException;
+
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+
+import util.VideoReader;
+
 public class SaveFullEverySecond {
 
 	/* ***************** VIDEO ***************** */

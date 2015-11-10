@@ -1,5 +1,17 @@
 package main;
 
+import java.io.IOException;
+
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+import util.Slider;
+import util.VideoReader;
+
 public class LaneDetection {
 
 	/* ***************** VIDEO ***************** */
@@ -46,7 +58,7 @@ public class LaneDetection {
 				int widthMidPt = mat.width() / 2;
 				//crop left and right
 				Rect leftRegion = new Rect(0,0, widthMidPt, mat.height());
-				left = new Mat()
+				left = new Mat();
 				Imgproc.cvtColor(mat, grey, Imgproc.COLOR_BGR2GRAY);
 
 				Imgproc.Canny(grey, canny, 50, 200);
