@@ -6,7 +6,12 @@ android {
     packagingOptions {
 //        exclude 'lib/*/libOpenCV.so'
         exclude 'lib/armeabi/libOpenCV.so'
+        exclude 'lib/armeabi-v7a/libOpenCV.so'
+        exclude 'lib/mips/libOpenCV.so'
+        exclude 'lib/mips64/libOpenCV.so'
+        exclude 'lib/x86_64/libOpenCV.so'
         exclude 'lib/x86/libOpenCV.so'
+        exclude 'lib/arm64-v8a/libOpenCV.so'
     }
 
     defaultConfig {
