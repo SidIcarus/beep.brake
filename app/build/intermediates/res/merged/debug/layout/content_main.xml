@@ -12,4 +12,4 @@
     <TextView android:text="Hello World!" android:layout_width="wrap_content"
         android:layout_height="wrap_content" android:id="@+id/textview"/>
 </RelativeLayout>
-<!-- From: file:/C:/Users/app61/Git/Github/sp/beep.brake/app/src/main/res/layout/content_main.xml -->
+<!-- From: file:/C:/Users/app61/Git/Github/beep.brake/app/src/main/res/layout/content_main.xml -->
