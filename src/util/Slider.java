@@ -2,6 +2,8 @@ package util;
  
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -17,147 +19,39 @@ public class Slider extends JPanel implements 	ActionListener,
 
 	private static final long serialVersionUID = 1L;
 	
-	//Image Stuff
-	static final int H_MIN = 0;
-	static final int H_MAX = 256;
-	static final int S_MIN = 0;
-	static final int S_MAX = 256;
-	static final int V_MIN = 0;
-	static final int V_MAX = 256;
-	
-    //Set up animation parameters.
-    static final int Slider_MIN = 0;
-    static final int Slider_MAX = 256;
-    static final int Slider_INIT_MIN = 88;    
-    static final int Slider_INIT_MAX = 168;    
+    static ArrayList<JSlider> allSliders = new ArrayList<JSlider>();
     
-    
-    //sliders
-    //Create the slider.
-    static JSlider hSliderMax = new JSlider(JSlider.HORIZONTAL, Slider_MIN, Slider_MAX, Slider_INIT_MAX);
-    static JSlider hSliderMin = new JSlider(JSlider.HORIZONTAL, Slider_MIN, Slider_MAX, Slider_INIT_MIN);
-    static JSlider sSliderMax = new JSlider(JSlider.HORIZONTAL, Slider_MIN, Slider_MAX, Slider_INIT_MAX);
-    static JSlider sSliderMin = new JSlider(JSlider.HORIZONTAL, Slider_MIN, Slider_MAX, Slider_INIT_MIN);
-    static JSlider vSliderMax = new JSlider(JSlider.HORIZONTAL, Slider_MIN, Slider_MAX, Slider_INIT_MAX);
-    static JSlider vSliderMin = new JSlider(JSlider.HORIZONTAL, Slider_MIN, Slider_MAX, Slider_INIT_MIN);
-     
- 
-    public Slider() {
+    public Slider(String[] sliders) {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-  
-        //Create the label.
+      //Create the label.
         Font text = new Font("Serif", Font.ITALIC, 15);
-        JLabel hMaxLabel = new JLabel("Hue Max", JLabel.CENTER);
-        JLabel hMinLabel = new JLabel("Hue Min", JLabel.CENTER);
-        JLabel sMaxLabel = new JLabel("Saturation Max", JLabel.CENTER);
-        JLabel sMinLabel = new JLabel("Saturation Min", JLabel.CENTER);
-        JLabel vMaxLabel = new JLabel("Value Max", JLabel.CENTER);
-        JLabel vMinLabel = new JLabel("Value Min", JLabel.CENTER);
-        hMaxLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        hMinLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        sMaxLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        sMinLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        vMaxLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        vMinLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        for(String s : sliders){
+            JLabel label = new JLabel(s, JLabel.CENTER);
+            label.setAlignmentX(Component.CENTER_ALIGNMENT);
+            JSlider slider = new JSlider();
+            slider.addChangeListener(this);
+            //Turn on labels at major tick marks.
+            slider.setMajorTickSpacing(50);
+            slider.setMinorTickSpacing(1);
+            slider.setPaintTicks(true);
+            slider.setPaintLabels(true);
+            slider.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
+            slider.setFont(text);
 
- 
-        /* hue Slider Max*/
-        hSliderMax.addChangeListener(this);
- 
-        //Turn on labels at major tick marks.
-        hSliderMax.setMajorTickSpacing(50);
-        hSliderMax.setMinorTickSpacing(1);
-        hSliderMax.setPaintTicks(true);
-        hSliderMax.setPaintLabels(true);
-        hSliderMax.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
-        hSliderMax.setFont(text);
-        
-        //Saturation Slider
-        hSliderMax.addChangeListener(this);
-        
-        /* hue Slider Min */
-        hSliderMin.addChangeListener(this);
- 
-        //Turn on labels at major tick marks.
-        hSliderMin.setMajorTickSpacing(50);
-        hSliderMin.setMinorTickSpacing(1);
-        hSliderMin.setPaintTicks(true);
-        hSliderMin.setPaintLabels(true);
-        hSliderMin.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
-        hSliderMin.setFont(text);
-        
-        /* Saturation Slider Max */
-        sSliderMax.addChangeListener(this);
-        
-        //Turn on labels at major tick marks.
-        sSliderMax.setMajorTickSpacing(50);
-        sSliderMax.setMinorTickSpacing(1);
-        sSliderMax.setPaintTicks(true);
-        sSliderMax.setPaintLabels(true);
-        sSliderMax.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
-        sSliderMax.setFont(text);
-        
-        /* Saturation Slider Min */
-        sSliderMin.addChangeListener(this);
-        
-        //Turn on labels at major tick marks.
-        sSliderMin.setMajorTickSpacing(50);
-        sSliderMin.setMinorTickSpacing(1);
-        sSliderMin.setPaintTicks(true);
-        sSliderMin.setPaintLabels(true);
-        sSliderMin.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
-        sSliderMin.setFont(text);
-        
-        
-        /* Value Slider Max */
-        vSliderMax.addChangeListener(this);
-        
-        //Turn on labels at major tick marks.
-        vSliderMax.setMajorTickSpacing(50);
-        vSliderMax.setMinorTickSpacing(1);
-        vSliderMax.setPaintTicks(true);
-        vSliderMax.setPaintLabels(true);
-        vSliderMax.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
-        vSliderMax.setFont(text);
- 
-        /* Value Slider Min*/
-        vSliderMin.addChangeListener(this);
-        
-        //Turn on labels at major tick marks.
-        vSliderMin.setMajorTickSpacing(50);
-        vSliderMin.setMinorTickSpacing(1);
-        vSliderMin.setPaintTicks(true);
-        vSliderMin.setPaintLabels(true);
-        vSliderMin.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
-        vSliderMin.setFont(text);
- 
-        //Put everything together.
-        add(hMaxLabel);
-        add(hSliderMax);
-        add(hMinLabel);
-        add(hSliderMin);
-        
-        add(sMaxLabel);
-        add(sSliderMax);
-        add(sMinLabel);
-        add(sSliderMin);
-        
-        add(vMaxLabel);
-        add(vSliderMax);
-        add(vMinLabel);
-        add(vSliderMin);
-        
-        setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+            //add components
+            add(label);
+            add(slider);
+            //store in list
+            allSliders.add(slider);
 
+        }
     }
     
-    public static void setInitalPositions(Scalar min, Scalar max){
-    	hSliderMin.setValue((int) min.val[0]);
-    	sSliderMin.setValue((int) min.val[1]);
-    	vSliderMin.setValue((int) min.val[2]);
-    	hSliderMax.setValue((int) max.val[0]);
-    	sSliderMax.setValue((int) max.val[1]);
-    	vSliderMax.setValue((int) max.val[2]);
+    public static void setInitalPositions(int[] values){
+    	for(int i = 0; i < allSliders.size(); i++){
+    		JSlider slider = new JSlider();
+    		slider.setValue(values[i]);
+    	}
     }
  
     /** Add a listener for window events. */
@@ -197,11 +91,11 @@ public class Slider extends JPanel implements 	ActionListener,
      * this method should be invoked from the
      * event-dispatching thread.
      */
-    public static void createAndShowGUI() {
-        //Create and set up the window.
+    public static void createAndShowGUI(String[] sliders) {
+    	//Create and set up the window.
         JFrame frame = new JFrame("SliderDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Slider animator = new Slider();
+        Slider animator = new Slider(sliders);
                  
         //Add content to the window.
         frame.add(animator, BorderLayout.CENTER);
@@ -218,19 +112,11 @@ public class Slider extends JPanel implements 	ActionListener,
     public void windowActivated(WindowEvent e) {}
     public void windowDeactivated(WindowEvent e) {}
 
-	public static Scalar getMin() {
-		// TODO Auto-generated method stub
-		Scalar min = new Scalar(hSliderMin.getValue(),
-								sSliderMin.getValue(),
-								vSliderMin.getValue());
-		return min;
-	}
-	
-	public static Scalar getMax(){
-		Scalar max = new Scalar(hSliderMax.getValue(),
-				sSliderMax.getValue(),
-				vSliderMax.getValue());
-		return max;
-		
+	public static int[] getSliderValues(){
+		int[] values = new int[allSliders.size()];
+		for( int i = 0; i < allSliders.size(); i++){
+			values[i] = allSliders.get(i).getValue();
+		}
+		return values;
 	}
 }

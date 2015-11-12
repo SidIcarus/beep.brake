@@ -24,7 +24,7 @@ public class ColorObjectDetection {
 
 	/* ***************** VIDEO ***************** */
 	static final String viddir = "Video/";
-	static final String videoname = "vid_0005.mp4";
+	static final String videoname = "vid_0004.mp4";
 	static final String vidName = videoname.substring(0, videoname.indexOf("."));
 
 	static Scalar sMin = new Scalar(88, 88, 88);
@@ -43,7 +43,7 @@ public class ColorObjectDetection {
 		}
 	    
 	    //setup frames
-	    String[] frameNames = {"original", "threshold", "licenseplate"};
+	    String[] frameNames = {"original"};
 	    VideoReader.initalizeVideoPlayer(frameNames);
 	    
 	    //set filesize
@@ -105,7 +105,7 @@ public class ColorObjectDetection {
 //		        shadows.clear();
 		        
 		        //Blue tail lights
-		        drawBoxs(display, tailLights, new Scalar(255,0,0));
+		        drawBoxs(display, tailLights, new Scalar(255,150,100));
 		        tailLights.clear();
 		        
 		        //purple
@@ -115,7 +115,7 @@ public class ColorObjectDetection {
 		        
 		        //next frame
 		        VideoReader.displayImage(display, 0);
-		        VideoReader.displayImage(threshold, 1);
+		        //VideoReader.displayImage(threshold, 1);
 		        //VideoReader.displayImage(licensePlate, 2);
 		        
 		        mat = VideoReader.getNextFrame(readSize);
