@@ -13,9 +13,11 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     static {
-        System.loadLibrary("OpenCV");
         System.loadLibrary("opencv_java3");
+        System.loadLibrary("splash");
     }
+
+    public native static String changeText();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         TextView textview = (TextView) findViewById(R.id.textview);
-        textview.setText(ChangeText());
+        textview.setText(changeText());
     }
 
     @Override
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the H1ome/Up button, so long
+        // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
@@ -49,9 +51,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
-
-    public native static String ChangeText();
-
 }

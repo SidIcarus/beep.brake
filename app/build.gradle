@@ -2,17 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.2'
-    packagingOptions {
-//        exclude 'lib/*/libOpenCV.so'
-        exclude 'lib/armeabi/libOpenCV.so'
-        exclude 'lib/armeabi-v7a/libOpenCV.so'
-        exclude 'lib/mips/libOpenCV.so'
-        exclude 'lib/mips64/libOpenCV.so'
-        exclude 'lib/x86_64/libOpenCV.so'
-        exclude 'lib/x86/libOpenCV.so'
-        exclude 'lib/arm64-v8a/libOpenCV.so'
-    }
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "edu.rit.margikarpets.beepbrake"
@@ -22,13 +12,10 @@ android {
         versionName "1.0"
 
         ndk {
-            moduleName "OpenCV"
+            moduleName "splash"
         }
     }
 
-//    Properties properties = new Properties()
-//    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-//    def ndkDir = properties.getProperty('ndk.dir')
     def ndkDir = android.ndkDirectory
 
     sourceSets.main {
@@ -60,9 +47,8 @@ android {
 
     clean.dependsOn 'cleanNative'
 
-
     tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn ndkBuild
+        compileTask -> compileTask.dependsOn ndkLibsToJar
     }
 
     buildTypes {
@@ -70,8 +56,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    productFlavors {
     }
 }
 

@@ -9,11 +9,11 @@ extern "C" {
 #endif
 /*
  * Class:     edu_rit_margikarpets_beepbrake_MainActivity
- * Method:    ChangeText
+ * Method:    changeText
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_edu_rit_margikarpets_beepbrake_MainActivity_ChangeText
-  (JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_edu_rit_margikarpets_beepbrake_MainActivity_changeText
+  (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }

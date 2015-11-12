@@ -11,6 +11,6 @@ include ${OPENCVROOT}/sdk/native/jni/OpenCV.mk
 
 LOCAL_SRC_FILES := edu_rit_margikarpets_beepbrake_MainActivity.c
 LOCAL_LDLIBS += -llog
-LOCAL_MODULE := OpenCV
+LOCAL_MODULE := splash
 
 include $(BUILD_SHARED_LIBRARY)
