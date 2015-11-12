@@ -57,8 +57,8 @@ public class ColorObjectDetection {
 	    Mat hierarchy = new Mat();
 	    
 	    //UI
-	    Slider.createAndShowGUI();
-	    Slider.setInitalPositions(sMin, sMax);
+	    String[] sliderNames = { "hMax","hMin", "sMax","sMin","vMax","vMin"};
+	    Slider.createAndShowGUI(sliderNames);
 	    Scanner scanner = new Scanner(System.in);
 	    
 	    //perf debug
@@ -85,8 +85,9 @@ public class ColorObjectDetection {
 		        Imgproc.cvtColor(mat, hsv, Imgproc.COLOR_RGB2HSV);
 		        //Threshold Matrix
 		        Mat threshold = new Mat();
-		        sMin = Slider.getMin();
-		        sMax = Slider.getMax();
+		        int[] input = Slider.getSliderValues();
+		        sMin = new Scalar(input[1], input[3], input[5]);
+		        sMax = new Scalar(input[0], input[2], input[4]);
 		        Core.inRange(hsv, sMin, sMax, threshold);
 		        Imgproc.erode(threshold, threshold, new Mat(2,2, CvType.CV_8U));
 		        Imgproc.dilate(threshold, threshold, new Mat(2,2, CvType.CV_8U));
