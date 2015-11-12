@@ -8,6 +8,9 @@
 /build/intermediates/dex-cache
 local.properties
 
+*.iml
+import-summary.txt
+
 /*/out
 /*/*/build
 /*/*/production
