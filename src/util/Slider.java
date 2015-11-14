@@ -37,6 +37,7 @@ public class Slider extends JPanel implements 	ActionListener,
             slider.setPaintLabels(true);
             slider.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
             slider.setFont(text);
+            slider.setMaximum(1000);
 
             //add components
             add(label);

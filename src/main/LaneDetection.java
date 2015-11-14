@@ -2,14 +2,11 @@ package main;
 
 import java.io.IOException;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
 
 import util.Slider;
 import util.VideoReader;
@@ -50,7 +47,7 @@ public class LaneDetection {
 		Size readSize = new Size(480, 320);
 		Mat mat = VideoReader.getNextFrame(readSize);
 
-		String[] sliderNames = { "Canny Min", "Canny Max", "Rho", "Theta", "Hough Thresh", "MinLineLen", "MaxLineGap"};
+		String[] sliderNames = { "Canny Min", "Canny Max", "Rho", "Hough Thresh", "MinLineLen", "MaxLineGap"};
 		Slider.createAndShowGUI(sliderNames);
 		//Slider.setInitalPositions(sMin, sMax);
 
@@ -75,17 +72,16 @@ public class LaneDetection {
 				int cannymin = input[0];
 				int cannymax = input[1];
 				double rhoInput = input[2];
-				double thetaInput = input[3];
-				int houghThreshold = input[4];
-				int minLineLen = input[5];
-				int maxLineGap = input[6];
+				int houghThreshold = input[3];
+				int minLineLen = input[4];
+				int maxLineGap = input[5];
 				for(int i = 0; i < input.length; i++){
 					System.out.print(input[i] + " ");
 				}
 				System.out.println();
 				
 				Imgproc.Canny(grey, canny, cannymin, cannymax);
-				Imgproc.HoughLinesP(canny, lines, rhoInput, thetaInput, houghThreshold,minLineLen,maxLineGap);
+				Imgproc.HoughLinesP(canny, lines, rhoInput, theta, houghThreshold,minLineLen,maxLineGap);
 				drawLines(display, lines, new Scalar(40, 200, 50));
 				long stop = System.currentTimeMillis();
 
