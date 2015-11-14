@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -40,7 +41,7 @@ public class LaneDetection {
 		}
 
 		// setup frames
-		String[] frameNames = { "Display", "Grey", "Canny"};
+		String[] frameNames = { "Display", "Left", "Right"};
 		VideoReader.initalizeVideoPlayer(frameNames);
 
 		// set filesize
@@ -55,18 +56,41 @@ public class LaneDetection {
 		double rho = 100;
 		double theta = (5 * Math.PI)/180;
 		Mat grey = new Mat();
-		Mat canny = new Mat();
-		Mat lines = new Mat();
+		Mat cannyLeft = new Mat();
+		Mat cannyRight = new Mat();
+		Mat linesLeft = new Mat();
+		Mat linesRight = new Mat();
 
+		/*
+		 * 		0,0							width, 0 
+		 * 		
+		 * 					
+		 * 
+		 * 		tlleft 			tlright				
+		 * 
+		 * 		0,height		bmid		width, height
+		 */
+		Point tlLeft = new Point(0, (3 * readSize.height)/4);
+		Point bmid = new Point(readSize.width/2, readSize.height);
+		Point tlRight = new Point(readSize.width/2, (3 * readSize.height)/4);
+		Point br = new Point(readSize.width, readSize.height);
+		
+		
+		Rect cropSizeLeft = new Rect(tlLeft, bmid );
+		Rect cropSizeRight = new Rect(tlRight, br);
+		
 
 		while (true) {
 			while (!mat.empty()) {
 				Mat display = new Mat();
 				Imgproc.resize(mat, display, readSize);
-				
 				long start = System.currentTimeMillis();
-				Imgproc.cvtColor(mat, grey, Imgproc.COLOR_BGR2GRAY);
-				Imgproc.GaussianBlur(grey, grey, new Size(5,5), theta);
+				Mat roiLeft = new Mat(mat, cropSizeLeft);
+				Mat roiRight = new Mat(mat, cropSizeRight);
+				Imgproc.cvtColor(roiLeft, roiLeft, Imgproc.COLOR_BGR2GRAY);
+				Imgproc.cvtColor(roiRight, roiRight, Imgproc.COLOR_BGR2GRAY);				
+				Imgproc.GaussianBlur(roiLeft, roiLeft, new Size(5,5), theta);
+				Imgproc.GaussianBlur(roiRight, roiRight, new Size(5,5), theta);
 				//get slider values
 				int[] input = Slider.getSliderValues();
 				int cannymin = input[0];
@@ -79,10 +103,18 @@ public class LaneDetection {
 					System.out.print(input[i] + " ");
 				}
 				System.out.println();
-				
-				Imgproc.Canny(grey, canny, cannymin, cannymax);
-				Imgproc.HoughLinesP(canny, lines, rhoInput, theta, houghThreshold,minLineLen,maxLineGap);
-				drawLines(display, lines, new Scalar(40, 200, 50));
+				Imgproc.Canny(roiLeft, cannyLeft, cannymin, cannymax);
+				Imgproc.Canny(roiRight, cannyRight, cannymin, cannymax);
+				Imgproc.HoughLinesP(cannyLeft, linesLeft, rhoInput, theta, houghThreshold, minLineLen, maxLineGap);
+				Imgproc.HoughLinesP(cannyRight, linesRight, rhoInput, theta, houghThreshold, minLineLen, maxLineGap);
+				int leftOffsetX = (int) (readSize.width - (readSize.width - tlLeft.x));
+				int leftOffsetY = (int) (readSize.height - (readSize.height - tlLeft.y));
+				int rightOffsetX = (int) (readSize.width - (readSize.width - tlRight.x));
+				int rightOffsetY = (int) (readSize.height - (readSize.height - tlRight.y));
+
+				drawLines(display, linesLeft, new Scalar(40, 200, 50), leftOffsetX, leftOffsetY);
+				drawLines(display, linesRight, new Scalar(40, 200, 50), rightOffsetX, rightOffsetY);
+
 				long stop = System.currentTimeMillis();
 
 		        //log on frame
@@ -93,8 +125,8 @@ public class LaneDetection {
 				
 				// display
 				VideoReader.displayImage(display, 0);
-				VideoReader.displayImage(grey, 1);
-				VideoReader.displayImage(canny, 2);
+				VideoReader.displayImage(cannyLeft, 1);
+				VideoReader.displayImage(cannyRight, 2);
 		        
 				// next frame
 				mat = VideoReader.getNextFrame(readSize);
@@ -103,32 +135,8 @@ public class LaneDetection {
 		}
 
 	}
-/*
-	public static void drawLines(Mat mat, Mat lines, Scalar color) {
-		double[] data;
-		double rho, theta;
-		Point pt1 = new Point();
-		Point pt2 = new Point();
-		double a, b;
-		double x0, y0;
-		for (int i = 0; i < lines.cols(); i++) {
-			data = lines.get(0, i);
-			rho = data[0];
-			theta = data[1];
-			a = Math.cos(theta);
-			b = Math.sin(theta);
-			x0 = a * rho;
-			y0 = b * rho;
-			pt1.x = Math.round(x0 + 1000 * (-b));
-			pt1.y = Math.round(y0 + 1000 * a);
-			pt2.x = Math.round(x0 - 1000 * (-b));
-			pt2.y = Math.round(y0 - 1000 * a);
-			Imgproc.line(mat, pt1, pt2, color, 1);
-		}
 
-	}
-*/
-	public static void drawLines(Mat mat, Mat lines, Scalar color) {
+	public static void drawLines(Mat mat, Mat lines, Scalar color, int offsetx, int offsety) {
 		double[] data;
 		double rho, theta;
 		Point pt1 = new Point();
@@ -147,8 +155,8 @@ public class LaneDetection {
 				if( Math.abs(angle) <= LINE_REJECT_DEGREES){
 					continue;
 				}
-				pt1 = new Point(data[0], data[1]);
-				pt2 = new Point(data[2], data[3]);
+				pt1 = new Point(offsetx + data[0], offsety + data[1]);
+				pt2 = new Point(offsetx + data[2], offsety + data[3]);
 				Imgproc.line(mat, pt1, pt2, color);
 				VideoReader.displayImage(mat, 0);
 
@@ -171,32 +179,5 @@ public class LaneDetection {
 
 			}
 		}
-	
 	}
-	
-	public static void oldDetectLines(){
-		/*long start = System.currentTimeMillis();
-		// Threshold Matrix on color
-		int widthMidPt = mat.width() / 2;
-		//crop left and right
-		Rect leftRegion = new Rect(new Point(0,0), new Point(widthMidPt, mat.height()));
-		left = new Mat(mat, leftRegion);
-		
-		Rect rightRegion = new Rect(new Point(widthMidPt,0), new Point(widthMidPt * 2, mat.height()));
-		right = new Mat(mat, rightRegion);
-		
-		//look for lanes in left img
-		Imgproc.cvtColor(left, left, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.Canny(left, cannyLeft, cannyThreshOne, cannyThreshTwo);
-		Imgproc.HoughLines(cannyLeft, linesLeft, 2, Math.PI / 180, 100);
-		//look for lanes in right img
-		Imgproc.cvtColor(right, right, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.Canny(right, cannyRight, cannyThreshOne, cannyThreshTwo);
-		Imgproc.HoughLines(cannyRight, linesRight, 2, Math.PI / 180, 100);
-		long stop = System.currentTimeMillis();
-		
-		drawLines(mat, linesLeft, new Scalar(40, 200, 50));
-		drawLines(mat, linesRight, new Scalar(40, 200, 50));*/
-	}
-
 }
