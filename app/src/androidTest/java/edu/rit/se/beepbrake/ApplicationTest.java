@@ -1,4 +1,4 @@
-package edu.rit.margikarpets.beepbrake;
+package edu.rit.se.beepbrake;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

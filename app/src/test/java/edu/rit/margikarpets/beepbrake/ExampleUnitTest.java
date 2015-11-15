@@ -1,4 +1,4 @@
-package edu.rit.margikarpets.beepbrake;
+package edu.rit.se.beepbrake;
 
 import org.junit.Test;
 
