@@ -38,7 +38,9 @@ obj/
 # file generated from importing opencv
 import-summary.txt
 
+
 /*/out
+/*/build
 /*/*/build
 /*/*/production
 *.iws

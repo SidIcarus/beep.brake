@@ -16,7 +16,7 @@ include ${OPENCV_ROOT}/native/jni/OpenCV.mk
 
 LOCAL_LDLIBS += -llog
 LOCAL_MODULE := splash
-LOCAL_SRC_FILES := edu_rit_margikarpets_beepbrake_MainActivity.c
+LOCAL_SRC_FILES := edu_rit_se_beepbrake_MainActivity.c
 #LOCAL_SRC_FILES += new_src_file.c #add more source files like this
 
 include $(BUILD_SHARED_LIBRARY)
