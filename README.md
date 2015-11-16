@@ -32,13 +32,12 @@ sdk.dir=C\:\\path\\to\\sdk
 ndk.dir=C\:\\path\\to\\ndk
 ```
 
-You should be set to run this application using an android 4.4.2 image or above!
+At this point, you should be set to run this application using an android 4.4.2 image or above!
 
 ##More Information
 
 (Addressing size concern)
 The application includes the [OpenCV 3.00 Android](http://opencv.org/downloads.html) sdk\java module and sdk\native folder underneath ``opencv_java3``. This allows for an easier project setup but causes it to be a much larger project.
-
 
 
 ##Creating Native Files
@@ -63,7 +62,7 @@ Check each checkbox under **Options** & **Show in**
 
 Now simply select the ``.java`` file that contains the abstracted class that is to be implemented in C or C++ code -> right click -> Android Tools -> javah
 
-This will generate the header file under the ``jni`` folder
+This will generate the header file under the ``jni`` folder.
 
 ## Resources
 * [Hujiaweibujidao GitHub](http://hujiaweibujidao.github.io/blog/2014/10/22/android-ndk-and-opencv-development-with-android-studio/)
