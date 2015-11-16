@@ -11,7 +11,7 @@ public class MainActivity extends AppCompatActivity {
 
     static {
         System.loadLibrary("opencv_java3");
-        System.loadLibrary("splash");
+        System.loadLibrary("beepbrake");
     }
 
     public native static String changeText();

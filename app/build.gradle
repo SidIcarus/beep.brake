@@ -12,7 +12,7 @@ android {
         versionName "1.0"
 
         ndk {
-            moduleName "splash"
+            moduleName "beepbrake"
         }
     }
     sourceSets.main {
@@ -53,9 +53,15 @@ android {
         into 'lib/'
     }
     task cleanNative(type: Exec, description: 'Clean JNI object files') {
-        commandLine "$ndkDir/ndk-build.cmd",
-                '-C', file('src/main/jni').absolutePath, // Change src/main/jni the relative path to your jni source
-                'clean'
+        if (isWindows) {
+            commandLine "$ndkDir/ndk-build.cmd",
+                    '-C', file('src/main/jni').absolutePath, // Change src/main/jni the relative path to your jni source
+                    'clean'
+        } else {
+            commandLine "$ndkDir/ndk-build",
+                    '-C', file('src/main/jni').absolutePath, // Change src/main/jni the relative path to your jni source
+                    'clean'
+        }
     }
     clean.dependsOn 'cleanNative'
     tasks.withType(JavaCompile) {
