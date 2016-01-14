@@ -12,8 +12,10 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import java.io.File;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 import edu.rit.se.beepbrake.R;
+import edu.rit.se.beepbrake.TempLogger;
 
 
 /**
@@ -27,26 +29,27 @@ import edu.rit.se.beepbrake.R;
 public class FrameAnalyzer implements Runnable {
 
     private static final String TAG = "Frame Analyzer Thread";
-
-    private final BlockingQueue<Mat> mFrameQueue;
-
-    private long count;
-    private long sum;
-
-    private Context mContext;
+    private boolean bDetecting;
+    private boolean bRunning;
+    // haar classifier
     private static CascadeClassifier mCascadeClassifier;
+    // lock to protect the current frame
+    private ReentrantLock mFrameLock;
+    //current frame
+    private Mat mCurrentFrame;
+    //detector
+    private Detector mDetector;
 
 
     /**
      * Constructor
-     * @param cascadeClassifier - cascade loaded
-     * @param concurrentQueue - mechanism to pass frame
-     * @param context -
+     * @param detector - decriptor how the frame is detected
      */
-    public FrameAnalyzer(CascadeClassifier cascadeClassifier, BlockingQueue<Mat> concurrentQueue, Context context){
-        mCascadeClassifier = cascadeClassifier;
-        mFrameQueue = concurrentQueue;
-        mContext = context;
+    public FrameAnalyzer(Detector detector){
+        mDetector = detector;
+        mFrameLock = new ReentrantLock();
+        bDetecting = true;
+        bRunning = true;
     }
 
 
@@ -56,26 +59,15 @@ public class FrameAnalyzer implements Runnable {
     @Override
     public void run() {
         Log.d(TAG, "Started Running!");
-        try {
-            // replace with something to pause/kill
-            while (true) {
-                Mat m = this.mFrameQueue.take();
-                long start = System.currentTimeMillis();
-                this.haar(m);
-                long end = System.currentTimeMillis();
-                Log.d(TAG, "Haar Time: " + (end - start) + " ms");
-                count++;
-                sum += (end - start);
-                if( count % 25 == 0){
-                    Log.d(TAG, "Avg: " + sum/count);
-                }
-
-
+        while (bRunning ) {
+            if( bDetecting ) {
+                mFrameLock.lock();
+                TempLogger.addMarkTime(TempLogger.SLACK_TIME);
+                mDetector.detect(mCurrentFrame);
+                mFrameLock.unlock();
             }
-        }catch(InterruptedException e){
-            Log.d(TAG, e.getMessage());
         }
-
+        Log.d(TAG, "Finished Running!");
     }
 
 
@@ -84,25 +76,23 @@ public class FrameAnalyzer implements Runnable {
      * @param mat - current img
      */
     public void addFrameToAnalyze(Mat mat){
-        if(mFrameQueue.peek() == null){
-            mFrameQueue.add(mat);
-        }else{
-            mFrameQueue.remove();
-            mFrameQueue.add(mat);
+        //if not being analyzed
+        if(mFrameLock.isLocked()){
+            //then set
+            TempLogger.addMarkTime(TempLogger.SLACK_TIME);
+            this.mCurrentFrame = mat;
         }
     }
 
-    /**
-     * detect img
-     * send points to draw to the UI Logic
-     * @param mat
-     */
-    public void haar( Mat mat){
-        MatOfRect foundLocations = new MatOfRect();
-        //mCascadeClassifier.detectMultiScale2(mat, 1, 1.1, 3, 0, );
-        mCascadeClassifier.detectMultiScale(mat, foundLocations, 4, 100, 0, new Size(24,24), new Size(64,64));
-        CameraPreview.setPointsToDraw(foundLocations);
+    public void pauseDetection(){
+        bDetecting = false;
     }
 
+    public void resumeDetection(){
+        bDetecting = true;
+    }
 
+    public void destroy(){
+        bRunning = false;
+    }
 }

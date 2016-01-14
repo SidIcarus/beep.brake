@@ -14,6 +14,8 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
+import edu.rit.se.beepbrake.TempLogger;
+
 /**
  * Created by richykapadia on 9/21/15
  *
@@ -36,10 +38,6 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     //color of rects
     final Scalar rectColor = new Scalar(0, 0, 255);
 
-    //
-    final Point fontPoint = new Point();
-
-
     public CameraPreview( FrameAnalyzer analyzer){
         bAnalyzeFrame = false;
         mFrameAnalyzer = analyzer;
@@ -57,6 +55,8 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
+        //multiple starts will be logged
         mFrameAnalyzer.addFrameToAnalyze(inputFrame.rgba());
         //To show tracking of an object
         return drawBox(inputFrame.rgba());
@@ -76,8 +76,6 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
                 rectPoint2.y = rect.y + rect.height;
                 // Draw rectangle around found object
                 Imgproc.rectangle(rgb, rectPoint1, rectPoint2, rectColor, 2);
-                fontPoint.x = rect.x;
-                fontPoint.y = rect.y - 4;
             }
         }
         return rgb;

@@ -16,4 +16,12 @@
         opencv:show_fps="true"
         opencv:camera_id="any" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Print Stats"
+        android:id="@+id/statsButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/CameraPreview" />
+
 </RelativeLayout>
