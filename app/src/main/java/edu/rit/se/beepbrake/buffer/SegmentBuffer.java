@@ -1,4 +1,4 @@
-package com.apps.richykapadia.beepbrake.BufferManagement;
+package edu.rit.se.beepbrake.buffer;
 
 
 import myfirstapp.app.Segment;
