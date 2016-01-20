@@ -1,6 +1,5 @@
 package edu.rit.se.beepbrake.buffer;
 
-
 import myfirstapp.app.Segment;
 
 public class SegmentBuffer {
@@ -54,7 +53,11 @@ public class SegmentBuffer {
      * Go through the segments starting from the oldest and remove any that are not needed anymore
      */
     private void prune() {
-
+        while(oldest.getDataObject("time") == null) {//TODO update to use timestamp (needs getter)
+            oldest.getNextSeg().setPrevSeg(null);
+            //TODO delete oldest if possible
+            oldest = oldest.getNextSeg();
+        }
     }
 
 }
