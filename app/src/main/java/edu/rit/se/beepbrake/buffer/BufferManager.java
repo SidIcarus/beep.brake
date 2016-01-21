@@ -34,6 +34,7 @@ public class BufferManager {
      * before and after buffers)
      */
     public void warningTriggered() {
-
+        buffer.save();
+        buffer.triggerSaveAfterWarning();
     }
 }
