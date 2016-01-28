@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Analysis;
+package edu.rit.se.beepbrake.Analysis.Detector;
 
 import org.opencv.core.Mat;
 

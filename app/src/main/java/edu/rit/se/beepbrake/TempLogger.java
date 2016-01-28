@@ -52,7 +52,7 @@ public class TempLogger {
      *
      * @param markName - unique identifier for the measure to be logged
      */
-    public static void addMarkTime(String markName){
+    public static synchronized void addMarkTime(String markName){
         validateLogLen();
         Long l = System.currentTimeMillis();
         if(!runningLogs.containsKey(markName)){
@@ -74,7 +74,7 @@ public class TempLogger {
      * @param markName
      * @param value
      */
-    public static void addValueMark(String markName, Long value){
+    public static synchronized void addValueMark(String markName, Long value){
         validateLogLen();
         //place directly in stored
         if(!storedLogs.containsKey(markName)){
@@ -88,7 +88,7 @@ public class TempLogger {
      * increment a count by 1 every time this is called per unique markName
      * @param markName - unique identifier for count
      */
-    public static void incrementCount(String markName){
+    public static synchronized void incrementCount(String markName){
         validateLogLen();
         if(!countLogs.containsKey(markName)){
             AtomicInteger aInt = new AtomicInteger(0);
@@ -99,7 +99,7 @@ public class TempLogger {
     }
 
 
-    private static void validateLogLen(){
+    private static synchronized void validateLogLen(){
         if(numLogs >= MAX_LOG_LEN ){
             printLogs();
             //clear logs
@@ -107,18 +107,11 @@ public class TempLogger {
                 storedLogs.get(key).clear();
             }
             storedLogs.clear();
-
-            //count running
-            int runcount = runningLogs.keySet().size();
-            System.out.println("RunCount: " + runcount);
-
-
             numLogs = 0;
         }
     }
 
-    public static void printLogs(){
-
+    public static synchronized void printLogs(){
         bPrintingLogs = true;
         Log.d(TAG, "Num Logs: " + numLogs);
         //total frames counts
@@ -166,30 +159,19 @@ public class TempLogger {
 
         //Calc Slack Time
 
-        Log.d(TAG, "------------------ Slack Time Stats ------------------");
+        Log.d(TAG, "------------------ Car Slack Time Stats ------------------");
         ArrayList<Long> slackDur = new ArrayList<>();
-        if( storedLogs.containsKey(SLACK_TIME)){
-            slackDur = storedLogs.get(SLACK_TIME);
+        if( storedLogs.containsKey(SLACK_TIME + "CarDetector")){
+            slackDur = storedLogs.get(SLACK_TIME + "CarDetector");
+            printMeasures(slackDur);
         }
 
-        //Stats for slack time
-        Collections.sort(slackDur);
-        if( !slackDur.isEmpty() && slackDur.size() != 0){
-            min = slackDur.get(0);
-            max = slackDur.get(slackDur.size() - 1);
-            med = slackDur.get(slackDur.size() / 2);
-
-            avg = 0l;
-            for( Long l : slackDur){
-                avg += l;
-            }
-            avg = avg / slackDur.size();
+        Log.d(TAG, "------------------ Lane Slack Time Stats ------------------");
+        slackDur = new ArrayList<>();
+        if( storedLogs.containsKey(SLACK_TIME + "LaneDetector")){
+            slackDur = storedLogs.get(SLACK_TIME + "LaneDetector");
+            printMeasures(slackDur);
         }
-
-        Log.d(TAG, "Min: " + min);
-        Log.d(TAG, "Max: " + max);
-        Log.d(TAG, "Med: " + med);
-        Log.d(TAG, "Avg: " + avg);
 
         //clear logs
         for(String key : storedLogs.keySet()){
@@ -205,4 +187,26 @@ public class TempLogger {
         return bPrintingLogs;
     }
 
+
+    public static void printMeasures(ArrayList<Long> durr){
+        //Stats for slack time
+        Collections.sort(durr);
+        long min = 0, max = 0, med = 0, avg = 0;
+        if( !durr.isEmpty() && durr.size() != 0){
+            min = durr.get(0);
+            max = durr.get(durr.size() - 1);
+            med = durr.get(durr.size() / 2);
+
+            avg = 0l;
+            for( Long l : durr){
+                avg += l;
+            }
+            avg = avg / durr.size();
+        }
+
+        Log.d(TAG, "Min: " + min);
+        Log.d(TAG, "Max: " + max);
+        Log.d(TAG, "Med: " + med);
+        Log.d(TAG, "Avg: " + avg);
+    }
 }

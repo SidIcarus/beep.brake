@@ -1,9 +1,6 @@
 package edu.rit.se.beepbrake.Analysis;
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,15 +13,16 @@ import android.widget.Button;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
 import org.opencv.objdetect.CascadeClassifier;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+
+import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
+import edu.rit.se.beepbrake.Analysis.Detector.Detector;
+import edu.rit.se.beepbrake.Analysis.Detector.SimpleLaneDetector;
 import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.TempLogger;
 
@@ -47,7 +45,8 @@ public class AnalysisActivity extends AppCompatActivity {
 
     private BaseLoaderCallback mLoaderCallback;
     private JavaCameraView mCameraView;
-    private FrameAnalyzer mFrameAnalyze;
+    private FrameAnalyzer mCarAnalyzer;
+    private FrameAnalyzer mLaneAnalyzer;
 
     //Cascade to be loaded
     private String CASCADE_XML = "cascade_5.xml";
@@ -67,12 +66,21 @@ public class AnalysisActivity extends AppCompatActivity {
         CascadeClassifier cascade = loadCascade();
 
         //construct frame analyzer and start thread
-        Detector detector = new CarDetector(cascade);
-        mFrameAnalyze = new FrameAnalyzer(detector);
-        (new Thread( mFrameAnalyze )).start();
+        Detector carDetect = new CarDetector(cascade);
+        mCarAnalyzer = new FrameAnalyzer(carDetect);
+        (new Thread(mCarAnalyzer)).start();
+
+        //construct lane detector
+        Detector laneDetector = new SimpleLaneDetector();
+        mLaneAnalyzer = new FrameAnalyzer(laneDetector);
+        (new Thread(mLaneAnalyzer)).start();
+
 
         //Set listener and callback
-        mCameraView.setCvCameraViewListener(new CameraPreview(mFrameAnalyze));
+        CameraPreview cameraPreview = new CameraPreview();
+        cameraPreview.addAnalyzer(mCarAnalyzer);
+        cameraPreview.addAnalyzer(mLaneAnalyzer);
+        mCameraView.setCvCameraViewListener(cameraPreview);
         mLoaderCallback = new LoaderCallback(this, mCameraView);
 
         //setup button
@@ -115,8 +123,12 @@ public class AnalysisActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if(mFrameAnalyze != null) {
-            mFrameAnalyze.pauseDetection();
+        if(mCarAnalyzer != null) {
+            mCarAnalyzer.pauseDetection();
+        }
+
+        if(mLaneAnalyzer != null){
+            mLaneAnalyzer.pauseDetection();
         }
     }
 
@@ -124,16 +136,23 @@ public class AnalysisActivity extends AppCompatActivity {
     public void onResume(){
         super.onResume();
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
-        if(mFrameAnalyze != null) {
-            mFrameAnalyze.resumeDetection();
+        if(mCarAnalyzer != null) {
+            mCarAnalyzer.resumeDetection();
+        }
+
+        if(mLaneAnalyzer != null){
+            mLaneAnalyzer.resumeDetection();
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mFrameAnalyze != null){
-            mFrameAnalyze.destroy();
+        if(mCarAnalyzer != null){
+            mCarAnalyzer.destroy();
+        }
+        if(mLaneAnalyzer != null){
+            mCarAnalyzer.destroy();
         }
         if(mCameraView != null){
             mCameraView.disableView();

@@ -1,20 +1,13 @@
 package edu.rit.se.beepbrake.Analysis;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.net.Uri;
 import android.util.Log;
 
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Size;
 import org.opencv.objdetect.CascadeClassifier;
 
-import java.io.File;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.rit.se.beepbrake.R;
+import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.TempLogger;
 
 
@@ -29,8 +22,8 @@ import edu.rit.se.beepbrake.TempLogger;
 public class FrameAnalyzer implements Runnable {
 
     private static final String TAG = "Frame Analyzer Thread";
-    private boolean bDetecting;
-    private boolean bRunning;
+    private volatile boolean bDetecting;
+    private volatile boolean bRunning;
     // haar classifier
     private static CascadeClassifier mCascadeClassifier;
     // lock to protect the current frame
@@ -40,16 +33,22 @@ public class FrameAnalyzer implements Runnable {
     //detector
     private Detector mDetector;
 
+    //for logging
+    private int analyzerId = 0;
+    static int numAnalyzer = 0;
+
 
     /**
      * Constructor
-     * @param detector - decriptor how the frame is detected
+     * @param detector - descriptor how the frame is detected
      */
     public FrameAnalyzer(Detector detector){
         mDetector = detector;
         mFrameLock = new ReentrantLock();
         bDetecting = true;
         bRunning = true;
+        analyzerId = numAnalyzer;
+        numAnalyzer++;
     }
 
 
@@ -59,13 +58,12 @@ public class FrameAnalyzer implements Runnable {
     @Override
     public void run() {
         Log.d(TAG, "Started Running!");
-        while (bRunning ) {
-            if( bDetecting ) {
-                mFrameLock.lock();
-                TempLogger.addMarkTime(TempLogger.SLACK_TIME);
-                mDetector.detect(mCurrentFrame);
-                mFrameLock.unlock();
-            }
+        while ( bRunning ) {
+            mFrameLock.lock();
+            TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
+            mDetector.detect(mCurrentFrame);
+            mFrameLock.unlock();
+            while( !bDetecting );
         }
         Log.d(TAG, "Finished Running!");
     }
@@ -79,7 +77,7 @@ public class FrameAnalyzer implements Runnable {
         //if not being analyzed
         if(mFrameLock.isLocked()){
             //then set
-            TempLogger.addMarkTime(TempLogger.SLACK_TIME);
+            TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
             this.mCurrentFrame = mat;
         }
     }
@@ -94,5 +92,17 @@ public class FrameAnalyzer implements Runnable {
 
     public void destroy(){
         bRunning = false;
+    }
+
+    public String toString(){
+        switch (this.analyzerId){
+            case 0:
+                return "CarDetector";
+            case 1:
+                return "LaneDetector";
+            default:
+                return "Unknown";
+        }
+
     }
 }
