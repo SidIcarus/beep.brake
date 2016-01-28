@@ -1,6 +1,5 @@
-package main;
+package depricated;
 
-import util.VideoReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -8,6 +7,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
+
+import swing.VideoReader;
 
 
 public class CreateNegativeFromVideo {

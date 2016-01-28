@@ -1,4 +1,4 @@
-package main;
+package depricated;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,15 +16,15 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import Algo.DetectCarByColor;
-import util.Slider;
-import util.VideoReader;
+import swing.Slider;
+import swing.VideoReader;
 
 
 public class ColorObjectDetection {
 
 	/* ***************** VIDEO ***************** */
-	static final String viddir = "Video/";
-	static final String videoname = "vid_0004.mp4";
+	static final String viddir = "Video/Car/";
+	static final String videoname = "car_0002.mp4";
 	static final String vidName = videoname.substring(0, videoname.indexOf("."));
 
 	static Scalar sMin = new Scalar(88, 88, 88);
@@ -105,8 +105,8 @@ public class ColorObjectDetection {
 //		        drawBoxs(display, shadows, new Scalar(0,0,255));
 //		        shadows.clear();
 		        
-		        //Blue tail lights
-		        drawBoxs(display, tailLights, new Scalar(255,150,100));
+		        //Green tail lights
+		        drawBoxs(display, tailLights, new Scalar(20,255,20));
 		        tailLights.clear();
 		        
 		        //purple

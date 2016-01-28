@@ -1,5 +1,6 @@
-package util;
+package swing;
 
+import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -14,11 +15,16 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
+import util.FrameSource;
+import util.RegionSelector;
+
 public class VideoReader {
 	
 	private static VideoCapture vc;
 	private static JLabel[] displayImg;
+	private static Mat[] currMat;
 	private static JFrame[] frames;
+	private static RegionSelector[] selectors;
 	private static int frameCount; 
 	
 	
@@ -30,6 +36,8 @@ public class VideoReader {
 		
 		displayImg = new JLabel[numScreens];
 		frames = new JFrame[numScreens];
+		selectors = new RegionSelector[numScreens];
+		currMat = new Mat[numScreens];
 
 		for(int i = 0; i < numScreens; i++){
 			createJFrame("Frame " + i, i);
@@ -46,6 +54,8 @@ public class VideoReader {
 		int numScreens = names.length;
 		displayImg = new JLabel[numScreens];
 		frames = new JFrame[numScreens];
+		selectors = new RegionSelector[numScreens];
+		currMat = new Mat[numScreens];
 
 		for(int i = 0; i < numScreens; i++){
 			String n = names[i];
@@ -63,8 +73,11 @@ public class VideoReader {
 		displayImg[frameIndex] = new JLabel();
 
 		frames[frameIndex] = new JFrame(name);
-		frames[frameIndex].setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frames[frameIndex].setSize(500, 500);
+		FlowLayout layout = new FlowLayout();
+		layout.setHgap(100);
+		layout.setVgap(100);
+		frames[frameIndex].setLayout( layout );
 		frames[frameIndex].add(displayImg[frameIndex]);
 		frames[frameIndex].setVisible(true);
 		frames[frameIndex].setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -88,23 +101,30 @@ public class VideoReader {
 		Mat image = new Mat();
 		vc.read(image);
 		frameCount++;
+		for(int i = 0; i < currMat.length; i++){
+			currMat[i] = image;
+		}
 		return image;
 	}
 	
 	public static Mat getNextFrame(Size s){
-		Mat image = new Mat();
+		Mat image = getNextFrame();
 		Mat newImage = new Mat();
-		vc.read(image);
 		if( image.empty() ){
 			return image;
 		}
 		Imgproc.resize(image, newImage, s);
-		frameCount++;
+		for(int i = 0; i < currMat.length; i++){
+			currMat[i] = newImage;
+		}
 		return newImage;
 	}
 	
 	public static void displayImage(Mat m, int i){
 	    //display image in gui
+		if(m == null || m.empty()){
+			return;
+		}
 	    BufferedImage bImage = Mat2BufferedImage(m);
 	    displayImage(bImage, i);
 	}
@@ -134,13 +154,28 @@ public class VideoReader {
 		if( displayImg.length < i ){
 			return;
 		}
-		
 		ImageIcon icon = new ImageIcon(img2);
 		displayImg[i].setIcon(icon);
 	}
 	
 	public static int getFrameCount(){
 		return frameCount;
+	}
+	
+	public static Mat getCurrMat(int index){
+		return currMat[index];
+	}
+	
+	public static void enableRegionSelector(int frameIndex, FrameSource source){
+		if( 0 <= frameIndex && frameIndex < selectors.length){
+			selectors[frameIndex] = new RegionSelector(frameIndex, source);
+			displayImg[frameIndex].addMouseMotionListener(selectors[frameIndex]);
+			displayImg[frameIndex].addMouseListener(selectors[frameIndex]);
+		}
+	}
+	
+	public static RegionSelector getRegionSelector(int frameIndex){
+		return selectors[frameIndex];
 	}
 
 }

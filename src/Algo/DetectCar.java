@@ -25,7 +25,7 @@ public class DetectCar {
 
     public static MatOfRect haar( Mat mat){
         MatOfRect foundLocations = new MatOfRect();
-        mCascadeClassifier.detectMultiScale(mat, foundLocations, 1.2, 100, 0, new Size(32, 32), new Size(400,400));
+        mCascadeClassifier.detectMultiScale(mat, foundLocations, 1.1, 100, 0, new Size(16,16), new Size(320,320));
         
         return foundLocations;
     }

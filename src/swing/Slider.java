@@ -1,4 +1,4 @@
-package util;
+package swing;
  
 import java.awt.*;
 import java.awt.event.*;
@@ -37,7 +37,7 @@ public class Slider extends JPanel implements 	ActionListener,
             slider.setPaintLabels(true);
             slider.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
             slider.setFont(text);
-            slider.setMaximum(1000);
+            slider.setMaximum(300);
 
             //add components
             add(label);

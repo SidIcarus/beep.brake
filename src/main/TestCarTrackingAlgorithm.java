@@ -1,6 +1,7 @@
 package main;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -11,13 +12,12 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import Algo.DetectCar;
-import util.VideoReader;
+import swing.VideoReader;
 
 public class TestCarTrackingAlgorithm {
 	
 	/* ***************** CASCADES *****************	
-	 * Kevin stole frome somewhere online
-	 * It works better for door stop */
+	/* It works better for door stop */
 	//static final String cascadePath = "cascade/cars3.xml";
 	
 	/* Trained from http://www.gti.ssr.upm.es/data/Vehicle_database.html */
@@ -25,14 +25,16 @@ public class TestCarTrackingAlgorithm {
 	//static final String cascadePath = "cascade/cascade200.xml";
 	/* 500 Positive */ 
 	//static final String cascadePath = "cascade/cascade500.xml";
-	/* 360 Positive  950 Negative and removed shitty images */
+	/* 360 Positive  950 Negative and removed some images */
 	//static final String cascadePath = "cascade/cascade_360_950_withremoval.xml";
 	//static final String cascadePath = "cascade/cascade_iteration_2.xml";
-	static final String cascadePath = "cascade/cascade_iteration_3.xml";
-	
+	//static final String cascadePath = "cascade/cascade_iteration_3.xml";
+	//TODO re-train with 16x16 imgs
+	static final String cascadePath = "cascade/cascade_iteration_5.xml";
+
 	/* ***************** VIDEO ***************** */
-	static final String viddir = "Video/";
-	static final String videoname = "vid_0005.mp4";
+	static final String viddir = "Video/day/";
+	static final String videoname = "day_0009.mp4";
 	static final String vidName = videoname.substring(0, videoname.indexOf("."));
 
 	
@@ -64,33 +66,43 @@ public class TestCarTrackingAlgorithm {
 	    Size readSize = new Size(480,320);
 	    //read video and converts to given size
 	    Mat mat = VideoReader.getNextFrame(readSize);
+	    Mat grey = new Mat();
+	    
+	    Scanner in = new Scanner(System.in);
 	    
 	    while( !mat.empty() ) {			
 			//Look for a car
-
-	    	start = System.currentTimeMillis();
-			//TODO switch algorithm here if needed
-			found = DetectCar.haar(mat);
-			end = System.currentTimeMillis();
-			detectionTime = Long.toString(end - start);
-			
-			//debug output
-			System.out.println( mat.toString() + " col: " + mat.cols() + " rows: " + mat.rows());
-			System.out.println("Detection Time: " + detectionTime + "ms");
-			System.out.println("Num of objects found: " + found.toArray().length);
-			
 			//save found images (should be about once a second)
 	    	if(VideoReader.getFrameCount() % 32 == 0){
-				saveFoundImages( mat, found );
-	    	}
-	    	
-			drawSquares(mat, found);
+		    	start = System.currentTimeMillis();
+				//TODO switch algorithm here if needed
+		    	//equalize hist
+		    	Imgproc.cvtColor(mat, grey, Imgproc.COLOR_BGR2GRAY);
+		    	Imgproc.equalizeHist(grey, grey);
+				found = DetectCar.haar(grey);
+				end = System.currentTimeMillis();
+				detectionTime = Long.toString(end - start);
+				
+				//debug output
+				System.out.println( mat.toString() + " col: " + mat.cols() + " rows: " + mat.rows());
+				System.out.println("Detection Time: " + detectionTime + "ms");
+				System.out.println("Num of objects found: " + found.toArray().length);
 
-			
-			
-			
-			VideoReader.displayImage(mat, 0);
-			mat = VideoReader.getNextFrame(readSize);
+				saveFoundImages( mat, found );
+				drawSquares(mat, found);
+				
+				VideoReader.displayImage(mat, 0);
+				mat = VideoReader.getNextFrame(readSize);
+				
+				//wait for input
+				/*while( !in.hasNext() );
+				in.nextLine();*/
+
+	    	}else{
+	    	
+				VideoReader.displayImage(mat, 0);
+				mat = VideoReader.getNextFrame(readSize);
+	    	}
 	    }
 
 

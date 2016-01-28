@@ -1,4 +1,4 @@
-package main;
+package depricated;
 
 import java.io.IOException;
 
@@ -6,13 +6,13 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import util.VideoReader;
+import swing.VideoReader;
 
 public class SaveFullEverySecond {
 
 	/* ***************** VIDEO ***************** */
 	static final String viddir = "Video/";
-	static final String videoname = "vid_0005.mp4";
+	static final String videoname = "vid_0007.mp4";
 	static final String vidName = videoname.substring(0, videoname.indexOf("."));
 
 	
