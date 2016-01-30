@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void Initialize() {
-        //Data Acqusition init
+        //Data Acquisition init
         segSync = new SegmentSync();
         gpsSen = new GPSSensor(this, segSync);
         aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);

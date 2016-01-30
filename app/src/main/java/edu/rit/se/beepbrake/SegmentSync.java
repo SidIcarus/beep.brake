@@ -85,12 +85,12 @@ public class SegmentSync {
     }
 
     protected void onResume(){
-        aggData = null;
-        singleData = null;
+        aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
+        singleData = new ConcurrentHashMap<String, Object>();
     }
 
     protected void onPause(){
-        aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
-        singleData = new ConcurrentHashMap<String, Object>();
+        aggData = null;
+        singleData = null;
     }
 }
