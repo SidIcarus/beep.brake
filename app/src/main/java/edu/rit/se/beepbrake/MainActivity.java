@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    //Data Acquisition Objects
     private SegmentSync segSync;
     private GPSSensor gpsSen;
     private AccelerometerSensor aSen;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void Initialize() {
+        //Data Acqusition init
         segSync = new SegmentSync();
         gpsSen = new GPSSensor(this, segSync);
         aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
