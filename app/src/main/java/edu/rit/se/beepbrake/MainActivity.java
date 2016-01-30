@@ -5,16 +5,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.hardware.SensorManager;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
+    //Data Acquisition Objects
+    private SegmentSync segSync;
+    private GPSSensor gpsSen;
+    private AccelerometerSensor aSen;
 
     static {
         System.loadLibrary("opencv_java3");
         System.loadLibrary("beepbrake");
     }
 
-    public native static String changeText();
+    //public native static String changeText();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        TextView textview = (TextView) findViewById(R.id.textview);
-        textview.setText(changeText());
+        Initialize();
     }
 
     @Override
@@ -47,5 +51,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void Initialize() {
+        //Data Acquisition init
+        segSync = new SegmentSync();
+        gpsSen = new GPSSensor(this, segSync);
+        aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+    }
+
+    protected void onResume(){
+        super.onResume();
+
+        //Data Acquisition onResume
+        segSync.onResume();
+        gpsSen.onResume();
+        aSen.onResume();
+    }
+
+    protected void onPause(){
+        super.onPause();
+
+        //Data Acquisition onPause
+        segSync.onPause();
+        gpsSen.onPause();
+        aSen.onPause();
     }
 }
