@@ -8,7 +8,12 @@ import android.view.MenuItem;
 import android.hardware.SensorManager;
 import android.widget.TextView;
 
+import edu.rit.se.beepbrake.buffer.BufferManager;
+
 public class MainActivity extends AppCompatActivity {
+
+    //Buffer
+    private BufferManager bufMan;
 
     //Data Acquisition Objects
     private SegmentSync segSync;
@@ -54,8 +59,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void Initialize() {
+        //Buffer init
+        bufMan = new BufferManager(this);
         //Data Acquisition init
-        segSync = new SegmentSync();
+        segSync = new SegmentSync(bufMan);
         gpsSen = new GPSSensor(this, segSync);
         aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
     }

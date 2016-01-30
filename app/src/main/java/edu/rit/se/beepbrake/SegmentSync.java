@@ -11,12 +11,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import edu.rit.se.beepbrake.buffer.BufferManager;
+
 public class SegmentSync {
+    private BufferManager buf;
 
     ConcurrentHashMap<String, ArrayList<Object>> aggData;
     ConcurrentHashMap<String, Object> singleData;
 
-    public SegmentSync() {
+    public SegmentSync(BufferManager bm) {
+        buf = bm;
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
     }
