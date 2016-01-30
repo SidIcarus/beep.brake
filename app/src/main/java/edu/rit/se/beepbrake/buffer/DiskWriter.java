@@ -2,21 +2,21 @@ package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
 
-import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 import edu.rit.se.beepbrake.Segment;
 
 public class DiskWriter extends Thread implements Runnable{
     private Segment head;
+    private Context context;
 
     /**
      * Constructor
-     *
      */
-    public DiskWriter(Segment head) {
+    public DiskWriter(Segment head, Context con) {
+        this.context = con;
         this.head = head;
     }
 
@@ -27,12 +27,18 @@ public class DiskWriter extends Thread implements Runnable{
      */
     public void start() {
         String fileName = Calendar.getInstance().getTime().toString();
-        FileOutputStream fos = null;//TODO actually get a fileStream (needs Context)
+        FileOutputStream fos;
 
-        while(head != null) {
-            head.setNextSeg(null);
-            writeSegment(head, fos);
-            head = head.getPrevSeg();
+        try {
+            fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+
+            while(head != null) {
+                head.setNextSeg(null);
+                writeSegment(head, fos);
+                head = head.getPrevSeg();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

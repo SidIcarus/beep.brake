@@ -1,5 +1,7 @@
 package edu.rit.se.beepbrake.buffer;
 
+import android.content.Context;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -7,6 +9,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import edu.rit.se.beepbrake.Segment;
 
 public class SegmentBuffer {
+
+    /**
+     * Application context, used for getting file locations
+     */
+    private Context context;
+
     /**
      * The segment most recently added to the buffer
      */
@@ -36,7 +44,8 @@ public class SegmentBuffer {
      * Constructor
      * Start with empty newest and oldest segments
      */
-    public SegmentBuffer() {
+    public SegmentBuffer(Context con) {
+        this.context = con;
         this.newest = null;
         this.oldest = null;
         warningTriggered = false;
@@ -75,7 +84,7 @@ public class SegmentBuffer {
      */
     public void save() {
         bufferLock.lock();
-        DiskWriter dw = new DiskWriter(newest);
+        DiskWriter dw = new DiskWriter(newest, context);
         newest = null;
         oldest = null;
         dw.start();

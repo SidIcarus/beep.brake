@@ -1,5 +1,7 @@
 package edu.rit.se.beepbrake.buffer;
 
+import android.content.Context;
+
 import edu.rit.se.beepbrake.Segment;
 
 public class BufferManager {
@@ -9,8 +11,8 @@ public class BufferManager {
      * Constructor
      * Creates an empty buffer
      */
-    public BufferManager() {
-        buffer = new SegmentBuffer();
+    public BufferManager(Context context) {
+        buffer = new SegmentBuffer(context);
     }
 
     /**
