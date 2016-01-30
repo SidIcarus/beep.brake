@@ -4,7 +4,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import myfirstapp.app.Segment;
+import edu.rit.se.beepbrake.Segment;
 
 public class SegmentBuffer {
     /**

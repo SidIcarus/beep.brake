@@ -1,6 +1,6 @@
 package edu.rit.se.beepbrake.buffer;
 
-import myfirstapp.app.Segment;
+import edu.rit.se.beepbrake.Segment;
 
 public class BufferManager {
     private SegmentBuffer buffer;

@@ -7,7 +7,7 @@ import java.io.FileOutputStream;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import myfirstapp.app.Segment;
+import edu.rit.se.beepbrake.Segment;
 
 public class DiskWriter extends Thread implements Runnable{
     private Segment head;
