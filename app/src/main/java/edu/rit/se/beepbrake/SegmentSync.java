@@ -56,7 +56,7 @@ public class SegmentSync {
             segMap.put(pair.getKey().toString(), tempSing.get(pair.getKey()));
         }
         Segment seg = new Segment(segMap);
-        //Call BufferManager add method -> Needs Kevin's stuff
+        buf.addSegment(seg);
     }
 
     public void UpdateDataAgg(HashMap<String, Object> map) {
