@@ -1,10 +1,10 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import edu.rit.se.beepbrake.Segment;
 
@@ -58,6 +58,7 @@ public class SegmentBuffer {
      * @param seg - The segment to add
      */
     public void addSegment(Segment seg) {
+        Log.d("Segment", String.valueOf(seg.getCreatedAt()));
         bufferLock.lock();
         if(newest == null) {
             newest = seg;
@@ -104,7 +105,7 @@ public class SegmentBuffer {
      * the warningTriggered flag.
      */
     private void prune() {
-        while(oldest.getDataObject("time") == null) {//TODO update to use timestamp (needs getter)
+        while(newest.getCreatedAt() - oldest.getCreatedAt() > timediff) {//TODO update to use timestamp (needs getter)
             if(warningTriggered) {
                 warningTriggered = false;
                 save();
