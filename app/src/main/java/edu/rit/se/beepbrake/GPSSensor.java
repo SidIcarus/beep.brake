@@ -3,6 +3,7 @@ package edu.rit.se.beepbrake;
 /**
  * Created by Bradley on 1/11/2016.
  */
+import android.hardware.SensorManager;
 import android.location.*;
 import android.content.Context;
 import android.os.Bundle;
@@ -77,5 +78,14 @@ public class GPSSensor implements LocationListener {
     public void onProviderDisabled(String provider) {
 
     }
+
+    protected void onResume(){
+        locationManager.requestLocationUpdates(provider, 100, 0, this);
+    }
+
+    protected void onPause(){
+        locationManager.removeUpdates(this);
+    }
+
 
 }

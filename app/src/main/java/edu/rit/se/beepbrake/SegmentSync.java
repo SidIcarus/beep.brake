@@ -83,4 +83,14 @@ public class SegmentSync {
             singleData.put(pair.getKey().toString(), pair.getValue());
         }
     }
+
+    protected void onResume(){
+        aggData = null;
+        singleData = null;
+    }
+
+    protected void onPause(){
+        aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
+        singleData = new ConcurrentHashMap<String, Object>();
+    }
 }

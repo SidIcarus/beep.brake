@@ -10,6 +10,10 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    private SegmentSync segSync;
+    private GPSSensor gpsSen;
+    private AccelerometerSensor aSen;
+
     static {
         System.loadLibrary("opencv_java3");
         System.loadLibrary("beepbrake");
@@ -49,11 +53,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void Initialize() {
-        SegmentSync segSync = new SegmentSync();
-        GPSSensor gpsSen = new GPSSensor(this, segSync);
-        AccelerometerSensor aSen = new AccelerometerSensor((SensorManager)
-                getSystemService(SENSOR_SERVICE), segSync);
-        //Sensor Manager is an object that we should store for pause/resume
+        segSync = new SegmentSync();
+        gpsSen = new GPSSensor(this, segSync);
+        aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+    }
 
+    protected void onResume(){
+        super.onResume();
+
+        //Data Acquisition onResume
+        segSync.onResume();
+        gpsSen.onResume();
+        aSen.onResume();
+    }
+
+    protected void onPause(){
+        super.onPause();
+
+        //Data Acquisition onPause
+        segSync.onPause();
+        gpsSen.onPause();
+        aSen.onPause();
     }
 }

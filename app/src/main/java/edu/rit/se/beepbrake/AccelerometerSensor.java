@@ -46,19 +46,16 @@ public class AccelerometerSensor implements SensorEventListener {
 
         segSync.UpdateDataAgg(data);
     }
-    /*  Activity will need to pause and resume this on it's super.onResume/super.onPause
+    //  Activity will need to pause and resume this on it's super.onResume/super.onPause
 
-      @Override
       protected void onResume(){
-        super.onResume();
         manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
       }
 
       protected void onPause(){
-        super.onPause();
         manager.unregisterListener(this);
       }
-    */
+
     public void onSensorChanged(SensorEvent event){
 
         Float x = event.values[0];
