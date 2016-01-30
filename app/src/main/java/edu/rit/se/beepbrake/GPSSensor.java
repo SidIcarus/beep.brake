@@ -57,10 +57,6 @@ public class GPSSensor implements LocationListener {
         Double lat = location.getLatitude();
         Double lng = location.getLongitude();
 
-        System.out.println(lat);
-        System.out.println(lng);
-        System.out.println(spd);
-
         send(spd, lat, lng);
 
     }

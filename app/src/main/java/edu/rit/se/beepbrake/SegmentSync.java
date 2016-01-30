@@ -52,7 +52,6 @@ public class SegmentSync {
             segMap.put(pair.getKey().toString(), tempSing.get(pair.getKey()));
         }
         Segment seg = new Segment(segMap);
-        Log.d("Bird", "Segment created");
         //Call BufferManager add method -> Needs Kevin's stuff
     }
 
@@ -71,7 +70,6 @@ public class SegmentSync {
             }
         }
 
-        Log.d("Bird", "New Data Added");
         makeSegment();
     }
 

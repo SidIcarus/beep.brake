@@ -62,11 +62,11 @@ public class AccelerometerSensor implements SensorEventListener {
         Float y = event.values[1];
         Float z = event.values[2];
 
-        Log.d("Bird", String.valueOf((d - new Date().getTime())));
-        d = new Date().getTime();
+        /*
         Log.d("Bird", String.valueOf(x));
         Log.d("Bird", y.toString());
         Log.d("Bird", z.toString());
+        */
 
 
         send(x, y, z);
