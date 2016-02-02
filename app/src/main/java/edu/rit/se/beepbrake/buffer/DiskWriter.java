@@ -47,8 +47,19 @@ public class DiskWriter extends Thread implements Runnable{
      * @param seg - the segment to read
      * @param file - the file to write to
      */
-    private void writeSegment(Segment seg, FileOutputStream file) {
+    private void writeSegment(Segment seg, FileOutputStream file) throws IOException{
+        //Segment header
+        file.write(String.valueOf(seg.getCreatedAt()).getBytes());
+        file.write(String.valueOf('\n').getBytes());
 
+        //Segment content
+        for(String k : seg.getKeys()) {
+            file.write(String.valueOf('\t').getBytes());
+            file.write(k.getBytes());
+            file.write(String.valueOf(':').getBytes());
+            file.write(seg.getDataObject(k).toString().getBytes());
+            file.write(String.valueOf('\n').getBytes());
+        }
     }
 
 }
