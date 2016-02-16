@@ -8,6 +8,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 
+import edu.rit.se.beepbrake.Analysis.AnalysisActivity;
 import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 
@@ -33,6 +34,12 @@ public class SimpleLaneDetector implements Detector {
     private Rect cropSizeRight;
 
     private boolean sizeSet = false;
+
+    private AnalysisActivity activity;
+
+    public SimpleLaneDetector(AnalysisActivity activity){
+        this.activity = activity;
+    }
 
     @Override
     public void detect(Mat m) {
@@ -78,9 +85,8 @@ public class SimpleLaneDetector implements Detector {
             i++;
         }
 
-        //return coordinates by sending to UI in a static method
 
-        CameraPreview.setLinesToDraw(results);
+        this.activity.setCurrentFoundLanes(results);
 
 
     }
