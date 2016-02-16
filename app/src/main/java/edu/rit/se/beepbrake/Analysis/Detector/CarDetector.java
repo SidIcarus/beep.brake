@@ -12,6 +12,7 @@ import org.opencv.objdetect.CascadeClassifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rit.se.beepbrake.Analysis.AnalysisActivity;
 import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.TempLogger;
@@ -24,9 +25,11 @@ public class CarDetector implements Detector {
     private static final String TAG = "Car-Detector";
     private final CascadeClassifier mCascade;
     private Size imgSize;
+    private AnalysisActivity activity;
 
-    public CarDetector(CascadeClassifier cascade){
+    public CarDetector(CascadeClassifier cascade, AnalysisActivity activity){
         this.mCascade = cascade;
+        this.activity = activity;
     }
 
     public void detect(Mat m){
@@ -55,7 +58,7 @@ public class CarDetector implements Detector {
         mCascade.detectMultiScale(mat, foundLocations, 1.4, 50, 0, new Size(24, 24), new Size(258, 258));
         Rect r = this.filterLocationsFound(foundLocations);
         //TODO tell actual UI where to draw squares
-        CameraPreview.setPointsToDraw(r);
+        activity.setCurrentFoundRect(mat, r);
         //CameraPreview.setPointsToDraw(foundLocations);
 
     }

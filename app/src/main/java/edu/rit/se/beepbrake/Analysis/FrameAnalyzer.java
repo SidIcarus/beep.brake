@@ -37,7 +37,6 @@ public class FrameAnalyzer implements Runnable {
     private int analyzerId = 0;
     static int numAnalyzer = 0;
 
-
     /**
      * Constructor
      * @param detector - descriptor how the frame is detected
