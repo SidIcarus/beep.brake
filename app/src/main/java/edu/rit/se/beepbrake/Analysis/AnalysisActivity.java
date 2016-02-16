@@ -1,6 +1,7 @@
 package edu.rit.se.beepbrake.Analysis;
 
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,6 +14,8 @@ import android.widget.Button;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.objdetect.CascadeClassifier;
 
 import java.io.File;
@@ -20,10 +23,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import edu.rit.se.beepbrake.AccelerometerSensor;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.Analysis.Detector.SimpleLaneDetector;
+import edu.rit.se.beepbrake.GPSSensor;
 import edu.rit.se.beepbrake.R;
+import edu.rit.se.beepbrake.SegmentSync;
 import edu.rit.se.beepbrake.TempLogger;
 
 /**
@@ -45,6 +51,7 @@ public class AnalysisActivity extends AppCompatActivity {
 
     private BaseLoaderCallback mLoaderCallback;
     private JavaCameraView mCameraView;
+    private CameraPreview mCameraPreview;
     private FrameAnalyzer mCarAnalyzer;
     private FrameAnalyzer mLaneAnalyzer;
 
@@ -52,11 +59,20 @@ public class AnalysisActivity extends AppCompatActivity {
     private String CASCADE_XML = "cascade_5.xml";
     private int CASCADE_ID = R.raw.cascade_5;
 
+    //Data Acquisition Objects
+    private SegmentSync segSync;
+    private GPSSensor gpsSen;
+    private AccelerometerSensor aSen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
+
+        //Data Acquisition init
+        segSync = new SegmentSync();
+        gpsSen = new GPSSensor(this, segSync);
+        aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
 
         // UI Element
         mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
@@ -66,21 +82,18 @@ public class AnalysisActivity extends AppCompatActivity {
         CascadeClassifier cascade = loadCascade();
 
         //construct frame analyzer and start thread
-        Detector carDetect = new CarDetector(cascade);
+        Detector carDetect = new CarDetector(cascade, this);
         mCarAnalyzer = new FrameAnalyzer(carDetect);
         (new Thread(mCarAnalyzer)).start();
 
         //construct lane detector
-        Detector laneDetector = new SimpleLaneDetector();
+        Detector laneDetector = new SimpleLaneDetector(this);
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
         (new Thread(mLaneAnalyzer)).start();
 
-
         //Set listener and callback
-        CameraPreview cameraPreview = new CameraPreview();
-        cameraPreview.addAnalyzer(mCarAnalyzer);
-        cameraPreview.addAnalyzer(mLaneAnalyzer);
-        mCameraView.setCvCameraViewListener(cameraPreview);
+        mCameraPreview = new CameraPreview(this);
+        mCameraView.setCvCameraViewListener(mCameraPreview);
         mLoaderCallback = new LoaderCallback(this, mCameraView);
 
         //setup button
@@ -158,8 +171,20 @@ public class AnalysisActivity extends AppCompatActivity {
             mCameraView.disableView();
         }
     }
+    public void setCurrentFrame(Mat currentFrame){
+        this.mCarAnalyzer.addFrameToAnalyze(currentFrame);
+        this.mLaneAnalyzer.addFrameToAnalyze(currentFrame);
+    }
 
+    public void setCurrentFoundRect(Mat m, Rect r){
+        this.mCameraPreview.setPointsToDraw(r);
+        //TODO send segment here
+        //this.segSync.makeSegment(m, otherstuffmap);
+    }
 
+    public void setCurrentFoundLanes(double[][] lanesCoord){
+
+    }
 
     public CascadeClassifier loadCascade(){
         CascadeClassifier cascadeClassifier = null;

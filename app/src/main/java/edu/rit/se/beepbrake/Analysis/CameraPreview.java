@@ -1,5 +1,7 @@
 package edu.rit.se.beepbrake.Analysis;
 
+import android.hardware.SensorManager;
+
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -11,6 +13,9 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rit.se.beepbrake.AccelerometerSensor;
+import edu.rit.se.beepbrake.GPSSensor;
+import edu.rit.se.beepbrake.SegmentSync;
 import edu.rit.se.beepbrake.TempLogger;
 
 /**
@@ -23,24 +28,26 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
 
     private final static String TAG = "Camera-Preview";
 
-    private ArrayList<FrameAnalyzer> mFrameAnalyzers = new ArrayList<FrameAnalyzer>();
-    //locations to draw boxes
-    static List<Rect> sFoundCars = new ArrayList<Rect>();
-    static double[][] sFoundLines = new double[0][0];
+    /**
+     * Drawing logic variables
+     */
+    private List<Rect> sFoundCars = new ArrayList<Rect>();
+    private double[][] sFoundLines = new double[0][0];
 
-    // points reused to draw
     final Point rectPoint1 = new Point();
     final Point rectPoint2 = new Point();
 
     final Point linePoint1 = new Point();
     final Point linePoint2 = new Point();
 
-    //color of rects
     final Scalar rectColor = new Scalar(0, 0, 255);
-    //color of line
     final Scalar lineColor = new Scalar(0, 255, 0);
 
-    public CameraPreview(){
+    // context used to receive/send frame data
+    private AnalysisActivity analysisActivity;
+
+    public CameraPreview(AnalysisActivity activity){
+        analysisActivity = activity;
     }
 
     @Override
@@ -56,28 +63,25 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
-        //multiple starts will be logged
-        for( FrameAnalyzer fa : mFrameAnalyzers){
-            fa.addFrameToAnalyze(inputFrame.rgba());
-        }
-        //To show tracking of an object
-        Mat result = inputFrame.rgba();
-        result = drawBox(result);
-        result = drawLines(result);
-        return result;
+        this.analysisActivity.setCurrentFrame(inputFrame.rgba());
+        //To show tracking on image
+        Mat display = inputFrame.rgba();
+        display = drawBox(display);
+        display = drawLines(display);
+        return display;
     }
 
-    public static void setPointsToDraw(MatOfRect loc ){
+    public void setPointsToDraw(MatOfRect loc ){
         sFoundCars = loc.toList();
 
     }
 
-    public static void setPointsToDraw(Rect r){
+    public void setPointsToDraw(Rect r){
         sFoundCars.clear();
         sFoundCars.add(r);
     }
 
-    public static void setLinesToDraw(double[][] lines){
+    public void setLinesToDraw(double[][] lines){
         sFoundLines = lines;
     }
 
@@ -95,10 +99,10 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
         return rgb;
     }
 
-    private Mat drawLines( Mat rgb ){
-        if(sFoundLines.length > 0){
-            for( double[] data : sFoundLines ){
-                if(data.length == 4) {
+    private Mat drawLines( Mat rgb ) {
+        if (sFoundLines.length > 0) {
+            for (double[] data : sFoundLines) {
+                if (data.length == 4) {
                     linePoint1.x = data[0];
                     linePoint1.y = data[1];
                     linePoint2.x = data[2];
@@ -109,10 +113,5 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
         }
         return rgb;
     }
-
-    public void addAnalyzer(FrameAnalyzer fa){
-        this.mFrameAnalyzers.add(fa);
-    }
-
 }
 
