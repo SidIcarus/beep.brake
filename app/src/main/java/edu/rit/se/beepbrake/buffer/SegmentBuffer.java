@@ -26,9 +26,9 @@ public class SegmentBuffer {
     private Segment oldest;
 
     /**
-     * Whether or not a warning has been triggered: used for saving a full buffer after a warning event
+     * The timestamp of the last issued warning, for determining when to stop saving segments to disk
      */
-    private boolean warningTriggered;
+    private long lastWarningTime;
 
     /**
      * Maximum amount of time (in millis) between segments to allow before removing old ones
@@ -41,6 +41,13 @@ public class SegmentBuffer {
     private Lock bufferLock;
 
     /**
+     * Tracking if we are currently saving segments to disk or not
+     */
+    private boolean activeWarning;
+
+    private DiskWriter activeWriter;
+
+    /**
      * Constructor
      * Start with empty newest and oldest segments
      */
@@ -48,7 +55,8 @@ public class SegmentBuffer {
         this.context = con;
         this.newest = null;
         this.oldest = null;
-        warningTriggered = false;
+        activeWarning = false;
+        activeWriter = null;
         bufferLock = new ReentrantLock();
     }
 
@@ -81,42 +89,37 @@ public class SegmentBuffer {
     }
 
     /**
-     * Save the current buffer to file by spawning a DiskWriter thread and passing it the current buffer
+     * A warning was triggered, so write event to disk
+     * Uses lock to ensure a segment is not pruned while the DiskWriter is being set up
      */
-    public void save() {
+    public void triggerWarning() {
         bufferLock.lock();
-        DiskWriter dw = new DiskWriter(newest, context);
-        newest = null;
-        oldest = null;
-        dw.start();
+        lastWarningTime = newest.getCreatedAt();
+        activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
+        activeWarning = true;
         bufferLock.unlock();
     }
 
     /**
-     * Schedule saving of the next full buffer
-     */
-    public void triggerSaveAfterWarning() {
-        warningTriggered = true;
-    }
-
-    /**
      * Go through the segments starting from the oldest and remove any that are not needed anymore
-     * Will also handle saving the buffer to disk immediately following a warning event by reading
-     * the warningTriggered flag.
+     * If a warning is active, will send the pruned segments to the active diskwriter
      */
     private void prune() {
-        while(newest.getCreatedAt() - oldest.getCreatedAt() > timediff) {//TODO update to use timestamp (needs getter)
-            if(warningTriggered) {
-                warningTriggered = false;
-                save();
-                return;
-            } else {
-                bufferLock.lock();
-                oldest.getNextSeg().setPrevSeg(null);
-                //TODO delete oldest if possible
-                oldest = oldest.getNextSeg();
-                bufferLock.unlock();
+        while(newest.getCreatedAt() - oldest.getCreatedAt() > timediff) {
+            bufferLock.lock();
+            if(activeWarning) {
+                //End the warning state if it's been long enough since the last warning segment
+                if(oldest.getCreatedAt() - lastWarningTime > timediff) {
+                    activeWarning = false;
+                    activeWriter.signalEnd();
+                } else {
+                    activeWriter.addSegment(oldest);
+                }
             }
+            //Remove the oldest segment from the list
+            oldest.getNextSeg().setPrevSeg(null);
+            oldest = oldest.getNextSeg();
+            bufferLock.unlock();
         }
     }
 }
