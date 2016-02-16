@@ -45,7 +45,7 @@ public class DiskWriter extends Thread implements Runnable{
      * Parses backwards through the segments passed to it saving each's contents to disk
      * Dereferences as it goes to cut down on memory usage
      */
-    public void start() {
+    public void run() {
         //File name = 'androidID'_'eventID'
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         String fileName = deviceId + "_" + String.valueOf(eventId);
