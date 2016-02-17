@@ -1,18 +1,15 @@
-package edu.rit.se.beepbrake;
+package edu.rit.se.beepbrake.Segment;
 
 /**
  * Created by Bradley on 1/11/2016.
  */
-import android.hardware.SensorManager;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.*;
 import android.content.Context;
 import android.os.Bundle;
-import android.widget.TextView;
-import android.util.Log;
-import android.view.View;
 
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by Bradley on 10/17/2015.
@@ -20,31 +17,34 @@ import java.util.List;
 public class GPSSensor implements LocationListener {
     private String provider;
     private SegmentSync segSync;
-
     private LocationManager locationManager;
+    private Context context;
 
     public GPSSensor(Context context, SegmentSync segSync) {
         this.segSync = segSync;
+        this.context = context;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
 
         provider = locationManager.getBestProvider(criteria, true);
-        locationManager.requestLocationUpdates(provider, 100, 0, this);
+        if(checkPermission()) {
+            locationManager.requestLocationUpdates(provider, 100, 0, this);
+        }
     }
 
     public void send(Float spd, Double lat, Double lng) {
         HashMap<String, Object> d = new HashMap<String, Object>();
 
         if (lat != null) {
-            d.put("lat", lat);
+            d.put(Constants.GPS_LAT, lat);
         }
         if (lng != null) {
-            d.put("lng", lng);
+            d.put(Constants.GPS_LNG, lng);
         }
         if (spd != null) {
-            d.put("spd", spd);
+            d.put(Constants.GPS_SPD, spd);
         }
 
         segSync.UpdateDataAgg(d);
@@ -76,11 +76,29 @@ public class GPSSensor implements LocationListener {
     }
 
     protected void onResume(){
-        locationManager.requestLocationUpdates(provider, 100, 0, this);
+        if(checkPermission()) {
+            locationManager.requestLocationUpdates(provider, 100, 0, this);
+        }
     }
 
     protected void onPause(){
-        locationManager.removeUpdates(this);
+        if(checkPermission()) {
+            locationManager.removeUpdates(this);
+        }
+    }
+
+    private boolean checkPermission(){
+        PackageManager pm = context.getPackageManager();
+        int hasPermission = pm.checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, context.getPackageName());
+        if(hasPermission == pm.PERMISSION_GRANTED) {
+            return true;
+        }else if( hasPermission == pm.PERMISSION_DENIED){
+            //TODO warn the user GPS doesn't work
+
+            return false;
+        }else{
+            return false;
+        }
     }
 
 

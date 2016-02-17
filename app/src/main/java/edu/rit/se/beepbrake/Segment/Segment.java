@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake;
+package edu.rit.se.beepbrake.Segment;
 
 /**
  * Created by Bradley on 1/11/2016.

@@ -1,9 +1,8 @@
-package edu.rit.se.beepbrake;
+package edu.rit.se.beepbrake.Segment;
 
 /**
  * Created by Bradley on 1/11/2016.
  */
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +21,7 @@ public class SegmentSync {
     }
 
 
-    public synchronized void makeSegment() {
+    public synchronized Segment makeSegment() {
         ConcurrentHashMap<String, ArrayList<Object>> tempAgg = new ConcurrentHashMap<>(aggData); // Proper Copy
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
 
@@ -52,6 +51,7 @@ public class SegmentSync {
             segMap.put(pair.getKey().toString(), tempSing.get(pair.getKey()));
         }
         Segment seg = new Segment(segMap);
+        return seg;
         //Call BufferManager add method -> Needs Kevin's stuff
     }
 
@@ -70,7 +70,8 @@ public class SegmentSync {
             }
         }
 
-        makeSegment();
+        //TODO Only make segment for video frame?
+        //makeSegment();
     }
 
     public void UpdateDataSingle(HashMap<String, Object> map) {

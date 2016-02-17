@@ -9,6 +9,7 @@ import android.widget.Button;
 
 import edu.rit.se.beepbrake.Analysis.AnalysisActivity;
 import edu.rit.se.beepbrake.MockStream.MockActivity;
+import edu.rit.se.beepbrake.Segment.SegmentActivity;
 
 public class TempHome extends AppCompatActivity {
 
@@ -20,9 +21,11 @@ public class TempHome extends AppCompatActivity {
         //set buttons
         Button b1 = (Button) findViewById(R.id.livefeedbutton);
         Button b2 = (Button) findViewById(R.id.mockvideobutton);
+        Button b3 = (Button) findViewById(R.id.segmentpreview);
 
         b1.setOnClickListener(new SwitchActivity(this, AnalysisActivity.class));
         b2.setOnClickListener(new SwitchActivity(this, MockActivity.class));
+        b3.setOnClickListener(new SwitchActivity(this, SegmentActivity.class));
     }
 
 

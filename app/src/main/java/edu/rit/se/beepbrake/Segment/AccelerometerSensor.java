@@ -1,16 +1,13 @@
-package edu.rit.se.beepbrake;
+package edu.rit.se.beepbrake.Segment;
 
 /**
  * Created by Bradley on 1/11/2016.
  */
 
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Bundle;
-import android.util.Log;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -35,13 +32,13 @@ public class AccelerometerSensor implements SensorEventListener {
         HashMap<String, Object> data = new HashMap<String, Object>();
 
         if(x != null){
-            data.put("XAcl", x);
+            data.put(Constants.ACCEL_X, x);
         }
         if(y != null){
-            data.put("YAcl", y);
+            data.put(Constants.ACCEL_Y, y);
         }
         if(z != null){
-            data.put("ZAcl", z);
+            data.put(Constants.ACCEL_Z, z);
         }
 
         segSync.UpdateDataAgg(data);

@@ -1,7 +1,5 @@
 package edu.rit.se.beepbrake.Analysis;
 
-import android.hardware.SensorManager;
-
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -13,9 +11,6 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rit.se.beepbrake.AccelerometerSensor;
-import edu.rit.se.beepbrake.GPSSensor;
-import edu.rit.se.beepbrake.SegmentSync;
 import edu.rit.se.beepbrake.TempLogger;
 
 /**

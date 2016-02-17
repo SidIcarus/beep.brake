@@ -23,13 +23,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import edu.rit.se.beepbrake.AccelerometerSensor;
+import edu.rit.se.beepbrake.Segment.AccelerometerSensor;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.Analysis.Detector.SimpleLaneDetector;
-import edu.rit.se.beepbrake.GPSSensor;
+import edu.rit.se.beepbrake.Segment.GPSSensor;
 import edu.rit.se.beepbrake.R;
-import edu.rit.se.beepbrake.SegmentSync;
+import edu.rit.se.beepbrake.Segment.SegmentSync;
 import edu.rit.se.beepbrake.TempLogger;
 
 /**

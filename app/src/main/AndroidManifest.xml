@@ -22,7 +22,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".TempHome"
-            android:label="@string/title_activity_temp_home"
+            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,6 +42,12 @@
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <activity
+            android:name=".Segment.SegmentActivity"
+            android:label="@string/title_activity_segment"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
     </application>
 
 </manifest>
