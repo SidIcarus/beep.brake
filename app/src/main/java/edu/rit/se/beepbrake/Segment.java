@@ -5,6 +5,7 @@ package edu.rit.se.beepbrake;
  */
 import java.util.Date;
 import java.util.HashMap;
+import org.opencv.core.Mat;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -12,13 +13,15 @@ public class Segment {
 
     private Segment nextSeg;
     private Segment prevSeg;
+    private Mat img;
 
     HashMap<String, Object> calculatedData;
     long createdAt;
 
-    public Segment(HashMap<String, Object> map) {
+    public Segment(HashMap<String, Object> map, Mat img) {
         calculatedData = map;
         createdAt = new Date().getTime();
+        this.img = img;
     }
 
     public Segment getNextSeg() {
@@ -51,5 +54,9 @@ public class Segment {
 
     public long getCreatedAt(){
         return createdAt;
+    }
+
+    public Mat getImg() {
+        return this.img;
     }
 };

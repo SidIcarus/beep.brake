@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.opencv.core.Mat;
 
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
@@ -26,7 +27,10 @@ public class SegmentSync {
     }
 
 
-    public synchronized void makeSegment() {
+    public synchronized void makeSegment(Mat img, HashMap<String, Object> camData) {
+
+        this.UpdateDataSingle(camData);
+
         ConcurrentHashMap<String, ArrayList<Object>> tempAgg = new ConcurrentHashMap<>(aggData); // Proper Copy
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
 
@@ -55,7 +59,7 @@ public class SegmentSync {
 
             segMap.put(pair.getKey().toString(), tempSing.get(pair.getKey()));
         }
-        Segment seg = new Segment(segMap);
+        Segment seg = new Segment(segMap, img);
         buf.addSegment(seg);
     }
 
@@ -74,7 +78,7 @@ public class SegmentSync {
             }
         }
 
-        makeSegment();
+        //makeSegment(); Used for demonstration purposes with android sensors
     }
 
     public void UpdateDataSingle(HashMap<String, Object> map) {
