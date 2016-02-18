@@ -100,6 +100,7 @@ public class MockActivity extends AppCompatActivity {
                Segment next = segments.get(i);
                curr.setNextSeg(next);
                next.setPrevSeg(curr);
+               curr = next;
            }
            // link last
            Segment first = segments.get(0);
