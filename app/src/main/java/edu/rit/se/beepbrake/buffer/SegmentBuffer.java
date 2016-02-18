@@ -1,6 +1,7 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -65,6 +66,7 @@ public class SegmentBuffer {
      * @param seg - The segment to add
      */
     public void addSegment(Segment seg) {
+        Log.d("Buffer", "Segment Added: " + String.valueOf(seg.getCreatedAt()));
         bufferLock.lock();
         if(newest == null) {
             newest = seg;

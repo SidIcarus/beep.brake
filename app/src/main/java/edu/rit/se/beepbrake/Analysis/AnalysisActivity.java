@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 import edu.rit.se.beepbrake.AccelerometerSensor;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
@@ -31,6 +32,7 @@ import edu.rit.se.beepbrake.GPSSensor;
 import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.SegmentSync;
 import edu.rit.se.beepbrake.TempLogger;
+import edu.rit.se.beepbrake.buffer.BufferManager;
 
 /**
  * Created by richykapadia on 1/7/16.
@@ -63,14 +65,18 @@ public class AnalysisActivity extends AppCompatActivity {
     private SegmentSync segSync;
     private GPSSensor gpsSen;
     private AccelerometerSensor aSen;
+    private BufferManager bufMan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
 
+        //Buffer init
+        bufMan = new BufferManager(this);
+        
         //Data Acquisition init
-        segSync = new SegmentSync();
+        segSync = new SegmentSync(bufMan);
         gpsSen = new GPSSensor(this, segSync);
         aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
 
@@ -105,6 +111,14 @@ public class AnalysisActivity extends AppCompatActivity {
                 if(!TempLogger.isPrintingLogs()) {
                     TempLogger.printLogs();
                 }
+            }
+        });
+
+        Button writeToDisk = (Button) findViewById(R.id.writeToDisk);
+        writeToDisk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bufMan.warningTriggered();
             }
         });
 
@@ -179,7 +193,7 @@ public class AnalysisActivity extends AppCompatActivity {
     public void setCurrentFoundRect(Mat m, Rect r){
         this.mCameraPreview.setPointsToDraw(r);
         //TODO send segment here
-        //this.segSync.makeSegment(m, otherstuffmap);
+        this.segSync.makeSegment(m, new HashMap<String, Object>());
     }
 
     public void setCurrentFoundLanes(double[][] lanesCoord){

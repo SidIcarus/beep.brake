@@ -1,7 +1,9 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
+import android.os.Environment;
 import android.provider.Settings;
+import android.util.Log;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,13 +48,15 @@ public class DiskWriter extends Thread implements Runnable{
      * Dereferences as it goes to cut down on memory usage
      */
     public void run() {
+        Log.d("Buffer", "Disk Writer started");
         //File name = 'androidID'_'eventID'
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        String fileName = deviceId + "_" + String.valueOf(eventId);
+        String fileName = deviceId + "_" + String.valueOf(eventId) + ".json";
         FileOutputStream fos;
 
         try {
-            fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+            //fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+            fos = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mock_stream/");
 
             //Print file header
             fos.write(String.valueOf("{\"deviceid\":\"" + deviceId + "\",").getBytes());

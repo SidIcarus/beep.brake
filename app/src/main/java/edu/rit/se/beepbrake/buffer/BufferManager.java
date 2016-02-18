@@ -1,6 +1,7 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
+import android.util.Log;
 
 import edu.rit.se.beepbrake.Segment;
 
@@ -36,6 +37,7 @@ public class BufferManager {
      * before and after buffers)
      */
     public void warningTriggered() {
+        Log.d("Buffer", "Warning triggered");
         buffer.triggerWarning();
     }
 }
