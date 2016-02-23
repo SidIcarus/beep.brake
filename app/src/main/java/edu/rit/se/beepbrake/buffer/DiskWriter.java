@@ -5,6 +5,13 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
 
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -56,7 +63,9 @@ public class DiskWriter extends Thread implements Runnable{
 
         try {
             //fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-            fos = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mock_stream/");
+            String path = Environment.getExternalStorageDirectory() + "/write_segments/" + fileName;
+            File writeDir = new File(path);
+            fos = new FileOutputStream(writeDir);
 
             //Print file header
             fos.write(String.valueOf("{\"deviceid\":\"" + deviceId + "\",").getBytes());
@@ -140,8 +149,15 @@ public class DiskWriter extends Thread implements Runnable{
         file.write(String.valueOf(",\"sensordata\": [").getBytes());
 
         //Segment content
-        //TODO actually read image
-        file.write(String.valueOf("{\"key\":\"imagename\",\"value\":\"/test/img.png\"}").getBytes());
+        if( seg.getImg() != null){
+            String imgName = String.valueOf(seg.getCreatedAt()) + ".png";
+            String filepath = Environment.getExternalStorageDirectory() + "/write_segments/" + imgName;
+            MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
+            Mat img = new Mat();
+            Imgproc.cvtColor(seg.getImg(), img, Imgproc.COLOR_BGR2RGB);
+            Imgcodecs.imwrite(filepath, seg.getImg(), param);
+            file.write(String.valueOf("{\"key\":\"imagename\",\"value\":\"" + filepath + "\"}").getBytes());
+        }
         for(String k : seg.getKeys()) {
             file.write(String.valueOf(",{\"key\":\"" + k + "\",\"value\":").getBytes());
             Object data = seg.getDataObject(k);

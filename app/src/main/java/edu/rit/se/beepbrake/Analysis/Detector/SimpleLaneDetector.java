@@ -118,12 +118,14 @@ public class SimpleLaneDetector implements Detector {
             double dx = data[0] - data[2];
             double dy = data[1] - data[3];
             float angleOne = (float) (Math.abs((Math.atan2(dy, dx) * 180/Math.PI)) % 180);
+            /*
             System.out.println("(" + data[0] + ", " + data[1] + ")" + "(" + data[2] + ", " + data[3] + ")");
             System.out.println("dx: " + dx + " dy: " + dy );
             System.out.println("Angles: " + angleOne);
+            */
             //	Small Angle measured 		OR		Nearly Straight angles measured
             if( angleOne <= LINE_REJECT_DEGREES || angleOne > 180 - LINE_REJECT_DEGREES){
-                System.out.println("line with " + angleOne + " has been rejected");
+                //System.out.println("line with " + angleOne + " has been rejected");
                 continue;
             }
             for( int j = 0; j < lines.rows(); j++){

@@ -102,7 +102,7 @@ public class AnalysisActivity extends AppCompatActivity {
         mCameraView.setCvCameraViewListener(mCameraPreview);
         mLoaderCallback = new LoaderCallback(this, mCameraView);
 
-        //setup button
+        //setup buttons
         Button statsButton = (Button) findViewById(R.id.statsButton);
         statsButton.setOnClickListener(new View.OnClickListener() {
             @Override

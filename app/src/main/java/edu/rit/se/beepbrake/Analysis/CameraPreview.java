@@ -65,7 +65,8 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
         TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
         this.analysisActivity.setCurrentFrame(inputFrame.rgba());
         //To show tracking on image
-        Mat display = inputFrame.rgba();
+        Mat display = new Mat();
+        inputFrame.rgba().copyTo(display);
         display = drawBox(display);
         display = drawLines(display);
         return display;
