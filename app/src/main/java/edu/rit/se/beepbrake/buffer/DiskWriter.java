@@ -63,9 +63,11 @@ public class DiskWriter extends Thread implements Runnable{
 
         try {
             //fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-            String path = Environment.getExternalStorageDirectory() + "/write_segments/" + fileName;
+            String path = Environment.getExternalStorageDirectory() + "/write_segments/";
             File writeDir = new File(path);
-            fos = new FileOutputStream(writeDir);
+            writeDir.mkdirs();
+            File event = new File(path, fileName);
+            fos = new FileOutputStream(event);
 
             //Print file header
             fos.write(String.valueOf("{\"deviceid\":\"" + deviceId + "\",").getBytes());

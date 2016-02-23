@@ -66,7 +66,6 @@ public class SegmentBuffer {
      * @param seg - The segment to add
      */
     public void addSegment(Segment seg) {
-        Log.d("Buffer", "Segment Added: " + String.valueOf(seg.getCreatedAt()));
         bufferLock.lock();
         if(newest == null) {
             newest = seg;

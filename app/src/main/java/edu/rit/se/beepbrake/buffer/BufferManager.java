@@ -37,7 +37,6 @@ public class BufferManager {
      * before and after buffers)
      */
     public void warningTriggered() {
-        Log.d("Buffer", "Warning triggered");
         buffer.triggerWarning();
     }
 }
