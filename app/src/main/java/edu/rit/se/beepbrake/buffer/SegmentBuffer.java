@@ -92,12 +92,15 @@ public class SegmentBuffer {
      * Uses lock to ensure a segment is not pruned while the DiskWriter is being set up
      */
     public void triggerWarning() {
-        bufferLock.lock();
-        lastWarningTime = newest.getCreatedAt();
-        activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
-        activeWriter.start();
-        activeWarning = true;
-        bufferLock.unlock();
+        //Ignore warning if we don't have any segments yet
+        if(newest != null) {
+            bufferLock.lock();
+            lastWarningTime = newest.getCreatedAt();
+            activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
+            activeWriter.start();
+            activeWarning = true;
+            bufferLock.unlock();
+        }
     }
 
     /**
