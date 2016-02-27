@@ -65,7 +65,9 @@ public class DiskWriter extends Thread implements Runnable{
             //fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
             String path = Environment.getExternalStorageDirectory() + "/write_segments/";
             File writeDir = new File(path);
-            writeDir.mkdirs();
+            if(!writeDir.exists()) {
+                writeDir.mkdirs();
+            }
             File event = new File(path, fileName);
             fos = new FileOutputStream(event);
 
@@ -155,8 +157,6 @@ public class DiskWriter extends Thread implements Runnable{
             String imgName = String.valueOf(seg.getCreatedAt()) + ".png";
             String filepath = Environment.getExternalStorageDirectory() + "/write_segments/" + imgName;
             MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
-            Mat img = new Mat();
-            Imgproc.cvtColor(seg.getImg(), img, Imgproc.COLOR_BGR2RGB);
             Imgcodecs.imwrite(filepath, seg.getImg(), param);
             file.write(String.valueOf("{\"key\":\"imagename\",\"value\":\"" + filepath + "\"}").getBytes());
         }
@@ -174,6 +174,7 @@ public class DiskWriter extends Thread implements Runnable{
 
         //Segment closing
         file.write(String.valueOf("]}").getBytes());
+        Log.d("Buffer", "Done Writing");
     }
 
 }

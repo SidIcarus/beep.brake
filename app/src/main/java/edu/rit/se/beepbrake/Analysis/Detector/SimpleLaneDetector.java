@@ -91,9 +91,13 @@ public class SimpleLaneDetector implements Detector {
 
     }
 
-    //TODO put this in the ndk if perf is a problem (due to passing obj in/out the jvm)
+
+    /**
+     * put this in the ndk if perf is a problem (due to passing obj in/out the jvm)
+     * @param img - greyscale image
+     * @return
+     */
     private Mat findLines(Mat img){
-        Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
         Imgproc.GaussianBlur(img, img, new Size(5, 5), THETA);
         Imgproc.Canny(img, img, CANNY_MIN, CANNY_MAX);
         Imgproc.HoughLinesP(img, img, 1, Math.PI/180, HOUGH_TRESHOLD, HOUGH_MIN_LINE_LENGTH, HOUGH_MAX_LINE_GAP);
