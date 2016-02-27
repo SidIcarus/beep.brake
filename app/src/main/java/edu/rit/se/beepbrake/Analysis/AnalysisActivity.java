@@ -58,8 +58,10 @@ public class AnalysisActivity extends AppCompatActivity {
     private FrameAnalyzer mLaneAnalyzer;
 
     //Cascade to be loaded
-    private String CASCADE_XML = "cascade_5.xml";
-    private int CASCADE_ID = R.raw.cascade_5;
+//    private String CASCADE_XML = "cascade_5.xml";
+//    private int CASCADE_ID = R.raw.cascade_5;
+    private String CASCADE_XML = "haarcascade_fullbody.xml";
+    private int CASCADE_ID = R.raw.haarcascade_fullbody;
 
     //Data Acquisition Objects
     private SegmentSync segSync;
@@ -82,6 +84,7 @@ public class AnalysisActivity extends AppCompatActivity {
 
         // UI Element
         mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
+        mCameraView.setMaxFrameSize(640,360);
         mCameraView.setVisibility(SurfaceView.VISIBLE);
 
         //load cascade

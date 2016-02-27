@@ -7,6 +7,7 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class CarDetector implements Detector {
     /**
      * detect img
      * send points to draw to the UI Logic
-     * @param mat
+     * @param mat - greyscale image
      */
     public void haar( Mat mat){
         if(imgSize == null){
@@ -57,9 +58,7 @@ public class CarDetector implements Detector {
         // param def           Img,  Locations, scaleFactor, MinNeighbor, flag, minSize, maxSize
         mCascade.detectMultiScale(mat, foundLocations, 1.4, 50, 0, new Size(24, 24), new Size(258, 258));
         Rect r = this.filterLocationsFound(foundLocations);
-        //TODO tell actual UI where to draw squares
         activity.setCurrentFoundRect(mat, r);
-        //CameraPreview.setPointsToDraw(foundLocations);
 
     }
 
