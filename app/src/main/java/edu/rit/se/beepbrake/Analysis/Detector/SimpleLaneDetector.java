@@ -47,16 +47,17 @@ public class SimpleLaneDetector implements Detector {
         if( !this.sizeSet || m == null || m.empty() ){
             return;
         }
+        Mat copy = new Mat();
+        m.copyTo(copy);
         //divide img in right/left half
-        Mat roiLeft = new Mat(m, this.cropSizeLeft);
-        Mat roiRight = new Mat(m, this.cropSizeRight);
+        Mat roiLeft = new Mat(copy, this.cropSizeLeft);
+        Mat roiRight = new Mat(copy, this.cropSizeRight);
         //imgproc stuff
         Mat leftLines = findLines(roiLeft);
         Mat rightLines = findLines(roiRight);
         //filter stuff
         double[][] leftCoord = filterOutLines(leftLines);
         double[][] rightCoord =filterOutLines(rightLines);
-        //TODO merge data by angles? (if improves accuracy)
 
         //calc offsets
         int leftOffsetX = (int) (this.totalSize.width - (this.totalSize.width - this.cropSizeLeft.tl().x));
