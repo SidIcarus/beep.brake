@@ -28,7 +28,7 @@ public class SegmentSync {
         ConcurrentHashMap<String, Object> tempSing = new ConcurrentHashMap<>(singleData);
         singleData = new ConcurrentHashMap<String, Object>();
 
-        HashMap<String, Object> segMap = new HashMap<String, Object>();
+        ConcurrentHashMap<String, Object> segMap = new ConcurrentHashMap<String, Object>();
 
         Iterator itAgg = tempAgg.entrySet().iterator();
         while (itAgg.hasNext()) {
@@ -50,6 +50,7 @@ public class SegmentSync {
 
             segMap.put(pair.getKey().toString(), tempSing.get(pair.getKey()));
         }
+
         Segment seg = new Segment(segMap);
         return seg;
         //Call BufferManager add method -> Needs Kevin's stuff

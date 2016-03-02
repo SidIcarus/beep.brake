@@ -5,16 +5,17 @@ package edu.rit.se.beepbrake.Segment;
  */
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Segment {
 
     private Segment nextSeg;
     private Segment prevSeg;
 
-    HashMap<String, Object> calculatedData;
+    ConcurrentHashMap<String, Object> calculatedData;
     long createdAt;
 
-    public Segment(HashMap<String, Object> map) {
+    public Segment(ConcurrentHashMap<String, Object> map) {
         calculatedData = map;
         createdAt = new Date().getTime();
     }
@@ -42,4 +43,8 @@ public class Segment {
     public void addDataObject(String name, Object item) {
         calculatedData.put(name, item);
     }
-};
+
+    public long getTimestamp(){
+        return this.createdAt;
+    }
+}
