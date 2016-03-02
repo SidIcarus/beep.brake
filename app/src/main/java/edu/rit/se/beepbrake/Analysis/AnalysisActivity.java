@@ -195,12 +195,18 @@ public class AnalysisActivity extends AppCompatActivity {
 
     public void setCurrentFoundRect(Mat m, Rect r){
         this.mCameraPreview.setPointsToDraw(r);
-        //TODO send segment here
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        if( r != null) {
+            data.put("br-x", r.br().x);
+            data.put("br-y", r.br().y);
+            data.put("tl-x", r.tl().x);
+            data.put("tl-y", r.tl().y);
+        }
         this.segSync.makeSegment(m, new HashMap<String, Object>());
     }
 
     public void setCurrentFoundLanes(double[][] lanesCoord){
-
+        this.mCameraPreview.setLinesToDraw( lanesCoord );
     }
 
     public CascadeClassifier loadCascade(){
