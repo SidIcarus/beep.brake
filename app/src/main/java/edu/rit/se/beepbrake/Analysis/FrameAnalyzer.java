@@ -29,7 +29,7 @@ public class FrameAnalyzer implements Runnable {
     // lock to protect the current frame
     private ReentrantLock mFrameLock;
     //current frame
-    private Mat mCurrentFrame;
+    private volatile Mat mCurrentFrame;
     //detector
     private Detector mDetector;
 
@@ -58,10 +58,13 @@ public class FrameAnalyzer implements Runnable {
     public void run() {
         Log.d(TAG, "Started Running!");
         while ( bRunning ) {
-            mFrameLock.lock();
-            TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
-            mDetector.detect(mCurrentFrame);
-            mFrameLock.unlock();
+            if( mCurrentFrame != null) {
+                mFrameLock.lock();
+                TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
+                mDetector.detect(mCurrentFrame);
+                mCurrentFrame = null;
+                mFrameLock.unlock();
+            }
             while( !bDetecting );
         }
         Log.d(TAG, "Finished Running!");
@@ -74,7 +77,7 @@ public class FrameAnalyzer implements Runnable {
      */
     public void addFrameToAnalyze(Mat mat){
         //if not being analyzed
-        if(mFrameLock.isLocked()){
+        if(!mFrameLock.isLocked()){
             //then set
             TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
             this.mCurrentFrame = mat;
