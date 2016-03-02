@@ -60,8 +60,12 @@ public class AnalysisActivity extends AppCompatActivity {
     //Cascade to be loaded
 //    private String CASCADE_XML = "cascade_5.xml";
 //    private int CASCADE_ID = R.raw.cascade_5;
-    private String CASCADE_XML = "haarcascade_fullbody.xml";
-    private int CASCADE_ID = R.raw.haarcascade_fullbody;
+    /*
+     * Sorry Clark, can't commercialize this without
+     * express written consent of the Visionary team
+     */
+    private String CASCADE_XML = "visionary.net_cars_and_truck_cascade_web_HAAR.xml";
+    private int CASCADE_ID = R.raw.visionary_net_cars_and_truck_cascade_web_HAAR;
 
     //Data Acquisition Objects
     private SegmentSync segSync;
