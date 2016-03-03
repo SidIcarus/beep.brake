@@ -13,9 +13,9 @@ public class CameraDecision extends Decision{
 
     public void run(){
         while(!this.interrupted()){
-            //Analysis loop
-
             requestSegment();
+
+            //Analysis loop
         }
     }
 
