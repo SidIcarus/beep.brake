@@ -64,8 +64,8 @@ public class AnalysisActivity extends AppCompatActivity {
      * Sorry Clark, can't commercialize this without
      * express written consent of the Visionary team
      */
-    private String CASCADE_XML = "visionary.net_cars_and_truck_cascade_web_HAAR.xml";
-    private int CASCADE_ID = R.raw.visionary_net_cars_and_truck_cascade_web_HAAR;
+    private String CASCADE_XML = "visionarynet_cars_and_truck_cascade_web_haar.xml";
+    private int CASCADE_ID = R.raw.visionarynet_cars_and_truck_cascade_web_haar;
 
     //Data Acquisition Objects
     private SegmentSync segSync;

@@ -14,11 +14,13 @@ import org.opencv.imgproc.Imgproc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import edu.rit.se.beepbrake.Segment;
 
 public class DiskWriter extends Thread implements Runnable{
+    private final String path;
     /**
      * Application context. Needed to make private app files
      */
@@ -44,6 +46,7 @@ public class DiskWriter extends Thread implements Runnable{
      */
     public DiskWriter(long id, Context con) {
         this.eventId = id;
+        this.path = Environment.getExternalStorageDirectory() + "/write_segments/"  + String.valueOf(eventId) + "/";
         this.context = con;
         this.segments = new ConcurrentLinkedQueue<>();
         this.endReached = false;
@@ -55,7 +58,6 @@ public class DiskWriter extends Thread implements Runnable{
      * Dereferences as it goes to cut down on memory usage
      */
     public void run() {
-        Log.d("Buffer", "Disk Writer started");
         //File name = 'androidID'_'eventID'
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         String fileName = deviceId + "_" + String.valueOf(eventId) + ".json";
@@ -63,7 +65,6 @@ public class DiskWriter extends Thread implements Runnable{
 
         try {
             //fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-            String path = Environment.getExternalStorageDirectory() + "/write_segments/";
             File writeDir = new File(path);
             if(!writeDir.exists()) {
                 writeDir.mkdirs();
@@ -112,6 +113,19 @@ public class DiskWriter extends Thread implements Runnable{
 
             fos.close();
 
+            //Now zip the file
+            Log.e("buferSystem", "Started zipping");
+            File[] files = writeDir.listFiles();
+            ArrayList<String> names = new ArrayList<>();
+            for (File f : files ) {
+                names.add(f.getAbsolutePath());
+            }
+            fileName = path + deviceId + "_" + String.valueOf(eventId) + ".zip";
+            String[] str = new String[3];
+            ZipFiles zf = new ZipFiles(names.toArray(str), fileName);
+            zf.zip();
+            Log.e("buferSystem", "Finished zipping");
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -155,7 +169,7 @@ public class DiskWriter extends Thread implements Runnable{
         //Segment content
         if( seg.getImg() != null){
             String imgName = String.valueOf(seg.getCreatedAt()) + ".png";
-            String filepath = Environment.getExternalStorageDirectory() + "/write_segments/" + imgName;
+            String filepath = path + imgName;
             MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
             Imgcodecs.imwrite(filepath, seg.getImg(), param);
             file.write(String.valueOf("{\"key\":\"imagename\",\"value\":\"" + filepath + "\"}").getBytes());
@@ -174,7 +188,6 @@ public class DiskWriter extends Thread implements Runnable{
 
         //Segment closing
         file.write(String.valueOf("]}").getBytes());
-        Log.d("Buffer", "Done Writing");
     }
 
 }
