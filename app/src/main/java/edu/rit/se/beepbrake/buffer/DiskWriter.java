@@ -1,6 +1,7 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
@@ -74,10 +75,13 @@ public class DiskWriter extends Thread implements Runnable{
 
             //Print file header
             fos.write(String.valueOf("{\"deviceid\":\"" + deviceId + "\",").getBytes());
-            //TODO:
             //hardware type
+            fos.write(("\"hardware\":\"" + Build.DISPLAY + "\",").getBytes());
             //OS version
+            fos.write(("\"osversion\":\"" + Build.VERSION.RELEASE + "\",").getBytes());
             //App version
+            fos.write(("\"appversion\":\"" + context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName + "\",").getBytes());
+            //Local event ID
             fos.write(String.valueOf("\"eventdata\":" + String.valueOf(eventId) + ",").getBytes());
             writeConfiguration(fos);
 
