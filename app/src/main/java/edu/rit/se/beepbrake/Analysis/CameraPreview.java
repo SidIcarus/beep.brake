@@ -1,15 +1,20 @@
 package edu.rit.se.beepbrake.Analysis;
 
+import android.util.Log;
+
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import edu.rit.se.beepbrake.TempLogger;
 
@@ -26,6 +31,8 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     /**
      * Drawing logic variables
      */
+
+    private ReentrantLock drawLock = new ReentrantLock();
     private List<Rect> sFoundCars = new ArrayList<Rect>();
     private double[][] sFoundLines = new double[0][0];
 
@@ -37,6 +44,8 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
 
     final Scalar rectColor = new Scalar(0, 0, 255);
     final Scalar lineColor = new Scalar(0, 255, 0);
+
+    private Size READ_SIZE = new Size(640,360);
 
     // context used to receive/send frame data
     private AnalysisActivity analysisActivity;
@@ -58,29 +67,32 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
-        this.analysisActivity.setCurrentFrame(inputFrame.rgba());
+        Mat analyzeFrame = new Mat();
+        Imgproc.cvtColor(inputFrame.rgba(), analyzeFrame, Imgproc.COLOR_RGBA2GRAY);
+        this.analysisActivity.setCurrentFrame(analyzeFrame);
         //To show tracking on image
-        Mat display = inputFrame.rgba();
+        Mat display = new Mat();
+        inputFrame.rgba().copyTo(display);
         display = drawBox(display);
         display = drawLines(display);
         return display;
     }
 
-    public void setPointsToDraw(MatOfRect loc ){
-        sFoundCars = loc.toList();
-
-    }
-
     public void setPointsToDraw(Rect r){
+        drawLock.lock();
         sFoundCars.clear();
         sFoundCars.add(r);
+        drawLock.unlock();
     }
 
     public void setLinesToDraw(double[][] lines){
+        drawLock.lock();
         sFoundLines = lines;
+        drawLock.unlock();
     }
 
     private Mat drawBox( Mat rgb ){
+        drawLock.lock();
         for (Rect rect : sFoundCars) {
             if(rect != null) {
                 rectPoint1.x = rect.x;
@@ -91,10 +103,12 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
                 Imgproc.rectangle(rgb, rectPoint1, rectPoint2, rectColor, 2);
             }
         }
+        drawLock.unlock();
         return rgb;
     }
 
     private Mat drawLines( Mat rgb ) {
+        drawLock.lock();
         if (sFoundLines.length > 0) {
             for (double[] data : sFoundLines) {
                 if (data.length == 4) {
@@ -106,6 +120,7 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
                 }
             }
         }
+        drawLock.unlock();
         return rgb;
     }
 }

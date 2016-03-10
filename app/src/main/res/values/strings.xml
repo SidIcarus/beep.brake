@@ -1,7 +1,4 @@
 <resources>
     <string name="app_name">beep.brake</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_mock">MockActivity</string>
-    <string name="title_activity_temp_home">TempHome</string>
-    <string name="title_activity_segment">SegmentPreview</string>
 </resources>

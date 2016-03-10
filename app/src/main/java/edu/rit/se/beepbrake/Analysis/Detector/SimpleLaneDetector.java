@@ -47,16 +47,17 @@ public class SimpleLaneDetector implements Detector {
         if( !this.sizeSet || m == null || m.empty() ){
             return;
         }
+        Mat copy = new Mat();
+        m.copyTo(copy);
         //divide img in right/left half
-        Mat roiLeft = new Mat(m, this.cropSizeLeft);
-        Mat roiRight = new Mat(m, this.cropSizeRight);
+        Mat roiLeft = new Mat(copy, this.cropSizeLeft);
+        Mat roiRight = new Mat(copy, this.cropSizeRight);
         //imgproc stuff
         Mat leftLines = findLines(roiLeft);
         Mat rightLines = findLines(roiRight);
         //filter stuff
         double[][] leftCoord = filterOutLines(leftLines);
         double[][] rightCoord =filterOutLines(rightLines);
-        //TODO merge data by angles? (if improves accuracy)
 
         //calc offsets
         int leftOffsetX = (int) (this.totalSize.width - (this.totalSize.width - this.cropSizeLeft.tl().x));
@@ -91,9 +92,13 @@ public class SimpleLaneDetector implements Detector {
 
     }
 
-    //TODO put this in the ndk if perf is a problem (due to passing obj in/out the jvm)
+
+    /**
+     * put this in the ndk if perf is a problem (due to passing obj in/out the jvm)
+     * @param img - greyscale image
+     * @return
+     */
     private Mat findLines(Mat img){
-        Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
         Imgproc.GaussianBlur(img, img, new Size(5, 5), THETA);
         Imgproc.Canny(img, img, CANNY_MIN, CANNY_MAX);
         Imgproc.HoughLinesP(img, img, 1, Math.PI/180, HOUGH_TRESHOLD, HOUGH_MIN_LINE_LENGTH, HOUGH_MAX_LINE_GAP);
@@ -118,12 +123,14 @@ public class SimpleLaneDetector implements Detector {
             double dx = data[0] - data[2];
             double dy = data[1] - data[3];
             float angleOne = (float) (Math.abs((Math.atan2(dy, dx) * 180/Math.PI)) % 180);
+            /*
             System.out.println("(" + data[0] + ", " + data[1] + ")" + "(" + data[2] + ", " + data[3] + ")");
             System.out.println("dx: " + dx + " dy: " + dy );
             System.out.println("Angles: " + angleOne);
+            */
             //	Small Angle measured 		OR		Nearly Straight angles measured
             if( angleOne <= LINE_REJECT_DEGREES || angleOne > 180 - LINE_REJECT_DEGREES){
-                System.out.println("line with " + angleOne + " has been rejected");
+                //System.out.println("line with " + angleOne + " has been rejected");
                 continue;
             }
             for( int j = 0; j < lines.rows(); j++){

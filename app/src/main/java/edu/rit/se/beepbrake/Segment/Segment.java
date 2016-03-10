@@ -6,18 +6,23 @@ package edu.rit.se.beepbrake.Segment;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import org.opencv.core.Mat;
+import java.util.Iterator;
+import java.util.Set;
 
 public class Segment {
 
     private Segment nextSeg;
     private Segment prevSeg;
+    private Mat img;
 
     ConcurrentHashMap<String, Object> calculatedData;
     long createdAt;
 
-    public Segment(ConcurrentHashMap<String, Object> map) {
+    public Segment(ConcurrentHashMap<String, Object> map, Mat img) {
         calculatedData = map;
         createdAt = new Date().getTime();
+        this.img = img;
     }
 
     public Segment getNextSeg() {
@@ -44,7 +49,16 @@ public class Segment {
         calculatedData.put(name, item);
     }
 
-    public long getTimestamp(){
-        return this.createdAt;
+    public Set<String> getKeys(){
+        return calculatedData.keySet();
+    }
+
+    public long getCreatedAt(){
+        return createdAt;
+    }
+
+    public Mat getImg() {
+        return this.img;
     }
 }
+
