@@ -84,7 +84,7 @@ public class AnalysisActivity extends AppCompatActivity {
         //Data Acquisition init
         segSync = new SegmentSync(bufMan);
         gpsSen = new GPSSensor(this, segSync);
-        aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
 
         // UI Element
         mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
