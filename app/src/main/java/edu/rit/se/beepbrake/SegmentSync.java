@@ -10,21 +10,29 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.opencv.core.Mat;
 
+import edu.rit.se.beepbrake.buffer.BufferManager;
+
 public class SegmentSync {
+    private BufferManager buf;
 
     ConcurrentHashMap<String, ArrayList<Object>> aggData;
     ConcurrentHashMap<String, Object> singleData;
+    private ReentrantLock lock = new ReentrantLock();
 
-    public SegmentSync() {
+
+    public SegmentSync(BufferManager bm) {
+        buf = bm;
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
     }
 
 
     public synchronized void makeSegment(Mat img, HashMap<String, Object> camData) {
-
+        this.lock.lock();
         this.UpdateDataSingle(camData);
 
         ConcurrentHashMap<String, ArrayList<Object>> tempAgg = new ConcurrentHashMap<>(aggData); // Proper Copy
@@ -56,10 +64,12 @@ public class SegmentSync {
             segMap.put(pair.getKey().toString(), tempSing.get(pair.getKey()));
         }
         Segment seg = new Segment(segMap, img);
-        //Call BufferManager add method -> Needs Kevin's stuff
+        buf.addSegment(seg);
+        lock.unlock();
     }
 
     public void UpdateDataAgg(HashMap<String, Object> map) {
+        lock.lock();
         Iterator it = map.entrySet().iterator();
 
         //Iterate over all items to be added
@@ -75,6 +85,8 @@ public class SegmentSync {
         }
 
         //makeSegment(); Used for demonstration purposes with android sensors
+
+        lock.unlock();
     }
 
     public void UpdateDataSingle(HashMap<String, Object> map) {

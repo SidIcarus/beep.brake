@@ -6,6 +6,8 @@ package edu.rit.se.beepbrake;
 import java.util.Date;
 import java.util.HashMap;
 import org.opencv.core.Mat;
+import java.util.Iterator;
+import java.util.Set;
 
 public class Segment {
 
@@ -44,6 +46,14 @@ public class Segment {
 
     public void addDataObject(String name, Object item) {
         calculatedData.put(name, item);
+    }
+
+    public Set<String> getKeys(){
+        return calculatedData.keySet();
+    }
+
+    public long getCreatedAt(){
+        return createdAt;
     }
 
     public Mat getImg() {
