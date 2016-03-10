@@ -3,12 +3,13 @@ package edu.rit.se.beepbrake.DecisionMaking;
 //created by RyanBega 2/8/16
 
 
+import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class CameraDecision extends Decision{
 
-    public CameraDecision(DecisionManager manager){
+    public CameraDecision(DecisionManager decMan, BufferManager bufMan){
 
-        super(manager);
+        super(decMan, bufMan);
     }
 
     public void run(){
@@ -21,7 +22,7 @@ public class CameraDecision extends Decision{
 
     private void warn(){
         curSeg.addDataObject("CameraWarning", "true");
-        manager.warn();
+        decMan.warn();
     }
 }
 

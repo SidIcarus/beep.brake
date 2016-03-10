@@ -45,11 +45,11 @@ public class AccelerometerSensor implements SensorEventListener {
     }
     //  Activity will need to pause and resume this on it's super.onResume/super.onPause
 
-      protected void onResume(){
+    public void onResume(){
         manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-      }
+    }
 
-      protected void onPause(){
+    public void onPause(){
         manager.unregisterListener(this);
       }
 

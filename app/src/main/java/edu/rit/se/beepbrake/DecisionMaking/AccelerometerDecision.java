@@ -5,12 +5,13 @@ package edu.rit.se.beepbrake.DecisionMaking;
  */
 
 import edu.rit.se.beepbrake.Segment.Constants;
+import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class AccelerometerDecision extends Decision{
 
-    public AccelerometerDecision(DecisionManager manager){
+    public AccelerometerDecision(DecisionManager decMan, BufferManager bufMan){
 
-        super(manager);
+        super(decMan, bufMan);
     }
 
     public void run(){
@@ -34,6 +35,6 @@ public class AccelerometerDecision extends Decision{
 
     private void warn(){
         curSeg.addDataObject("CrashDetected", "true");
-        manager.warn();
+        decMan.warn();
     }
 }

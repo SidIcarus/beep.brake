@@ -98,12 +98,12 @@ public class SegmentSync {
         lock.unlock();
     }
 
-    protected void onResume(){
+    public void onResume(){
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
     }
 
-    protected void onPause(){
+    public void onPause(){
         aggData = null;
         singleData = null;
     }

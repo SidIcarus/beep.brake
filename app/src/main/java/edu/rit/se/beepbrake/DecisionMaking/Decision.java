@@ -5,14 +5,17 @@
 package edu.rit.se.beepbrake.DecisionMaking;
 
 import edu.rit.se.beepbrake.Segment.Segment;
+import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class Decision extends Thread{
 
-    protected DecisionManager manager;
+    protected DecisionManager decMan;
+    protected BufferManager bufMan;
     protected Segment curSeg;
 
-    public Decision(DecisionManager manager){
-        this.manager = manager;
+    public Decision(DecisionManager decMan, BufferManager bufMan){
+        this.decMan = decMan;
+        this.bufMan = bufMan;
     }
 
     protected boolean requestSegment(){
@@ -20,8 +23,8 @@ public class Decision extends Thread{
 
         try {
             while (true) {
-                //TODO: Request segment from BufferManager
-                if (curSeg.getTimestamp() < requested.getTimestamp()) {
+                requested = bufMan.getNewestSegment();
+                if (curSeg.getCreatedAt() < requested.getCreatedAt()) {
                     curSeg = requested;
                     return true;
                 }

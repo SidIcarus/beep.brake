@@ -5,16 +5,21 @@ package edu.rit.se.beepbrake.DecisionMaking;
 import java.util.Date;
 import java.util.ArrayList;
 
+import edu.rit.se.beepbrake.buffer.BufferManager;
+
 public class DecisionManager {
     private ArrayList<Decision> decisions;
     private Date lastWarn;
+    private BufferManager bufMan;
 
-    public DecisionManager(){
+    public DecisionManager(BufferManager bufMan){
+        this.bufMan = bufMan;
+
         decisions = new ArrayList<Decision>();
 
         //Add decisions to the list
-        decisions.add(new CameraDecision(this));
-        decisions.add(new AccelerometerDecision(this));
+        decisions.add(new CameraDecision(this, this.bufMan));
+        decisions.add(new AccelerometerDecision(this, this.bufMan));
 
         //Start all decision threads
         for(int i = 0; i < decisions.size(); i++){
@@ -33,7 +38,7 @@ public class DecisionManager {
         if(curTime.after(new Date(lastWarn.getTime() + 1000))) {
             //TODO: Alert UI
         }
-        //TODO: Alert buffer manager
+        bufMan.warningTriggered();
         lastWarn = curTime;
     }
 

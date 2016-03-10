@@ -75,13 +75,13 @@ public class GPSSensor implements LocationListener {
 
     }
 
-    protected void onResume(){
+    public void onResume(){
         if(checkPermission()) {
             locationManager.requestLocationUpdates(provider, 100, 0, this);
         }
     }
 
-    protected void onPause(){
+    public void onPause(){
         if(checkPermission()) {
             locationManager.removeUpdates(this);
         }
