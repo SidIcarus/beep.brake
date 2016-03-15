@@ -35,7 +35,7 @@ public class DecisionManager {
         time between auditory warnings
         */
 
-        if(curTime.after(new Date(lastWarn.getTime() + 1000))) {
+        if(lastWarn == null || curTime.after(new Date(lastWarn.getTime() + 1000))) {
             //TODO: Alert UI
         }
         bufMan.warningTriggered();

@@ -22,12 +22,14 @@ public class AccelerometerDecision extends Decision{
         while(!this.interrupted()){
             requestSegment();
 
-            zVal = (Double)curSeg.getDataObject(Constants.ACCEL_Z);
-            oldzVal = (Double)curSeg.getPrevSeg().getDataObject(Constants.ACCEL_Z);
-            diffzVal = oldzVal - zVal;
+            if(curSeg.getDataObject(Constants.ACCEL_Z) != null) {
+                zVal = (Double) curSeg.getDataObject(Constants.ACCEL_Z);
+                //oldzVal = (Double)curSeg.getPrevSeg().getDataObject(Constants.ACCEL_Z);
+                //diffzVal = oldzVal - zVal;
 
-            if(diffzVal < -7 || diffzVal > 7){
-                warn();
+                if (zVal < -7 || zVal > 7) {
+                    warn();
+                }
             }
 
         }

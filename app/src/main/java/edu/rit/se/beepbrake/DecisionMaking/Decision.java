@@ -24,11 +24,12 @@ public class Decision extends Thread{
         try {
             while (true) {
                 requested = bufMan.getNewestSegment();
-                if (curSeg.getCreatedAt() < requested.getCreatedAt()) {
+                if (requested != null && (curSeg == null ||
+                        curSeg.getCreatedAt() < requested.getCreatedAt())) {
                     curSeg = requested;
                     return true;
                 }
-                this.wait(50);
+                this.sleep(50);
             }
         }catch(InterruptedException e){
             return false;

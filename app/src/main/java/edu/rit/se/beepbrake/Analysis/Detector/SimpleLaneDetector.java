@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import edu.rit.se.beepbrake.Analysis.AnalysisActivity;
 import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
+import edu.rit.se.beepbrake.TempMainActivity;
 
 /**
  * Created by richykapadia on 1/19/16.
@@ -35,9 +36,9 @@ public class SimpleLaneDetector implements Detector {
 
     private boolean sizeSet = false;
 
-    private AnalysisActivity activity;
+    private TempMainActivity activity;
 
-    public SimpleLaneDetector(AnalysisActivity activity){
+    public SimpleLaneDetector(TempMainActivity activity){
         this.activity = activity;
     }
 

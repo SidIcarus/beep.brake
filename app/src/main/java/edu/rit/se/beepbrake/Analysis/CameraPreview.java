@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import edu.rit.se.beepbrake.TempLogger;
+import edu.rit.se.beepbrake.TempMainActivity;
 
 /**
  * Created by richykapadia on 9/21/15
@@ -48,9 +49,9 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     private Size READ_SIZE = new Size(640,360);
 
     // context used to receive/send frame data
-    private AnalysisActivity analysisActivity;
+    private TempMainActivity analysisActivity;
 
-    public CameraPreview(AnalysisActivity activity){
+    public CameraPreview(TempMainActivity activity){
         analysisActivity = activity;
     }
 

@@ -13,11 +13,11 @@ public class CameraDecision extends Decision{
     }
 
     public void run(){
-        while(!this.interrupted()){
-            requestSegment();
-
-            //Analysis loop
-        }
+//        while(!this.interrupted()){
+//            requestSegment();
+//
+//            //Analysis loop
+//        }
     }
 
     private void warn(){
