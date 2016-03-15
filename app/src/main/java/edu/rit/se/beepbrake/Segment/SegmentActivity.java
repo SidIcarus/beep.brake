@@ -65,6 +65,9 @@ public class SegmentActivity extends AppCompatActivity {
     }
 
     public synchronized void displaySegmentData(ConcurrentHashMap<String, ArrayList<Object>> data){
+        /*
+        TODO: Update makeSegment call
+
         Segment s = segSync.makeSegment();
 
         updateText(accel_x, Constants.ACCEL_X, s);
@@ -73,6 +76,7 @@ public class SegmentActivity extends AppCompatActivity {
         updateText(gps_lat, Constants.GPS_LAT, s);
         updateText(gps_lng, Constants.GPS_LNG, s);
         updateText(gps_spd, Constants.GPS_SPD, s);
+        */
     }
 
     private void updateText(TextView textView, String key, Segment s){
@@ -108,9 +112,9 @@ public class SegmentActivity extends AppCompatActivity {
 
     public void Initialize() {
         //Data Acquisition init
-        segSync = new SegmentSync();
+        segSync = new SegmentSync(null);        //NEEDS BUFFERMANAGER NOT NULL
         gpsSen = new GPSSensor(this, segSync);
-        aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
     }
 
     protected void onResume(){

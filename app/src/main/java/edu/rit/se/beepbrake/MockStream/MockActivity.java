@@ -27,6 +27,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.rit.se.beepbrake.Analysis.LoaderCallback;
 import edu.rit.se.beepbrake.R;
@@ -137,7 +138,7 @@ public class MockActivity extends AppCompatActivity {
                 // for segment in json
                 for( int i = 0; i < segmentArray.length(); i++) {
                     JSONObject currJsonSeg = (JSONObject) segmentArray.get(i);
-                    HashMap<String, Object> mapData = new HashMap<>();
+                    ConcurrentHashMap<String, Object> mapData = new ConcurrentHashMap<>();
 
                     JSONArray positionsFound = currJsonSeg.getJSONArray(Constants.CAR_POSITIONS);
                     //get all the rectangles
@@ -173,7 +174,7 @@ public class MockActivity extends AppCompatActivity {
                     double gps_spd = currJsonSeg.getDouble(Constants.GPS_SPD);
                     mapData.put(Constants.GPS_SPD, gps_spd);
 
-                    Segment s = new Segment(mapData);
+                    Segment s = new Segment(mapData, null);
                     results.add(s);
                 }
             }
