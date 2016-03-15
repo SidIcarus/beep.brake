@@ -126,6 +126,7 @@ public class SegmentBuffer {
                 if(oldest.getCreatedAt() - lastWarningTime > timediff || oldest.getCreatedAt() - firstWarningTime > maxtime) {
                     activeWarning = false;
                     activeWriter.signalEnd();
+                    activeWriter = null;
                 } else {
                     activeWriter.addSegment(oldest);
                 }
@@ -135,5 +136,23 @@ public class SegmentBuffer {
             oldest = oldest.getNextSeg();
             bufferLock.unlock();
         }
+    }
+
+    /**
+     * Clear the current buffer. Used to remove stale data when the app is paused.
+     */
+    public void clear() {
+        bufferLock.lock();
+        if(activeWarning) {
+            //If a warning is active, flush the buffer into the DiskWriter, then close the event
+            while(oldest != newest) {
+                activeWriter.addSegment(oldest);
+                //TODO: actually flush buffer
+            }
+        }
+        oldest = null;
+        newest = null;
+        activeWriter = null;
+        bufferLock.unlock();
     }
 }
