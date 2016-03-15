@@ -31,9 +31,19 @@ public class SegmentBuffer {
     private long lastWarningTime;
 
     /**
+     * The timestamp of the first warning for this event
+     */
+    private long firstWarningTime;
+
+    /**
      * Maximum amount of time (in millis) between segments to allow before removing old ones
      */
     private final int timediff = 6000;
+
+    /**
+     * Max length (in millis) of an event
+     */
+    private final int maxtime = 20000;
 
     /**
      * Lock to ensure the buffer is not saved while a Segment is being added
@@ -96,6 +106,7 @@ public class SegmentBuffer {
         if(newest != null) {
             bufferLock.lock();
             lastWarningTime = newest.getCreatedAt();
+            firstWarningTime = lastWarningTime;
             activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
             activeWriter.start();
             activeWarning = true;
@@ -111,8 +122,8 @@ public class SegmentBuffer {
         while(newest.getCreatedAt() - oldest.getCreatedAt() > timediff) {
             bufferLock.lock();
             if(activeWarning) {
-                //End the warning state if it's been long enough since the last warning segment
-                if(oldest.getCreatedAt() - lastWarningTime > timediff) {
+                //End the warning state if it's been long enough since the last warning segment, or is too long of an event
+                if(oldest.getCreatedAt() - lastWarningTime > timediff || oldest.getCreatedAt() - firstWarningTime > maxtime) {
                     activeWarning = false;
                     activeWriter.signalEnd();
                 } else {
