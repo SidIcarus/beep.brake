@@ -1,7 +1,6 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -147,9 +146,16 @@ public class SegmentBuffer {
             //If a warning is active, flush the buffer into the DiskWriter, then close the event
             while(oldest != newest) {
                 activeWriter.addSegment(oldest);
-                //TODO: actually flush buffer
+                oldest = oldest.getNextSeg();
+                oldest.setPrevSeg(null);
             }
+            //Send the last segment
+            activeWriter.addSegment(oldest);
+            activeWriter.signalEnd();
+            activeWarning = false;
         }
+
+        //Reset values to defaults
         oldest = null;
         newest = null;
         activeWriter = null;
