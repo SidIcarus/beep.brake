@@ -83,5 +83,8 @@ public class MainActivity extends AppCompatActivity {
         segSync.onPause();
         gpsSen.onPause();
         aSen.onPause();
+
+        //Buffer onPause
+        bufMan.onPause();
     }
 }
