@@ -24,8 +24,7 @@ public class Decision extends Thread{
         try {
             while (true) {
                 requested = bufMan.getNewestSegment();
-                if (requested != null && (curSeg == null ||
-                        curSeg.getCreatedAt() < requested.getCreatedAt())) {
+                if (requested != null && (curSeg == null || curSeg.getCreatedAt() < requested.getCreatedAt())) {
                     curSeg = requested;
                     return true;
                 }

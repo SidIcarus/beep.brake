@@ -1,6 +1,6 @@
 package edu.rit.se.beepbrake.DecisionMaking;
 
-//created by RyanBega 2/8/16
+//created by Ryan 2/8/16
 
 
 import edu.rit.se.beepbrake.buffer.BufferManager;
@@ -13,11 +13,13 @@ public class CameraDecision extends Decision{
     }
 
     public void run(){
-//        while(!this.interrupted()){
-//            requestSegment();
-//
-//            //Analysis loop
-//        }
+
+        //Analysis loop
+        while(!this.interrupted()){
+            requestSegment();
+
+            //Analysis
+        }
     }
 
     private void warn(){

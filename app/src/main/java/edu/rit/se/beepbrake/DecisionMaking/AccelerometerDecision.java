@@ -19,6 +19,15 @@ public class AccelerometerDecision extends Decision{
         double oldzVal;
         double diffzVal;
 
+
+        /*
+         * Analysis loop
+         *
+         * Each run through the loop is analyzing the data in a new segment
+         * Trying to determine whether or not the condition is met for that period
+         * of time.
+         */
+
         while(!this.interrupted()){
             requestSegment();
 
@@ -31,7 +40,6 @@ public class AccelerometerDecision extends Decision{
                     warn();
                 }
             }
-
         }
     }
 
