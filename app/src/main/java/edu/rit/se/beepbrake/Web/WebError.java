@@ -12,16 +12,16 @@ import java.io.File;
  */
 public class WebError implements Response.ErrorListener {
 
-    private WebListener webListener;
+    private WebManager webManager;
     private String filename;
 
     /**
      *
-     * @param webListener - used to requeue the upload request
+     * @param webManager - used to re-queue the upload request
      * @param filename - file name of the requested
      */
-    public WebError(WebListener webListener, String filename){
-        this.webListener = webListener;
+    public WebError(WebManager webManager, String filename){
+        this.webManager = webManager;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class WebError implements Response.ErrorListener {
         //Something messed up our upload, re-queue the upload
         File f = new File(this.filename);
         if( f != null && f.exists() ){
-            this.webListener.queueUpload(this.filename);
+            this.webManager.queueUpload(this.filename);
         }
 
     }
