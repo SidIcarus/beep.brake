@@ -24,13 +24,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import edu.rit.se.beepbrake.AccelerometerSensor;
+import edu.rit.se.beepbrake.Segment.AccelerometerSensor;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.Analysis.Detector.SimpleLaneDetector;
-import edu.rit.se.beepbrake.GPSSensor;
+import edu.rit.se.beepbrake.Segment.GPSSensor;
 import edu.rit.se.beepbrake.R;
-import edu.rit.se.beepbrake.SegmentSync;
+import edu.rit.se.beepbrake.Segment.SegmentSync;
 import edu.rit.se.beepbrake.TempLogger;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
@@ -84,7 +84,7 @@ public class AnalysisActivity extends AppCompatActivity {
         //Data Acquisition init
         segSync = new SegmentSync(bufMan);
         gpsSen = new GPSSensor(this, segSync);
-        aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
 
         // UI Element
         mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
@@ -93,6 +93,8 @@ public class AnalysisActivity extends AppCompatActivity {
 
         //load cascade
         CascadeClassifier cascade = loadCascade();
+
+        /*
 
         //construct frame analyzer and start thread
         Detector carDetect = new CarDetector(cascade, this);
@@ -128,6 +130,8 @@ public class AnalysisActivity extends AppCompatActivity {
                 bufMan.warningTriggered();
             }
         });
+
+        */
 
     }
 
@@ -198,7 +202,7 @@ public class AnalysisActivity extends AppCompatActivity {
     }
 
     public void setCurrentFoundRect(Mat m, Rect r){
-        this.mCameraPreview.setPointsToDraw(r);
+        this.mCameraPreview.setPointsToDraw(r); // draw to camera, which is holding the UI
         HashMap<String, Object> data = new HashMap<String, Object>();
         if( r != null) {
             data.put("br-x", r.br().x);

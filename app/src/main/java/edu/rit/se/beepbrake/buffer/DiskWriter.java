@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import edu.rit.se.beepbrake.Segment;
+import edu.rit.se.beepbrake.Segment.*;
 
 public class DiskWriter extends Thread implements Runnable{
     private final String path;

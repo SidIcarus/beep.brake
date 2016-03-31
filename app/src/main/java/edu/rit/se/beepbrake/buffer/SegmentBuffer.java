@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.rit.se.beepbrake.Segment;
+import edu.rit.se.beepbrake.Segment.*;
 
 public class SegmentBuffer {
 
@@ -96,8 +96,10 @@ public class SegmentBuffer {
         if(newest != null) {
             bufferLock.lock();
             lastWarningTime = newest.getCreatedAt();
-            activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
-            activeWriter.start();
+            if(!activeWarning) {
+                activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
+                activeWriter.start();
+            }
             activeWarning = true;
             bufferLock.unlock();
         }
