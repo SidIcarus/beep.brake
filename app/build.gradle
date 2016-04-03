@@ -4,6 +4,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
+    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId 'edu.rit.se.beepbrake'
         minSdkVersion 19
@@ -84,5 +85,6 @@ dependencies {
     compile 'com.android.support:design:23.1.0'
     compile project(':opencv_java3')
     compile 'com.android.volley:volley:1.0.0'
+    compile('org.apache.httpcomponents:httpmime:4.3.6')
 
 }

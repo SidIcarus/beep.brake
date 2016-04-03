@@ -2,63 +2,45 @@ package edu.rit.se.beepbrake.Web;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
 
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+
+import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
-public class Upload extends Request<NetworkResponse> {
-    private final Response.Listener<NetworkResponse> mListener;
-    private final Response.ErrorListener mErrorListener;
-    private final Map<String, String> mHeaders;
-    private final String mMimeType;
-    private final byte[] mMultipartBody;
 
-    public Upload(String url, Map<String, String> headers, String mimeType, byte[] multipartBody, Response.Listener<NetworkResponse> listener, Response.ErrorListener errorListener) {
-        super(Method.POST, url, errorListener);
-        this.mListener = listener;
-        this.mErrorListener = errorListener;
-        this.mHeaders = headers;
-        this.mMimeType = mimeType;
-        this.mMultipartBody = multipartBody;
+public class Upload extends Request<String> {
+
+    private Response.Listener success;
+
+
+    public Upload(int method, String url, Response.Listener success, Response.ErrorListener error){
+        super(method, url, error);
+        this.success = success;
+    }
+
+    public Upload(String url, Map<String, String> header, String mimeType, FileBody zip, Response.Listener success, Response.ErrorListener error){
+        super(Method.POST, url, error);
+        MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
+        multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        multipartEntity.addPart("file", zip);
+
+    }
+
+
+
+    @Override
+    protected Response<String> parseNetworkResponse(NetworkResponse response) {
+        return null;
     }
 
     @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
-        return (mHeaders != null) ? mHeaders : super.getHeaders();
+    protected void deliverResponse(String response) {
+
     }
 
-    @Override
-    public String getBodyContentType() {
-        return mMimeType;
-    }
-
-    @Override
-    public byte[] getBody() throws AuthFailureError {
-        return mMultipartBody;
-    }
-
-    @Override
-    protected Response<NetworkResponse> parseNetworkResponse(NetworkResponse response) {
-        try {
-            return Response.success(
-                    response,
-                    HttpHeaderParser.parseCacheHeaders(response));
-        } catch (Exception e) {
-            return Response.error(new ParseError(e));
-        }
-    }
-
-    @Override
-    protected void deliverResponse(NetworkResponse response) {
-        mListener.onResponse(response);
-    }
-
-    @Override
-    public void deliverError(VolleyError error) {
-        mErrorListener.onErrorResponse(error);
-    }
 }

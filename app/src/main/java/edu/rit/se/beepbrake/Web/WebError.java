@@ -6,6 +6,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by richykapadia on 3/22/16.
@@ -26,11 +27,18 @@ public class WebError implements Response.ErrorListener {
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        Log.d("WebError", error.getMessage());
-        //Something messed up our upload, re-queue the upload
-        File f = new File(this.filename);
-        if( f != null && f.exists() ){
-            this.webManager.queueUpload(this.filename);
+        try {
+            String message = (error.getMessage() == null) ?  "No message" : error.getMessage();
+            Log.d("WebError", message);
+            //Something messed up our upload, re-queue the upload
+            File f = new File(this.filename);
+            if (f != null && f.exists()) {
+                Log.d("WebError", "Requeueing");
+                this.webManager.queueUpload(this.filename);
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
         }
 
     }

@@ -4,14 +4,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.util.Log;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.HurlStack;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,7 +35,7 @@ public class WebManager extends BroadcastReceiver {
 
     private ArrayList<String> uploadQueue = new ArrayList<String>();
     private ReentrantLock qLock = new ReentrantLock();
-    private String upload_url = "https://magikarpets.se.rit.edu:3000/web/api/newFile";
+    private String upload_url = "http://magikarpets.se.rit.edu:3000/web/api/newFile";
 
 
     public WebManager(ConnectivityManager connectionManager){
@@ -88,24 +93,24 @@ public class WebManager extends BroadcastReceiver {
     private void uploadFile(String path, Context context) {
         // error handler
         WebError errorlistener = new WebError(this, path);
-        // byte[] of the file
-        byte[] multipartbody = createMultipart(path);
-        // TODO find out if headers are needed ?????
-        Map<String, String> header = null;
+        // file to upload
+        File file = new File(path);
         // minetype
         String boundary = "apiclient-" + System.currentTimeMillis();
         String mimeType = "multipart/form-data;boundary=" + boundary;
         //network reponse
-        Response.Listener<NetworkResponse> networkReponse = new Response.Listener<NetworkResponse>(){
+        Response.Listener<String> networkReponse = new Response.Listener<String>(){
             @Override
-            public void onResponse(NetworkResponse response) {
-                Log.d("WebManager", "Response: " + response.statusCode);
+            public void onResponse(String response) {
+                Log.d("WebManager", "Response: " + response);
             }
         };
 
         Log.d("Web", "created upload object for " + path);
-        Upload multipart = new Upload(upload_url, header, mimeType, multipartbody, networkReponse, errorlistener);
-        VolleyUploader.getInstance(context).addToRequestQueue(multipart);
+        MultipartRequest request = new MultipartRequest(upload_url, mimeType, errorlistener, networkReponse, file);
+
+
+        VolleyUploader.getInstance(context).addToRequestQueue(request);
 
     }
 

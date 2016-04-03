@@ -44,7 +44,7 @@ public class VolleyUploader {
         return Volley.newRequestQueue(context.getApplicationContext());
     }
 
-    public void addToRequestQueue(Upload upload){
+    public void addToRequestQueue(MultipartRequest upload){
         getRequestQueue(context).add(upload);
     }
 
