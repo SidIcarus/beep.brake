@@ -1,5 +1,6 @@
 package edu.rit.se.beepbrake.Web;
 
+import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,10 +15,14 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -91,27 +96,35 @@ public class WebManager extends BroadcastReceiver {
     }
 
     private void uploadFile(String path, Context context) {
-        // error handler
-        WebError errorlistener = new WebError(this, path);
         // file to upload
         File file = new File(path);
+        Map<String, File> fileParts = new HashMap<>();
+        fileParts.put("file", file);
+
+        // error handler
+        WebError errorlistener = new WebError(this, path);
+
+        // headers
+        Map<String, String> headers = new HashMap<>();
+
         // minetype
         String boundary = "apiclient-" + System.currentTimeMillis();
-        String mimeType = "multipart/form-data;boundary=" + boundary;
+        String mimeType = "multipart/form-data;charset=utf-8;boundary=" + boundary;
         //network reponse
-        Response.Listener<String> networkReponse = new Response.Listener<String>(){
+        Response.Listener<NetworkResponse> networkReponse = new Response.Listener<NetworkResponse>(){
             @Override
-            public void onResponse(String response) {
-                Log.d("WebManager", "Response: " + response);
+            public void onResponse(NetworkResponse response) {
+                Log.d("WebManager", "Response: " + response.statusCode);
             }
         };
 
         Log.d("Web", "created upload object for " + path);
-        MultipartRequest request = new MultipartRequest(upload_url, mimeType, errorlistener, networkReponse, file);
-
+        MultipartRequest request = new MultipartRequest(upload_url, headers, mimeType, fileParts, networkReponse, errorlistener);
 
         VolleyUploader.getInstance(context).addToRequestQueue(request);
 
+
     }
+
 
 }

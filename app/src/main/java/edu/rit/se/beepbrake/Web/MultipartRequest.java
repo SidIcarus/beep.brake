@@ -2,74 +2,131 @@ package edu.rit.se.beepbrake.Web;
 
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyLog;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 
-public class MultipartRequest extends Request<String> {
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Map;
 
+class MultipartRequest extends Request<NetworkResponse> {
+    private final Response.Listener<NetworkResponse> mListener;
+    private final Response.ErrorListener mErrorListener;
+    private final Map<String, String> mHeaders;
+    private final String mMimeType;
+    private final byte[] mMultipartBody;
 
-    MultipartEntityBuilder entity = MultipartEntityBuilder.create();
-    HttpEntity httpentity;
-    private static final String FILE_PART_NAME = "file";
-
-    private final Response.Listener<String> mListener;
-    private final File mFilePart;
-
-    public MultipartRequest(String url, String mimeType, Response.ErrorListener errorListener,
-                            Response.Listener<String> listener, File file) {
+    public MultipartRequest(String url, Map<String, String> headers, String mimeType, Map<String, File> fileParts, Response.Listener<NetworkResponse> listener, Response.ErrorListener errorListener) {
         super(Method.POST, url, errorListener);
-
-        mListener = listener;
-        mFilePart = file;
-        entity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        buildMultipartEntity();
+        this.mListener = listener;
+        this.mErrorListener = errorListener;
+        this.mHeaders = headers;
+        this.mMimeType = mimeType;
+        this.mMultipartBody = createBody(fileParts);
+        Log.d("Multipart", mHeaders.toString());
+        Log.d("Multipart", mimeType);
+        Log.d("Multipart", mMultipartBody.toString());
     }
 
-
-    private void buildMultipartEntity() {
-        entity.addPart(FILE_PART_NAME, new FileBody(mFilePart));
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        return (mHeaders != null) ? mHeaders : super.getHeaders();
     }
 
     @Override
     public String getBodyContentType() {
-        return httpentity.getContentType().getValue();
+        return mMimeType;
     }
-
-
 
     @Override
     public byte[] getBody() throws AuthFailureError {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        return mMultipartBody;
+    }
+
+    @Override
+    protected Response<NetworkResponse> parseNetworkResponse(NetworkResponse response) {
         try {
-            httpentity = entity.build();
-            httpentity.writeTo(bos);
-        } catch (IOException e) {
-            VolleyLog.e("IOException writing to ByteArrayOutputStream");
-        } catch( Exception e){
-            Log.e("Web", e.getMessage());
+            return Response.success(
+                    response,
+                    HttpHeaderParser.parseCacheHeaders(response));
+        } catch (Exception e) {
+            return Response.error(new ParseError(e));
         }
+    }
+
+    @Override
+    protected void deliverResponse(NetworkResponse response) {
+        mListener.onResponse(response);
+    }
+
+    @Override
+    public void deliverError(VolleyError error) {
+        mErrorListener.onErrorResponse(error);
+    }
+
+    private byte[] createBody(Map<String, File> fileMap){
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(bos);
+
+        byte[] body;
+        for( String part : fileMap.keySet() ){
+            File f = fileMap.get(part);
+            byte[] fileData = new byte[(int) f.length()];
+            try {
+                //convert file into array of bytes
+                FileInputStream fileInputStream = new FileInputStream(f);
+                fileInputStream.read(fileData);
+                fileInputStream.close();
+
+                buildPart(dos, fileData, part);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
         return bos.toByteArray();
     }
 
-    @Override
-    protected Response<String> parseNetworkResponse(NetworkResponse response) {
-        return Response.success("Uploaded", getCacheEntry());
-    }
+    private void buildPart(DataOutputStream dataOutputStream, byte[] fileData, String partName) throws IOException {
+        String twoHyphens = "--";
+        String lineEnd = "\r\n";
+        String boundary = "apiclient-" + System.currentTimeMillis();
+        String mimeType = "multipart/form-data;boundary=" + boundary;
 
-    @Override
-    protected void deliverResponse(String response) {
-        mListener.onResponse(response);
+
+        dataOutputStream.writeBytes("--" + boundary + lineEnd);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + partName + "\"" + lineEnd);
+        dataOutputStream.writeBytes(lineEnd);
+
+        ByteArrayInputStream fileInputStream = new ByteArrayInputStream(fileData);
+        int bytesAvailable = fileInputStream.available();
+
+        int maxBufferSize = 1024 * 1024;
+        int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+        byte[] buffer = new byte[bufferSize];
+
+        // read file and write it into form...
+        int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+        while (bytesRead > 0) {
+            dataOutputStream.write(buffer, 0, bufferSize);
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+        }
+
+        dataOutputStream.writeBytes(lineEnd);
     }
 }
