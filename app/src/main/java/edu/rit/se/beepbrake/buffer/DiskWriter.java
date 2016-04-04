@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import edu.rit.se.beepbrake.Segment.*;
@@ -83,6 +84,8 @@ public class DiskWriter extends Thread implements Runnable{
             fos.write(("\"appversion\":\"" + context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName + "\",").getBytes());
             //Local event ID
             fos.write(String.valueOf("\"eventdata\":" + String.valueOf(eventId) + ",").getBytes());
+            //Local Timezone
+            fos.write(("\"timezone\":\"" + TimeZone.getDefault().getID() + "\",").getBytes());
             writeConfiguration(fos);
 
             //Open of segments section
