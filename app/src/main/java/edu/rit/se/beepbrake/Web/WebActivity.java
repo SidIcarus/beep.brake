@@ -20,6 +20,9 @@ public class WebActivity extends AppCompatActivity {
     static private String UPLOAD_2 = Environment.getExternalStorageDirectory() +
             "/write_segments/1458250230609/e9bb32c0c705a93d_1458250230609.zip" ;
 
+    static private String UPLOAD_3 = Environment.getExternalStorageDirectory() +
+            "/write_segments/17958013dc1ff915_1459805565287.zip" ;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +36,7 @@ public class WebActivity extends AppCompatActivity {
         WebManager webManager = new WebManager(connectionManager);
 
         //try to push test file
-        webManager.queueUpload(UPLOAD_2);
+        webManager.queueUpload(UPLOAD_3);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);

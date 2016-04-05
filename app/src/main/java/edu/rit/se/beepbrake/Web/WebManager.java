@@ -30,6 +30,7 @@ public class WebManager extends BroadcastReceiver {
     private ReentrantLock qLock = new ReentrantLock();
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
+    private ArrayList<Thread> activeUploads = new ArrayList<>();
 
     public WebManager(ConnectivityManager connectionManager){
         this.connectionManager = connectionManager;
@@ -57,6 +58,7 @@ public class WebManager extends BroadcastReceiver {
         }
         else{
             Log.d("Web", "No Connection!");
+
         }
 
     }
@@ -72,13 +74,20 @@ public class WebManager extends BroadcastReceiver {
         try{
             File file = new File(path);
             URL url = new URL(upload_url);
-            (new Thread(new UploadThread(file, url))).start();
+            Thread t = new Thread(new UploadThread(file, url));
+            t.setName(path);
+            t.setPriority(Thread.MIN_PRIORITY);
+            activeUploads.add(t);
+            t.start();
         }catch (IOException e){
             Log.e("Web", e.getMessage());
         }
-
-
     }
 
+    public void markCompleted(Thread t){
+        if(activeUploads.contains(t)){
+            activeUploads.remove(t);
+        }
+    }
 
 }

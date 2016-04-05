@@ -40,10 +40,10 @@ public class UploadThread implements Runnable {
         // minetype
         String boundary = "apiclient-" + System.currentTimeMillis();
         String mimeType = "multipart/form-data;charset=utf-8;boundary=" + boundary;
-
+        HttpURLConnection connection = null;
 
         try {
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setUseCaches(false);
             connection.setDoInput(true);
@@ -56,8 +56,7 @@ public class UploadThread implements Runnable {
 
             outputStream.writeBytes("--" + boundary + "\r\n");
 
-
-            outputStream.writeBytes("Content-Disposition: form-data; name=\"file\";" +
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"somethingelse\";" +
                     "filename=\"" + file.getName() + "\"\r\n");
             outputStream.writeBytes("Content-Type: application/octet-stream\r\nContent-Length: "
                     + file.length() + "\r\n\r\n");
@@ -86,26 +85,21 @@ public class UploadThread implements Runnable {
 
             // close streams
             fileInputStream.close();
-
             outputStream.flush();
-
-            Log.d("Web", "File Sent, Response: "+String.valueOf(connection.getResponseCode()));
-
-            InputStream is = connection.getInputStream();
-
-            // retrieve the response from server
-            int ch;
-
-            StringBuffer b =new StringBuffer();
-            while( ( ch = is.read() ) != -1 ){ b.append( (char)ch ); }
-            String s=b.toString();
-            Log.d("Response", s);
             outputStream.close();
 
 
+            Log.d("Web", "File Sent");
+            Log.d("Web", "Response: " + String.valueOf(connection.getResponseCode()));
+
 
         }catch (IOException e){
-            e.printStackTrace();
+            Log.e("Web", e.getMessage());
+        }finally {
+            Log.d("Web", "in finally");
+            if (connection != null){
+                connection.disconnect();
+            }
         }
 
     }
