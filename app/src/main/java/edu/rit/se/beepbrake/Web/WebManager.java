@@ -1,29 +1,28 @@
 package edu.rit.se.beepbrake.Web;
 
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
-import android.os.Environment;
 import android.util.Log;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.HurlStack;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 
-import java.io.ByteArrayOutputStream;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -40,7 +39,7 @@ public class WebManager extends BroadcastReceiver {
 
     private ArrayList<String> uploadQueue = new ArrayList<String>();
     private ReentrantLock qLock = new ReentrantLock();
-    private String upload_url = "http://magikarpets.se.rit.edu:3000/web/api/newFile";
+    private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
 
     public WebManager(ConnectivityManager connectionManager){
@@ -63,7 +62,7 @@ public class WebManager extends BroadcastReceiver {
             qLock.lock();
             Log.d("Web", "Preparing to upload " + this.uploadQueue.size() + " file(s)");
             for( String path : this.uploadQueue ){
-                uploadFile( path, context );
+                uploadFile(path);
             }
             qLock.unlock();
         }
@@ -80,48 +79,14 @@ public class WebManager extends BroadcastReceiver {
     }
 
 
-    private byte[] createMultipart(String path){
-        File f = new File(path);
-        byte[] bFile = new byte[(int) f.length()];
-
-        try {
-            FileInputStream fileInputStream = new FileInputStream(f);
-            fileInputStream.read(bFile);
-            fileInputStream.close();
-        }catch (Exception e){
-            Log.e("WebManager", e.getMessage());
+    private void uploadFile(String path) {
+        try{
+            File file = new File(path);
+            URL url = new URL(upload_url);
+            (new Thread(new UploadThread(file, url))).start();
+        }catch (IOException e){
+            Log.e("Web", e.getMessage());
         }
-
-        return bFile;
-    }
-
-    private void uploadFile(String path, Context context) {
-        // file to upload
-        File file = new File(path);
-        Map<String, File> fileParts = new HashMap<>();
-        fileParts.put("file", file);
-
-        // error handler
-        WebError errorlistener = new WebError(this, path);
-
-        // headers
-        Map<String, String> headers = new HashMap<>();
-
-        // minetype
-        String boundary = "apiclient-" + System.currentTimeMillis();
-        String mimeType = "multipart/form-data;charset=utf-8;boundary=" + boundary;
-        //network reponse
-        Response.Listener<NetworkResponse> networkReponse = new Response.Listener<NetworkResponse>(){
-            @Override
-            public void onResponse(NetworkResponse response) {
-                Log.d("WebManager", "Response: " + response.statusCode);
-            }
-        };
-
-        Log.d("Web", "created upload object for " + path);
-        MultipartRequest request = new MultipartRequest(upload_url, headers, mimeType, fileParts, networkReponse, errorlistener);
-
-        VolleyUploader.getInstance(context).addToRequestQueue(request);
 
 
     }

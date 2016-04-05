@@ -2,6 +2,7 @@ package edu.rit.se.beepbrake.Web;
 
 import android.content.Context;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
@@ -19,16 +20,16 @@ import javax.net.ssl.X509TrustManager;
  */
 public class VolleyUploader {
     private static VolleyUploader instance;
-    private static Context context;
-    private static TrustManager trustManager;
+    private RequestQueue mRequestQueue;
 
-    private VolleyUploader(Context context) {
-        this.context = context;
+    private VolleyUploader(){
+        mRequestQueue = Volley.newRequestQueue(MyApp.getAppContext());
     }
 
-    public static synchronized VolleyUploader getInstance(Context context) {
+
+    public static synchronized VolleyUploader getInstance() {
         if (instance == null) {
-            instance = new VolleyUploader(context);
+            instance = new VolleyUploader();
         }
         return instance;
     }
@@ -37,34 +38,11 @@ public class VolleyUploader {
      * The broadcast listener can be called by any app
      * therefore it's safer to uses the app context as the key
      *
-     * @param context - the "key" to get the corresponding queue
      * @return
      */
-    public RequestQueue getRequestQueue(Context context){
-        return Volley.newRequestQueue(context.getApplicationContext());
+    public RequestQueue getRequestQueue(){
+        return mRequestQueue;
     }
 
-    public void addToRequestQueue(MultipartRequest upload){
-        getRequestQueue(context).add(upload);
-    }
-
-    private void getTrustManager(){
-        TrustManager tm = new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-
-            }
-
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
-            }
-        };
-    }
 
 }

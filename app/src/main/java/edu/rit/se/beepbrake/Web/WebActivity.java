@@ -28,7 +28,10 @@ public class WebActivity extends AppCompatActivity {
         ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         WebManager webManager = new WebManager(connectionManager);
 
-        //queue 1 upload
+        // write some test file
+        //String TEST_FILE_NAME = Environment.getExternalStorageDirectory() + "/Test.txt";
+
+        //try to push test file
         webManager.queueUpload(UPLOAD_1);
 
         IntentFilter filter = new IntentFilter();

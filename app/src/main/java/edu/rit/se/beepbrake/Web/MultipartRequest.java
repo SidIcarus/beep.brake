@@ -16,6 +16,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 class MultipartRequest extends Request<NetworkResponse> {
@@ -23,18 +24,19 @@ class MultipartRequest extends Request<NetworkResponse> {
     private final Response.ErrorListener mErrorListener;
     private final Map<String, String> mHeaders;
     private final String mMimeType;
-    private final byte[] mMultipartBody;
+    private final File mFile;
 
-    public MultipartRequest(String url, Map<String, String> headers, String mimeType, Map<String, File> fileParts, Response.Listener<NetworkResponse> listener, Response.ErrorListener errorListener) {
+    public MultipartRequest(String url, Map<String, String> headers, String mimeType, File file,
+                            Response.Listener<NetworkResponse> listener, Response.ErrorListener errorListener) {
         super(Method.POST, url, errorListener);
         this.mListener = listener;
         this.mErrorListener = errorListener;
         this.mHeaders = headers;
         this.mMimeType = mimeType;
-        this.mMultipartBody = createBody(fileParts);
+        mFile = file;
         Log.d("Multipart", mHeaders.toString());
         Log.d("Multipart", mimeType);
-        Log.d("Multipart", mMultipartBody.toString());
+
     }
 
     @Override
@@ -49,7 +51,65 @@ class MultipartRequest extends Request<NetworkResponse> {
 
     @Override
     public byte[] getBody() throws AuthFailureError {
-        return mMultipartBody;
+
+        byte[] fileData = new byte[(int) mFile.length()];
+        try {
+            FileInputStream fileInputStream = new FileInputStream(mFile);
+            fileInputStream.read(fileData);
+            fileInputStream.close();
+        }catch( IOException e){
+            e.printStackTrace();
+        }
+
+
+        String lineEnd = "\r\n";
+        String boundary = "apiclient-" + System.currentTimeMillis();
+        String twoHyphens = "--";
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(bos);
+
+        try {
+            dos.writeBytes(twoHyphens + boundary + lineEnd);
+            dos.writeBytes("Content-Disposition: form-data; name=\"file\";filename=\""
+                    + this.mFile.getName() + "\"" + lineEnd);
+            dos.writeBytes(lineEnd);
+
+            ByteArrayInputStream fileInputStream = new ByteArrayInputStream(fileData);
+            int bytesAvailable = fileInputStream.available();
+            int maxBufferSize = 1024 * 1024;
+
+            int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            byte[] buffer = new byte[bufferSize];
+
+            // read file and write it into form...
+            int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+            while (bytesRead > 0) {
+                dos.write(buffer, 0, bufferSize);
+                bytesAvailable = fileInputStream.available();
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+            }
+
+            // send multipart form data necesssary after file data...
+            dos.writeBytes(lineEnd);
+            dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+            return bos.toByteArray();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileData;
+
+    }
+
+    @Override
+    protected Map<String, String> getParams() throws AuthFailureError {
+        Map<String, String> params = super.getParams();
+        params.put("file", mFile.toString());
+        return params;
     }
 
     @Override
@@ -78,7 +138,6 @@ class MultipartRequest extends Request<NetworkResponse> {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
 
-        byte[] body;
         for( String part : fileMap.keySet() ){
             File f = fileMap.get(part);
             byte[] fileData = new byte[(int) f.length()];

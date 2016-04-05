@@ -23,6 +23,7 @@ public class WebError implements Response.ErrorListener {
      */
     public WebError(WebManager webManager, String filename){
         this.webManager = webManager;
+        this.filename = filename;
     }
 
     @Override
@@ -33,8 +34,8 @@ public class WebError implements Response.ErrorListener {
             //Something messed up our upload, re-queue the upload
             File f = new File(this.filename);
             if (f != null && f.exists()) {
-                Log.d("WebError", "Requeueing");
-                this.webManager.queueUpload(this.filename);
+//                Log.d("WebError", "Requeueing");
+//                this.webManager.queueUpload(this.filename);
             }
 
         }catch(Exception e){
