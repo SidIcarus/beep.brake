@@ -2,9 +2,6 @@ package edu.rit.se.beepbrake.Web;
 
 import android.util.Log;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.Response;
-
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,8 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by richykapadia on 4/4/16.

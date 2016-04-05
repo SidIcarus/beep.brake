@@ -17,6 +17,10 @@ public class WebActivity extends AppCompatActivity {
     static private String UPLOAD_1 = Environment.getExternalStorageDirectory() +
             "/write_segments/upload/e9bb32c0c705a93d_1458249140140.zip" ;
 
+    static private String UPLOAD_2 = Environment.getExternalStorageDirectory() +
+            "/write_segments/1458250230609/e9bb32c0c705a93d_1458250230609.zip" ;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,11 +32,8 @@ public class WebActivity extends AppCompatActivity {
         ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         WebManager webManager = new WebManager(connectionManager);
 
-        // write some test file
-        //String TEST_FILE_NAME = Environment.getExternalStorageDirectory() + "/Test.txt";
-
         //try to push test file
-        webManager.queueUpload(UPLOAD_1);
+        webManager.queueUpload(UPLOAD_2);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
