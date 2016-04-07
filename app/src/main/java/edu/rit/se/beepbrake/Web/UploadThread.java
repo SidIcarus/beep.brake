@@ -6,20 +6,20 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Created by richykapadia on 4/4/16.
  */
 public class UploadThread implements Runnable {
 
-    private File file;
+    private List<File> fileList;
     private URL url;
 
-    public UploadThread(File f, URL url){
-        this.file = f;
+    public UploadThread(List<File> fList, URL url){
+        this.fileList = fList;
         this.url = url;
 
     }
@@ -27,16 +27,15 @@ public class UploadThread implements Runnable {
 
     @Override
     public void run() {
-
-        byte[] fileData = new byte[(int) file.length()];
-        try {
-            FileInputStream fileInputStream = new FileInputStream(file);
-            fileInputStream.read(fileData);
-            fileInputStream.close();
-        }catch( IOException e){
-            e.printStackTrace();
+        for(File f : this.fileList ){
+            if( WebManager.getInstance().hasWifi() ) {
+                uploadFile(f);
+            }
         }
+    }
 
+
+    private void uploadFile(File f){
         // minetype
         String boundary = "apiclient-" + System.currentTimeMillis();
         String mimeType = "multipart/form-data;charset=utf-8;boundary=" + boundary;
@@ -56,14 +55,13 @@ public class UploadThread implements Runnable {
 
             outputStream.writeBytes("--" + boundary + "\r\n");
 
-            outputStream.writeBytes("Content-Disposition: form-data; name=\"somethingelse\";" +
-                    "filename=\"" + file.getName() + "\"\r\n");
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"file\";" +
+                    "filename=\"" + f.getName() + "\"\r\n");
             outputStream.writeBytes("Content-Type: application/octet-stream\r\nContent-Length: "
-                    + file.length() + "\r\n\r\n");
-            outputStream.writeBytes("\r\n");
+                    + f.length() + "\r\n\r\n");
 
             // create a buffer of maximum size
-            FileInputStream fileInputStream = new FileInputStream(this.file);
+            FileInputStream fileInputStream = new FileInputStream(f);
             int bytesAvailable = fileInputStream.available();
 
             int maxBufferSize = 1024;
@@ -90,17 +88,27 @@ public class UploadThread implements Runnable {
 
 
             Log.d("Web", "File Sent");
-            Log.d("Web", "Response: " + String.valueOf(connection.getResponseCode()));
+            int code = connection.getResponseCode();
+            Log.d("Web", "Response: " + code);
 
+            connection.disconnect();
+            connection = null;
+
+            if (200 <= code && code <= 299){
+                // remove file from dir
+                Log.d("Web", "Here is where i would delete the file");
+                //f.delete();
+            }else{
+                //re-queue event upload
+                WebManager.getInstance().queueUpload(f);
+            }
 
         }catch (IOException e){
             Log.e("Web", e.getMessage());
         }finally {
-            Log.d("Web", "in finally");
             if (connection != null){
                 connection.disconnect();
             }
         }
-
     }
 }

@@ -14,14 +14,23 @@ import edu.rit.se.beepbrake.R;
  */
 public class WebActivity extends AppCompatActivity {
 
+    //Kevin's
     static private String UPLOAD_1 = Environment.getExternalStorageDirectory() +
-            "/write_segments/upload/e9bb32c0c705a93d_1458249140140.zip" ;
+            "/write_segments/17958013dc1ff915_1459805565287.zip" ;
 
     static private String UPLOAD_2 = Environment.getExternalStorageDirectory() +
             "/write_segments/1458250230609/e9bb32c0c705a93d_1458250230609.zip" ;
 
     static private String UPLOAD_3 = Environment.getExternalStorageDirectory() +
-            "/write_segments/17958013dc1ff915_1459805565287.zip" ;
+            "/write_segments/1458250162024/e9bb32c0c705a93d_1458250162024.zip";
+
+    static private String UPLOAD_4 = Environment.getExternalStorageDirectory() +
+            "/write_segments/1458250357530/e9bb32c0c705a93d_1458250357530.zip";
+
+    static private String UPLOAD_5 = Environment.getExternalStorageDirectory() +
+            "/write_segments/1458250388619/e9bb32c0c705a93d_1458250388619.zip";
+
+
 
 
     @Override
@@ -33,10 +42,14 @@ public class WebActivity extends AppCompatActivity {
 
         //wifi listener
         ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        WebManager webManager = new WebManager(connectionManager);
+        WebManager webManager = WebManager.getInstance();
+        webManager.setConnectionManager(connectionManager);
 
         //try to push test file
-        webManager.queueUpload(UPLOAD_3);
+//        webManager.queueUpload(UPLOAD_2);
+//        webManager.queueUpload(UPLOAD_3);
+//        webManager.queueUpload(UPLOAD_4);
+//        webManager.queueUpload(UPLOAD_5);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);

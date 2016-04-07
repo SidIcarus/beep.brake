@@ -9,6 +9,7 @@ import android.util.Log;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,17 +24,31 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class WebManager extends BroadcastReceiver {
 
+    private static WebManager instance;
+
     // set once instead of allocating on callback
     private ConnectivityManager connectionManager;
-
-    private ArrayList<String> uploadQueue = new ArrayList<String>();
+    private ArrayList<File> uploadQueue = new ArrayList<>();
     private ReentrantLock qLock = new ReentrantLock();
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
-    private ArrayList<Thread> activeUploads = new ArrayList<>();
+    private WebManager(){}
 
-    public WebManager(ConnectivityManager connectionManager){
+    public static WebManager getInstance(){
+        if(instance == null){
+            instance = new WebManager();
+        }
+        return instance;
+    }
+
+    public void setConnectionManager(ConnectivityManager connectionManager){
         this.connectionManager = connectionManager;
+    }
+
+    public boolean hasWifi(){
+        NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
+        boolean wifiConnected = (activeNetwork != null) && (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
+        return wifiConnected;
     }
 
     /**
@@ -44,16 +59,12 @@ public class WebManager extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("Web", "onReceive");
-        NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
-        boolean wifiConnected = (activeNetwork != null) && (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
 
-        if( wifiConnected ){
+        if( hasWifi() ){
             Log.d("Web", "Connection!");
             qLock.lock();
             Log.d("Web", "Preparing to upload " + this.uploadQueue.size() + " file(s)");
-            for( String path : this.uploadQueue ){
-                uploadFile(path);
-            }
+            uploadFiles();
             qLock.unlock();
         }
         else{
@@ -65,29 +76,32 @@ public class WebManager extends BroadcastReceiver {
 
     public void queueUpload(String filename){
         qLock.lock();
-        uploadQueue.add(filename);
+        File f = new File(filename);
+        if( f.exists() ) {
+            uploadQueue.add(f);
+        }
+        qLock.unlock();
+    }
+
+    public void queueUpload(File file){
+        qLock.lock();
+        if( file.exists() ) {
+            uploadQueue.add(file);
+        }
         qLock.unlock();
     }
 
 
-    private void uploadFile(String path) {
-        try{
-            File file = new File(path);
+    private void uploadFiles() {
+        try {
             URL url = new URL(upload_url);
-            Thread t = new Thread(new UploadThread(file, url));
-            t.setName(path);
+            Thread t = new Thread(new UploadThread(uploadQueue, url));
             t.setPriority(Thread.MIN_PRIORITY);
-            activeUploads.add(t);
             t.start();
-        }catch (IOException e){
+        } catch (IOException e) {
             Log.e("Web", e.getMessage());
         }
     }
 
-    public void markCompleted(Thread t){
-        if(activeUploads.contains(t)){
-            activeUploads.remove(t);
-        }
-    }
 
 }
