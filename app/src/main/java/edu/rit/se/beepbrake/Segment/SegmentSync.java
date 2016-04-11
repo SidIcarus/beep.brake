@@ -1,9 +1,8 @@
-package edu.rit.se.beepbrake;
+package edu.rit.se.beepbrake.Segment;
 
 /**
  * Created by Bradley on 1/11/2016.
  */
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ public class SegmentSync {
         singleData = new ConcurrentHashMap<String, Object>();
     }
 
-
     public synchronized void makeSegment(Mat img, HashMap<String, Object> camData) {
         this.lock.lock();
         this.UpdateDataSingle(camData);
@@ -41,7 +39,7 @@ public class SegmentSync {
         ConcurrentHashMap<String, Object> tempSing = new ConcurrentHashMap<>(singleData);
         singleData = new ConcurrentHashMap<String, Object>();
 
-        HashMap<String, Object> segMap = new HashMap<String, Object>();
+        ConcurrentHashMap<String, Object> segMap = new ConcurrentHashMap<String, Object>();
 
         Iterator itAgg = tempAgg.entrySet().iterator();
         while (itAgg.hasNext()) {
@@ -63,6 +61,7 @@ public class SegmentSync {
 
             segMap.put(pair.getKey().toString(), tempSing.get(pair.getKey()));
         }
+
         Segment seg = new Segment(segMap, img);
         buf.addSegment(seg);
         lock.unlock();
@@ -83,27 +82,28 @@ public class SegmentSync {
                 aggData.put(pair.getKey().toString(), a);
             }
         }
+        lock.unlock();
 
         //makeSegment(); Used for demonstration purposes with android sensors
-
-        lock.unlock();
     }
 
     public void UpdateDataSingle(HashMap<String, Object> map) {
+        lock.lock();
         Iterator it = map.entrySet().iterator();
 
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             singleData.put(pair.getKey().toString(), pair.getValue());
         }
+        lock.unlock();
     }
 
-    protected void onResume(){
+    public void onResume(){
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
     }
 
-    protected void onPause(){
+    public void onPause(){
         aggData = null;
         singleData = null;
     }

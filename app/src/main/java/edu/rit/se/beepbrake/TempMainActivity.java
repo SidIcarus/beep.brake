@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Analysis;
+package edu.rit.se.beepbrake;
 
 import android.content.Context;
 import android.hardware.SensorManager;
@@ -24,14 +24,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import edu.rit.se.beepbrake.Segment.AccelerometerSensor;
+import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.Analysis.Detector.SimpleLaneDetector;
+import edu.rit.se.beepbrake.Analysis.FrameAnalyzer;
+import edu.rit.se.beepbrake.Analysis.LoaderCallback;
+import edu.rit.se.beepbrake.DecisionMaking.DecisionManager;
+import edu.rit.se.beepbrake.Segment.AccelerometerSensor;
 import edu.rit.se.beepbrake.Segment.GPSSensor;
-import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.Segment.SegmentSync;
-import edu.rit.se.beepbrake.TempLogger;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 /**
@@ -45,21 +47,19 @@ import edu.rit.se.beepbrake.buffer.BufferManager;
  *
  */
 
-public class AnalysisActivity extends AppCompatActivity {
+public class TempMainActivity extends AppCompatActivity {
 
     static{ System.loadLibrary("opencv_java3"); }
 
     private static final String TAG = "Analysis-Activity";
 
+    // Image Analysis Stuff
     private BaseLoaderCallback mLoaderCallback;
     private JavaCameraView mCameraView;
     private CameraPreview mCameraPreview;
     private FrameAnalyzer mCarAnalyzer;
     private FrameAnalyzer mLaneAnalyzer;
 
-    //Cascade to be loaded
-//    private String CASCADE_XML = "cascade_5.xml";
-//    private int CASCADE_ID = R.raw.cascade_5;
     /*
      * Sorry Clark, can't commercialize this without
      * express written consent of the Visionary team
@@ -67,24 +67,27 @@ public class AnalysisActivity extends AppCompatActivity {
     private String CASCADE_XML = "visionarynet_cars_and_truck_cascade_web_haar.xml";
     private int CASCADE_ID = R.raw.visionarynet_cars_and_truck_cascade_web_haar;
 
+    // Our cascade that requires much more training
+    // private String CASCADE_XML = "cascade_5.xml"
+    // private int CASCADE_ID = R.raw.cascade_5;
+
     //Data Acquisition Objects
     private SegmentSync segSync;
     private GPSSensor gpsSen;
     private AccelerometerSensor aSen;
     private BufferManager bufMan;
 
+    //Decision Objects
+    private DecisionManager decMan;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
 
-        //Buffer init
-        bufMan = new BufferManager(this);
-        
-        //Data Acquisition init
-        segSync = new SegmentSync(bufMan);
-        gpsSen = new GPSSensor(this, segSync);
-        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+        // Segement sync + buffer
+        initialize();
 
         // UI Element
         mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
@@ -94,7 +97,6 @@ public class AnalysisActivity extends AppCompatActivity {
         //load cascade
         CascadeClassifier cascade = loadCascade();
 
-        /*
 
         //construct frame analyzer and start thread
         Detector carDetect = new CarDetector(cascade, this);
@@ -130,9 +132,6 @@ public class AnalysisActivity extends AppCompatActivity {
                 bufMan.warningTriggered();
             }
         });
-
-        */
-
     }
 
     @Override
@@ -157,6 +156,20 @@ public class AnalysisActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void initialize() {
+        //Buffer init
+        bufMan = new BufferManager(this);
+
+        //Data Acquisition init
+        segSync = new SegmentSync(bufMan);
+        gpsSen = new GPSSensor(this, segSync);
+        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+
+        //Decision init
+        decMan = new DecisionManager(bufMan);
+    }
+
 
     @Override
     protected void onPause() {
@@ -202,7 +215,7 @@ public class AnalysisActivity extends AppCompatActivity {
     }
 
     public void setCurrentFoundRect(Mat m, Rect r){
-        this.mCameraPreview.setPointsToDraw(r); // draw to camera, which is holding the UI
+        this.mCameraPreview.setPointsToDraw(r);
         HashMap<String, Object> data = new HashMap<String, Object>();
         if( r != null) {
             data.put("br-x", r.br().x);

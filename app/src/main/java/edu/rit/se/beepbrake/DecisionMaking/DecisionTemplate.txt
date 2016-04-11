@@ -1,0 +1,77 @@
+//created by Ryan 3/13/16
+
+public class DecisionTemplate extends Decision{
+
+    /*
+    * This template serves as an explanation for how new Decisions
+    * should be implemented.
+    *
+    * Individual decision classes extend the generic decision
+    * class in order to take advantage of several pre-implemented
+    * features.
+    *
+    * Primarily the requestSegment method. Which stores the most recent
+    * segment into the curSeg variable.
+    *
+    * Beyond that the generic decision currently only stores both the buffer
+    * and decision manager references to reduce code reuse.
+    */
+
+    public DecisionTemplate(DecisionManager decMan, BufferManager bufMan){
+
+    /*
+    * In most cases the decision constructors will not need to do anything
+    * beyond call the super class's constructor to store the two manager
+    * objects.
+    *
+    * Each new Decision will need to be added to the DecisionManager's
+    * constructor in order to be spun up during runtime.
+    */
+
+        super(decMan, bufMan);
+    }
+
+    public void run(){
+
+    /*
+    * Decisions are run individually as threads to ensure that for each
+    * algorithm a decision can be reached in a timely manner.
+    *
+    * The run method is being overwritten from the base thread class which
+    * the generic decision class is extending.
+    *
+    * The decision making algorithm should be implemented within the supplied
+    * while loop, following the requestSegment call.
+    *
+    * The requestSegment call updates the curSeg instance variable located
+    * within the generic decision with the newest Segment from the buffer.
+    *
+    * Each segment will contain an image and all of the information gathered
+    * by the connected sensors, labeled with the label supplied by the sensor.
+    * In addition, each segment contains a reference to older segments allowing
+    * the decision to look at past data during its algorithm's runtime.
+    *
+    * Finally, if a decision warrants a warning to the user. The supplied warn
+    * method must be called.
+    */
+
+        while(!this.interrupted()){
+            requestSegment();
+
+        }
+    }
+
+    /*
+    * The warn method is intended to do 2 things.
+    *
+    * Append a note to the current segment saying that a warning was triggered.
+    *
+    * Call the warning method on the Decision Manager which will alert the
+    * User and tell the Buffer Manager to write the current stored data to disk.
+    */
+
+    private void warn(){
+        curSeg.addDataObject("DecisionTemplate", "true");
+        decMan.warn();
+    }
+}

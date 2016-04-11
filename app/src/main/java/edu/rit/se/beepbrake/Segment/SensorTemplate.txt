@@ -1,0 +1,156 @@
+//created by Ryan 3/13/16
+
+/*
+* The template seen here is the current implementation of the accelerometer
+* within the system.
+*
+* This template is intended to serve as an explanation for how new sensors
+* should be implemented.
+*
+* Sensors within the system largely follow the standard procedure for
+* implementing and interfacing with a sensor in android.
+*
+* Each sensor implementation within the system should be viewed as an
+* interaction with the default android sensors in order to pass data into
+* the system's data aggregation pipeline.
+*/
+
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.content.Context;
+import java.util.Date;
+import java.util.HashMap;
+
+public class AccelerometerSensor implements SensorEventListener {
+
+    private Context context;
+    private SensorManager manager;
+    private Sensor Accelerometer;
+    private SegmentSync segSync;
+
+    public AccelerometerSensor(Context context, SensorManager manager, SegmentSync segSync){
+
+    /*
+    * Sensor constructors are relatively unique between each implementation
+    * However each sensor will need a reference to the segment synchronizer
+    * in order to pass data into the pipeline.
+    *
+    * A check for availability of any hardware sensor is also important in order
+    * to prevent a sensor from spinning up if the device does not support it.
+    *
+    * Sensors must be manually added to the main activity in order to be spun
+    * up during runtime.
+    */
+
+        this.context = context;
+        this.manager = manager;
+
+        if(checkAvailability()) {
+            this.Accelerometer = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            this.manager.registerListener(this, Accelerometer, manager.SENSOR_DELAY_NORMAL);
+            this.segSync = segSync;
+        }
+    }
+
+    /*
+    * The send method overall is quite simple, but is quite important
+    * because the Segment Synchronizer is expecting data in a specific
+    * format.
+    *
+    * The synchronizer has two methods available to sensors for data
+    * storage. UpdateDataAgg (Aggregate) and UpdateDataSingle.
+    *
+    * UpdateDataAgg stores a running array of data from a given sensor
+    * Between segments, and averages the collected data as the segment
+    * is created.
+    *
+    * UpdateDataSingle replaces the existing value supplied by the sensor
+    * and replaces it with the new data.
+    *
+    * Both methods expect a single HashMap<String, Object>. The supplied
+    * String key acts as a label for the data object value, while the data
+    * itself is stored as a generic object to give greater versatility to
+    * both the sensor storing the data and the decision running analysis on
+    * the data.
+    *
+    * The synchronizer expects a map instead of just the data for cases
+    * such as the supplied accelerometer, where an individual sensor has
+    * multiple pieces of data being supplied at once.
+    */
+
+    public void send(Float x, Float y, Float z){
+
+        HashMap<String, Object> data = new HashMap<String, Object>();
+
+        if(x != null){
+            data.put(Constants.ACCEL_X, x);
+        }
+        if(y != null){
+            data.put(Constants.ACCEL_Y, y);
+        }
+        if(z != null){
+            data.put(Constants.ACCEL_Z, z);
+        }
+
+        segSync.UpdateDataAgg(data);
+    }
+
+    /*
+    * If the app is taken out of focus during runtime the majority of the
+    * functionality is paused and stopped.
+    *
+    * This includes the sensors, which need to pause themselves and resume them
+    * selves.
+    *
+    * These methods most be manually added to the main activity's onPause and
+    * onResume since the Sensor implementations are not part of the activity.
+    *
+    */
+
+    public void onResume(){
+        if(checkAvailability()) {
+            manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    public void onPause() {
+        if (checkAvailability()) {
+            manager.unregisterListener(this);
+        }
+    }
+
+    /*
+    * Since android hardware sensors are callback methods, the callback
+    * must be captured and the data needs to be stored as appropriate.
+    */
+
+    public void onSensorChanged(SensorEvent event){
+
+        Float x = event.values[0];
+        Float y = event.values[1];
+        Float z = event.values[2];
+
+        send(x, y, z);
+    }
+
+    /*
+    * As stated previously, not all devices support a given hardware sensor.
+    * In addition, receiving permissions for a sensor is also not a given.
+    *
+    * A check needs to made to verify that a sensor can be used.
+    *
+    * This check should wrap the constructor and onPause/onResume methods.
+    */
+
+    private boolean checkAvailability(){
+        PackageManager pm = context.getPackageManager();
+        if(pm.hasSystemFeature(pm.FEATURE_SENSOR_ACCELEROMETER)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
