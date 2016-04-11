@@ -4,6 +4,8 @@ package edu.rit.se.beepbrake.DecisionMaking;
 
 import java.util.Date;
 import java.util.ArrayList;
+import android.media.ToneGenerator;
+import android.media.AudioManager;
 
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
@@ -36,7 +38,9 @@ public class DecisionManager {
         */
 
         if(lastWarn == null || curTime.after(new Date(lastWarn.getTime() + 1000))) {
-            //TODO: Alert UI
+            //Driver alert beep
+            ToneGenerator tone = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+            tone.startTone(ToneGenerator.TONE_DTMF_S, 200);
         }
         bufMan.warningTriggered();
         lastWarn = curTime;
