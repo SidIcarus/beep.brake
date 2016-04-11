@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.rit.se.beepbrake.Segment;
+import edu.rit.se.beepbrake.Segment.Segment;
 
 public class SegmentBuffer {
 
@@ -126,6 +126,7 @@ public class SegmentBuffer {
             if(activeWarning) {
                 //End the warning state if it's been long enough since the last warning segment, or is too long of an event
                 if(oldest.getCreatedAt() - lastWarningTime > timediff || oldest.getCreatedAt() - firstWarningTime > maxtime) {
+                    Log.d("bufer system", "Prune is ending the event: o: " + oldest.getCreatedAt() + " n: " + newest.getCreatedAt());
                     activeWarning = false;
                     activeWriter.signalEnd();
                     activeWriter = null;

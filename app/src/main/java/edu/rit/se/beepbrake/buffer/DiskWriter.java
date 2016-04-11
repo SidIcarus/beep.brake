@@ -64,12 +64,14 @@ public class DiskWriter extends Thread implements Runnable{
      * Dereferences as it goes to cut down on memory usage
      */
     public void run() {
+        Log.d("bufer System", "DiskWriter starting");
         //File name format: 'androidID'_'eventID'
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         String baseName = deviceId + "_" + String.valueOf(eventId);
         String fileName = baseName + ".json";
         FileOutputStream fos;
         ZipOutputStream zos;
+        StringBuilder json = new StringBuilder();
 
         try {
             //fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
@@ -78,29 +80,38 @@ public class DiskWriter extends Thread implements Runnable{
                 //noinspection ResultOfMethodCallIgnored
                 writeDir.mkdirs();
             }
-            File event = new File(path, fileName);
-            fos = new FileOutputStream(event);
+            //File event = new File(path, fileName);
+            //fos = new FileOutputStream(event);
 
             //open the Zip File
-            zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(baseName + ".zip")));
+            FileOutputStream zip_file = new FileOutputStream(path + baseName + ".zip");
+            zos = new ZipOutputStream(new BufferedOutputStream(zip_file));
 
             //Print file header
-            fos.write(String.valueOf("{\"deviceid\":\"" + deviceId + "\",").getBytes());
+            //fos.write(String.valueOf("{\"deviceid\":\"" + deviceId + "\",").getBytes());
+            json.append("{\"deviceid\":\"" + deviceId + "\",");
             //hardware type
-            fos.write(("\"hardware\":\"" + Build.DISPLAY + "\",").getBytes());
+            //fos.write(("\"hardware\":\"" + Build.DISPLAY + "\",").getBytes());
+            json.append("\"hardware\":\"" + Build.DISPLAY + "\",");
             //OS version
-            fos.write(("\"osversion\":\"" + Build.VERSION.RELEASE + "\",").getBytes());
+            //fos.write(("\"osversion\":\"" + Build.VERSION.RELEASE + "\",").getBytes());
+            json.append("\"osversion\":\"" + Build.VERSION.RELEASE + "\",");
             //App version
-            fos.write(("\"appversion\":\"" + context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName + "\",").getBytes());
+            //fos.write(("\"appversion\":\"" + context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName + "\",").getBytes());
+            json.append("\"appversion\":\"" + context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName + "\",");
             //Local event ID
-            fos.write(String.valueOf("\"eventdata\":" + String.valueOf(eventId) + ",").getBytes());
+            //fos.write(String.valueOf("\"eventdata\":" + String.valueOf(eventId) + ",").getBytes());
+            json.append("\"eventdata\":" + String.valueOf(eventId) + ",");
             //Local Timezone
-            fos.write(("\"timezone\":\"" + TimeZone.getDefault().getID() + "\",").getBytes());
-            writeConfiguration(fos);
+            //fos.write(("\"timezone\":\"" + TimeZone.getDefault().getID() + "\",").getBytes());
+            json.append("\"timezone\":\"" + TimeZone.getDefault().getID() + "\",");
+            writeConfiguration(json);
 
             //Open of segments section
-            fos.write(String.valueOf("\"segments\": [").getBytes());
+            //fos.write(String.valueOf("\"segments\": [").getBytes());
+            json.append("\"segments\": [");
 
+            Log.d("bufer system", "Starting to check for segments");
             //segment contents
             boolean first = true;
             Segment s;
@@ -113,22 +124,29 @@ public class DiskWriter extends Thread implements Runnable{
                     if(first) {
                         first = false;
                     } else {
-                        fos.write(String.valueOf(',').getBytes());
+                        //fos.write(String.valueOf(',').getBytes());
+                        json.append(",");
                     }
-                    writeSegment(s, fos, zos);
+                    writeSegment(s, json, zos);
                 }
             }
+            Log.d("bufer system", "Diskwriter checking queue after being notified endReached");
             //We've been notified that all segments are in the queue, but we may not have
             // written all of them to disk yet
             while((s = segments.poll()) != null) {
-                fos.write(String.valueOf(',').getBytes());
-                writeSegment(s, fos, zos);
+                //fos.write(String.valueOf(',').getBytes());
+                json.append(",");
+                writeSegment(s, json, zos);
             }
 
             //Close of segments and json
-            fos.write(String.valueOf("]}").getBytes());
+            //fos.write(String.valueOf("]}").getBytes());
+            json.append("]}");
 
-            fos.close();
+            //fos.close();
+            ZipEntry jsonfile = new ZipEntry(fileName);
+            zos.putNextEntry(jsonfile);
+            zos.write(json.toString().getBytes());
             zos.close();
 
             /*
@@ -146,6 +164,7 @@ public class DiskWriter extends Thread implements Runnable{
             Log.e("buferSystem", "Finished zipping");
             */
         } catch (Exception e) {
+            Log.d("bufer System", "Error in main DiskWriter loop");
             e.printStackTrace();
         }
     }
@@ -165,25 +184,32 @@ public class DiskWriter extends Thread implements Runnable{
         segments.add(seg);
     }
 
-    private void writeConfiguration(FileOutputStream fos) throws IOException {
+    private void writeConfiguration(StringBuilder json) throws IOException {
         //TODO actually read from configuration file
-        fos.write(String.valueOf("\"configuration\": {").getBytes());
+        //fos.write(String.valueOf("\"configuration\": {").getBytes());
+        json.append("\"configuration\": {");
+
         //Each configuration item
-        fos.write(String.valueOf("\"warningtime\":10").getBytes());
+        //fos.write(String.valueOf("\"warningtime\":10").getBytes());
+        json.append("\"warningtime\":10");
 
         //Close of config section
-        fos.write(String.valueOf("},").getBytes());
+        //fos.write(String.valueOf("},").getBytes());
+        json.append("},");
     }
 
     /**
      * Writes a single segment to the given file
      * @param seg - the segment to read
-     * @param file - the file to write to
+     * //@param file - the file to write to
      */
-    private void writeSegment(Segment seg, FileOutputStream file, ZipOutputStream zip) throws IOException{
+    private void writeSegment(Segment seg, StringBuilder json, ZipOutputStream zip) throws IOException{
+        Log.d("bufer system", "Start of writeSegment");
         //Segment header
-        file.write(String.valueOf("{\"segtime\":" + String.valueOf(seg.getCreatedAt())).getBytes());
-        file.write(String.valueOf(",\"sensordata\": [").getBytes());
+        //file.write(String.valueOf("{\"segtime\":" + String.valueOf(seg.getCreatedAt())).getBytes());
+        json.append("{\"segtime\":" + String.valueOf(seg.getCreatedAt()));
+        //file.write(String.valueOf(",\"sensordata\": [").getBytes());
+        json.append(",\"sensordata\": [");
 
         //Segment content
         if( seg.getImg() != null){
@@ -199,22 +225,29 @@ public class DiskWriter extends Thread implements Runnable{
             zip.putNextEntry(ze);
             zip.write(buf.toArray());
 
-            file.write(String.valueOf("{\"key\":\"imagename\",\"value\":\"" + filepath + "\"}").getBytes());
+            //file.write(String.valueOf("{\"key\":\"imagename\",\"value\":\"" + filepath + "\"}").getBytes());
+            json.append("{\"key\":\"imagename\",\"value\":\"" + filepath + "\"}");
+            Log.d("bufer system", "Wrote image to zip");
         }
         for(String k : seg.getKeys()) {
-            file.write(String.valueOf(",{\"key\":\"" + k + "\",\"value\":").getBytes());
+            //file.write(String.valueOf(",{\"key\":\"" + k + "\",\"value\":").getBytes());
+            json.append(",{\"key\":\"" + k + "\",\"value\":");
             Object data = seg.getDataObject(k);
             //Need to add Quotation marks around Strings
             if(data.getClass() == String.class) {
-                file.write(String.valueOf("\"" + data.toString() + "\"").getBytes());
+                //file.write(String.valueOf("\"" + data.toString() + "\"").getBytes());
+                json.append("\"" + data.toString() + "\"");
             } else {
-                file.write(data.toString().getBytes());
+                //file.write(data.toString().getBytes());
+                json.append(data.toString());
             }
-            file.write(String.valueOf("}").getBytes());
+            //file.write(String.valueOf("}").getBytes());
+            json.append("}");
         }
 
         //Segment closing
-        file.write(String.valueOf("]}").getBytes());
+        //file.write(String.valueOf("]}").getBytes());
+        json.append("]}");
     }
 
 }
