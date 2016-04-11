@@ -9,6 +9,8 @@ import android.hardware.SensorManager;
 import android.widget.TextView;
 
 import edu.rit.se.beepbrake.buffer.BufferManager;
+import edu.rit.se.beepbrake.Segment.*;
+import edu.rit.se.beepbrake.DecisionMaking.DecisionManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
     private SegmentSync segSync;
     private GPSSensor gpsSen;
     private AccelerometerSensor aSen;
+
+    //Decision Objects
+    private DecisionManager decMan;
 
     static {
         System.loadLibrary("opencv_java3");
@@ -61,10 +66,14 @@ public class MainActivity extends AppCompatActivity {
     public void Initialize() {
         //Buffer init
         bufMan = new BufferManager(this);
+
         //Data Acquisition init
         segSync = new SegmentSync(bufMan);
         gpsSen = new GPSSensor(this, segSync);
-        aSen = new AccelerometerSensor((SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+
+        //Decision init
+        decMan = new DecisionManager(bufMan);
     }
 
     protected void onResume(){
@@ -74,6 +83,9 @@ public class MainActivity extends AppCompatActivity {
         segSync.onResume();
         gpsSen.onResume();
         aSen.onResume();
+
+        //Decision
+        decMan.onResume();
     }
 
     protected void onPause(){
@@ -83,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
         segSync.onPause();
         gpsSen.onPause();
         aSen.onPause();
+
+        //Decision
+        decMan.onPause();
 
         //Buffer onPause
         bufMan.onPause();

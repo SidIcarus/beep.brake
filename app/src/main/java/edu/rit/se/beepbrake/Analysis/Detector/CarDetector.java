@@ -17,6 +17,7 @@ import edu.rit.se.beepbrake.Analysis.AnalysisActivity;
 import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.TempLogger;
+import edu.rit.se.beepbrake.TempMainActivity;
 
 /**
  * Created by richykapadia on 1/11/16.
@@ -26,9 +27,9 @@ public class CarDetector implements Detector {
     private static final String TAG = "Car-Detector";
     private final CascadeClassifier mCascade;
     private Size imgSize;
-    private AnalysisActivity activity;
+    private TempMainActivity activity;
 
-    public CarDetector(CascadeClassifier cascade, AnalysisActivity activity){
+    public CarDetector(CascadeClassifier cascade, TempMainActivity activity){
         this.mCascade = cascade;
         this.activity = activity;
     }
