@@ -12,6 +12,7 @@ public class Decision extends Thread{
     protected DecisionManager decMan;
     protected BufferManager bufMan;
     protected Segment curSeg;
+    protected boolean running;
 
     public Decision(DecisionManager decMan, BufferManager bufMan){
         this.decMan = decMan;
@@ -33,5 +34,9 @@ public class Decision extends Thread{
         }catch(InterruptedException e){
             return false;
         }
+    }
+
+    protected void setRunning(boolean running){
+        this.running = running;
     }
 }

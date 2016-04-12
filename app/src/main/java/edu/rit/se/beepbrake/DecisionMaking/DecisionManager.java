@@ -19,7 +19,7 @@ public class DecisionManager {
 
         //Add decisions to the list
         decisions.add(new CameraDecision(this, this.bufMan));
-//        decisions.add(new AccelerometerDecision(this, this.bufMan));
+        decisions.add(new AccelerometerDecision(this, this.bufMan));
 
     }
 
@@ -40,13 +40,14 @@ public class DecisionManager {
 
     public void onResume(){
         for(int i = 0; i < decisions.size(); i++){
-            decisions.get(i).start();
+            decisions.get(i).setRunning(true);
+            decisions.get(i).run();
         }
     }
 
     public void onPause(){
         for(int i = 0; i < decisions.size(); i++){
-            decisions.get(i).interrupt();
+            decisions.get(i).setRunning(false);
         }
     }
 }
