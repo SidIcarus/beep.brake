@@ -3,6 +3,8 @@ package edu.rit.se.beepbrake.DecisionMaking;
 //created by Ryan 2/8/16
 
 
+import android.util.Log;
+
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class CameraDecision extends Decision{
@@ -14,14 +16,17 @@ public class CameraDecision extends Decision{
 
     public void run(){
 
-        //Analysis loop
-        while(!this.interrupted()){
-            if(running) {
-                requestSegment();
+        Log.d("CameraDec", "Running");
 
-                //Analysis
-            }
+        //Analysis loop
+        while(running) {
+            requestSegment();
+
+            //Analysis
         }
+
+        Log.d("CameraDec", "Finished");
+
     }
 
     private void warn(){

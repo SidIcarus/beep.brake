@@ -86,12 +86,10 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         //construct frame analyzer and start thread
         Detector carDetect = new CarDetector(cascade, this);
         mCarAnalyzer = new FrameAnalyzer(carDetect);
-        (new Thread(mCarAnalyzer)).start();
 
         //construct lane detector
         Detector laneDetector = new SimpleLaneDetector(this);
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
-        (new Thread(mLaneAnalyzer)).start();
 
         //Set listener and callback
         mCameraPreview = new CameraPreview(this);
@@ -148,62 +146,35 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         super.onResume();
 
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
-        if(mCarAnalyzer != null) {
-            mCarAnalyzer.resumeDetection();
-        }
-
-        if(mLaneAnalyzer != null){
-            mLaneAnalyzer.resumeDetection();
-        }
-
+//        mCarAnalyzer.resumeDetection();
+//        mLaneAnalyzer.resumeDetection();
         //Data Acquisition onResume
-        if(segSync != null) {
-            segSync.onResume();
-        }
-        if(gpsSen != null) {
-            gpsSen.onResume();
-        }
-        if(aSen != null) {
-            aSen.onResume();
-        }
+        segSync.onResume();
+        gpsSen.onResume();
+        aSen.onResume();
 
         //Decision
-        if(decMan != null) {
-            decMan.onResume();
-        }
+        decMan.onResume();
 
     }
 
     protected void onPause(){
         super.onPause();
-        if(mCarAnalyzer != null) {
-            mCarAnalyzer.pauseDetection();
-        }
-
-        if(mLaneAnalyzer != null){
-            mLaneAnalyzer.pauseDetection();
-        }
+//        mCarAnalyzer.pauseDetection();
+//        mLaneAnalyzer.pauseDetection();
 
         //Data Acquisition onPause
-        if(segSync != null) {
-            segSync.onPause();
-        }
-        if(gpsSen != null) {
-            gpsSen.onPause();
-        }
-        if(aSen != null) {
-            aSen.onPause();
-        }
+        segSync.onPause();
+        gpsSen.onPause();
+        aSen.onPause();
+
 
         //Decision
-        if(decMan != null) {
-            decMan.onPause();
-        }
+        decMan.onPause();
 
         //Buffer onPause
-        if(bufMan != null) {
-            bufMan.onPause();
-        }
+        bufMan.onPause();
+
     }
 
     /**
@@ -229,7 +200,9 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
             data.put("tl-x", r.tl().x);
             data.put("tl-y", r.tl().y);
         }
-        this.segSync.makeSegment(m, new HashMap<String, Object>());
+        if(this.segSync.isRunning()) {
+            this.segSync.makeSegment(m, new HashMap<String, Object>());
+        }
     }
 
     /**

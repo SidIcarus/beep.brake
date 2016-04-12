@@ -41,7 +41,7 @@ public class DecisionManager {
     public void onResume(){
         for(int i = 0; i < decisions.size(); i++){
             decisions.get(i).setRunning(true);
-            decisions.get(i).run();
+            (new Thread(decisions.get(i))).start();
         }
     }
 

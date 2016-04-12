@@ -21,12 +21,14 @@ public class SegmentSync {
     ConcurrentHashMap<String, ArrayList<Object>> aggData;
     ConcurrentHashMap<String, Object> singleData;
     private ReentrantLock lock = new ReentrantLock();
+    private boolean isRunning;
 
 
     public SegmentSync(BufferManager bm) {
         buf = bm;
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
+        isRunning = true;
     }
 
     public synchronized void makeSegment(Mat img, HashMap<String, Object> camData) {
@@ -99,12 +101,18 @@ public class SegmentSync {
     }
 
     public void onResume(){
+        isRunning = true;
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
     }
 
     public void onPause(){
+        isRunning = false;
         aggData = null;
         singleData = null;
+    }
+
+    public boolean isRunning(){
+        return isRunning;
     }
 }

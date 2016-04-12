@@ -7,33 +7,35 @@ package edu.rit.se.beepbrake.DecisionMaking;
 import edu.rit.se.beepbrake.Segment.Segment;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
-public class Decision extends Thread{
+abstract class Decision implements Runnable{
 
     protected DecisionManager decMan;
     protected BufferManager bufMan;
     protected Segment curSeg;
-    protected boolean running;
+    protected volatile boolean running;
 
     public Decision(DecisionManager decMan, BufferManager bufMan){
         this.decMan = decMan;
         this.bufMan = bufMan;
+        this.running = true;
     }
 
     protected boolean requestSegment(){
         Segment requested;
 
         try {
-            while (true) {
+            while (running) {
                 requested = bufMan.getNewestSegment();
                 if (requested != null && (curSeg == null || curSeg.getCreatedAt() < requested.getCreatedAt())) {
                     curSeg = requested;
                     return true;
                 }
-                this.sleep(50);
+                Thread.sleep(50);
             }
         }catch(InterruptedException e){
             return false;
         }
+        return false;
     }
 
     protected void setRunning(boolean running){
