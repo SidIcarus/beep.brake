@@ -1,8 +1,7 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
-import android.util.Log;
-import edu.rit.se.beepbrake.Segment.*;
+import edu.rit.se.beepbrake.Segment.Segment;
 
 public class BufferManager {
     private SegmentBuffer buffer;
