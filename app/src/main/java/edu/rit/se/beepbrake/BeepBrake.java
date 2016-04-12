@@ -28,6 +28,6 @@ public class BeepBrake extends Application {
         connectionIntent.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         this.registerReceiver(webMan, connectionIntent);
 
-
+        
     }
 }

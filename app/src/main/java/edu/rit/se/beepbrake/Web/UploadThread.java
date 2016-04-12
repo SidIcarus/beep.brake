@@ -137,6 +137,8 @@ public class UploadThread implements Runnable {
             }
         }catch (IOException e){
             Log.e("Web", e.getMessage());
+        }catch (Exception e){
+            Log.e("Web", e.getMessage());
         }finally {
             if (connection != null){
                 connection.disconnect();

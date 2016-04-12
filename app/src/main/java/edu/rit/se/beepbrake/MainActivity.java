@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         // UI Element
         mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
-        mCameraView.setMaxFrameSize(640, 360);
+        mCameraView.setMaxFrameSize(352, 288);
         mCameraView.setVisibility(SurfaceView.VISIBLE);
 
         //Set listener and callback

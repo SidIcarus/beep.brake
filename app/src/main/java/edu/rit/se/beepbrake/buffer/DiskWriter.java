@@ -23,7 +23,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import edu.rit.se.beepbrake.BeepBrake;
 import edu.rit.se.beepbrake.Segment.*;
+import edu.rit.se.beepbrake.Web.WebManager;
 
 public class DiskWriter extends Thread implements Runnable{
     private final String path;
@@ -163,6 +165,10 @@ public class DiskWriter extends Thread implements Runnable{
             zf.zip();
             Log.e("buferSystem", "Finished zipping");
             */
+
+            //Queue Upload
+            WebManager.getInstance().triggerUpload();
+
         } catch (Exception e) {
             Log.d("bufer System", "Error in main DiskWriter loop");
             e.printStackTrace();

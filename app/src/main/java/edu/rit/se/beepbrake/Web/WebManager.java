@@ -60,16 +60,17 @@ public class WebManager extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("Web", "onReceive");
+        triggerUpload();
+    }
 
+    public void triggerUpload(){
         if( hasWifi() ){
             Log.d("Web", "Connection!");
             uploadFiles();
         }
         else{
             Log.d("Web", "No Connection!");
-
         }
-
     }
 
     /**
