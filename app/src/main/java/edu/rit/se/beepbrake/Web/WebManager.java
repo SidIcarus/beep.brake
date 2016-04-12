@@ -5,22 +5,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.util.Log;
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by richykapadia on 3/22/16.
  *
- * Waits for the wifi to connect then
- * runs through the queue of files and
- * packages them into multipart requests
+ * Implemented as a singleton since only one instance is needed to listen for wifi
+ *
  */
 public class WebManager extends BroadcastReceiver {
 
@@ -28,10 +24,11 @@ public class WebManager extends BroadcastReceiver {
 
     // set once instead of allocating on callback
     private ConnectivityManager connectionManager;
-    private ArrayList<File> uploadQueue = new ArrayList<>();
-    private ReentrantLock qLock = new ReentrantLock();
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
+    static private String SEGMENT_DIR = Environment.getExternalStorageDirectory() + "/write_segments/";
+
+    //Singleton implementation
     private WebManager(){}
 
     public static WebManager getInstance(){
@@ -41,6 +38,10 @@ public class WebManager extends BroadcastReceiver {
         return instance;
     }
 
+    /**
+     * Set this in the Main Activity before setting the listeners
+     * @param connectionManager
+     */
     public void setConnectionManager(ConnectivityManager connectionManager){
         this.connectionManager = connectionManager;
     }
@@ -62,10 +63,7 @@ public class WebManager extends BroadcastReceiver {
 
         if( hasWifi() ){
             Log.d("Web", "Connection!");
-            qLock.lock();
-            Log.d("Web", "Preparing to upload " + this.uploadQueue.size() + " file(s)");
             uploadFiles();
-            qLock.unlock();
         }
         else{
             Log.d("Web", "No Connection!");
@@ -74,28 +72,14 @@ public class WebManager extends BroadcastReceiver {
 
     }
 
-    public void queueUpload(String filename){
-        qLock.lock();
-        File f = new File(filename);
-        if( f.exists() ) {
-            uploadQueue.add(f);
-        }
-        qLock.unlock();
-    }
-
-    public void queueUpload(File file){
-        qLock.lock();
-        if( file.exists() ) {
-            uploadQueue.add(file);
-        }
-        qLock.unlock();
-    }
-
-
+    /**
+     * starts a low priority thread to scan for zip events to upload
+     * and sends them to the server
+     */
     private void uploadFiles() {
         try {
             URL url = new URL(upload_url);
-            Thread t = new Thread(new UploadThread(uploadQueue, url));
+            Thread t = new Thread(new UploadThread(url, SEGMENT_DIR));
             t.setPriority(Thread.MIN_PRIORITY);
             t.start();
         } catch (IOException e) {

@@ -7,11 +7,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-
-import edu.rit.se.beepbrake.Analysis.AnalysisActivity;
-import edu.rit.se.beepbrake.Analysis.CameraPreview;
-import edu.rit.se.beepbrake.Analysis.Detector.Detector;
-import edu.rit.se.beepbrake.TempMainActivity;
+import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 
 /**
  * Created by richykapadia on 1/19/16.
@@ -36,9 +32,9 @@ public class SimpleLaneDetector implements Detector {
 
     private boolean sizeSet = false;
 
-    private TempMainActivity activity;
+    private DetectorCallback activity;
 
-    public SimpleLaneDetector(TempMainActivity activity){
+    public SimpleLaneDetector(DetectorCallback activity){
         this.activity = activity;
     }
 

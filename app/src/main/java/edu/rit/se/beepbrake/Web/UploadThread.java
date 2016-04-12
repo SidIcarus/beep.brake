@@ -1,5 +1,6 @@
 package edu.rit.se.beepbrake.Web;
 
+import android.content.AsyncTaskLoader;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -8,33 +9,66 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+
+import edu.rit.se.beepbrake.buffer.DiskWriter;
 
 /**
  * Created by richykapadia on 4/4/16.
  */
 public class UploadThread implements Runnable {
 
-    private List<File> fileList;
-    private URL url;
+    private final URL url;
+    private final String eventDir;
 
-    public UploadThread(List<File> fList, URL url){
-        this.fileList = fList;
+    public UploadThread(URL url, String eventDir){
         this.url = url;
-
+        this.eventDir = eventDir;
     }
 
 
     @Override
     public void run() {
-        for(File f : this.fileList ){
+        //scan for files in event dir
+        ArrayList<File> fileList = new ArrayList<File>();
+        File uploadDir = new File(eventDir);
+        if(!uploadDir.isDirectory()){ return; }
+        // write segment (dir) --> timestamp (dir) --> event zip (file)
+        for( File ts : uploadDir.listFiles() ){
+            if( ts.isDirectory() ){
+                for( File event : ts.listFiles()){
+                    //zips should be here
+                    if( "zip".equals(getFileExtension(event))){
+                        fileList.add(event);
+                    }
+                }
+            }
+        }
+
+
+        for(File f : fileList ){
+            //double check wifi connection before starting upload
             if( WebManager.getInstance().hasWifi() ) {
                 uploadFile(f);
             }
         }
     }
 
+    private static String getFileExtension(File file) {
+        String fileName = file.getName();
+        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            return fileName.substring(fileName.lastIndexOf(".")+1);
+        else return "";
+    }
 
+
+    /**
+     * multipart post with the zip file (event) in the "file" part
+     * expects 204 back - delete event off the phone
+     * otherwise - re-queue upload on next wifi connection
+     * @param f - zip file to upload
+     */
     private void uploadFile(File f){
         // minetype
         String boundary = "apiclient-" + System.currentTimeMillis();
@@ -94,15 +128,13 @@ public class UploadThread implements Runnable {
             connection.disconnect();
             connection = null;
 
-            if (200 <= code && code <= 299){
+            if (200 <= code && code <= 299) {
                 // remove file from dir
-                Log.d("Web", "Here is where i would delete the file");
-                //f.delete();
-            }else{
-                //re-queue event upload
-                WebManager.getInstance().queueUpload(f);
+                // the parent file should be the timestamp dir
+                File parent = f.getParentFile();
+                f.delete();
+                parent.delete();
             }
-
         }catch (IOException e){
             Log.e("Web", e.getMessage());
         }finally {

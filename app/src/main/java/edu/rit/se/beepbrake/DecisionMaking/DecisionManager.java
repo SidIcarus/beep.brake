@@ -19,12 +19,8 @@ public class DecisionManager {
 
         //Add decisions to the list
         decisions.add(new CameraDecision(this, this.bufMan));
-        decisions.add(new AccelerometerDecision(this, this.bufMan));
+//        decisions.add(new AccelerometerDecision(this, this.bufMan));
 
-        //Start all decision threads
-        for(int i = 0; i < decisions.size(); i++){
-            decisions.get(i).start();
-        }
     }
 
     public void warn(){
