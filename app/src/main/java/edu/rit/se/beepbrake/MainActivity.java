@@ -77,8 +77,13 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         // UI Element
         mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
-        mCameraView.setMaxFrameSize(640,360);
+        mCameraView.setMaxFrameSize(640, 360);
         mCameraView.setVisibility(SurfaceView.VISIBLE);
+
+        //Set listener and callback
+        mCameraPreview = new CameraPreview(this);
+        mCameraView.setCvCameraViewListener(mCameraPreview);
+        mLoaderCallback = new LoaderCallback(this, mCameraView);
 
         //load cascade
         CascadeClassifier cascade = loadCascade();
@@ -90,11 +95,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         //construct lane detector
         Detector laneDetector = new SimpleLaneDetector(this);
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
-
-        //Set listener and callback
-        mCameraPreview = new CameraPreview(this);
-        mCameraView.setCvCameraViewListener(mCameraPreview);
-        mLoaderCallback = new LoaderCallback(this, mCameraView);
 
         Button warning = (Button) findViewById(R.id.triggerWarning);
         warning.setOnClickListener(new View.OnClickListener() {
@@ -146,8 +146,9 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         super.onResume();
 
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
-//        mCarAnalyzer.resumeDetection();
-//        mLaneAnalyzer.resumeDetection();
+        mCarAnalyzer.resumeDetection();
+        mLaneAnalyzer.resumeDetection();
+
         //Data Acquisition onResume
         segSync.onResume();
         gpsSen.onResume();
@@ -160,20 +161,19 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
     protected void onPause(){
         super.onPause();
-//        mCarAnalyzer.pauseDetection();
-//        mLaneAnalyzer.pauseDetection();
+        mCarAnalyzer.pauseDetection();
+        mLaneAnalyzer.pauseDetection();
 
         //Data Acquisition onPause
         segSync.onPause();
         gpsSen.onPause();
         aSen.onPause();
 
+        //Buffer onPause
+        bufMan.onPause();
 
         //Decision
         decMan.onPause();
-
-        //Buffer onPause
-        bufMan.onPause();
 
     }
 

@@ -41,10 +41,10 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     final Scalar lineColor = new Scalar(0, 255, 0);
 
     // context used to receive/send frame data
-    private DetectorCallback analysisActivity;
+    private final DetectorCallback detectorCallback;
 
-    public CameraPreview(DetectorCallback activity){
-        analysisActivity = activity;
+    public CameraPreview(DetectorCallback detectorCallback){
+        this.detectorCallback = detectorCallback;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
 
-        this.analysisActivity.setCurrentFrame(inputFrame.gray());
+        this.detectorCallback.setCurrentFrame(inputFrame.gray());
         //To show tracking on image
         Mat display = new Mat();
         inputFrame.rgba().copyTo(display);
