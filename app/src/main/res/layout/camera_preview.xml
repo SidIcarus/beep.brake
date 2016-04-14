@@ -24,4 +24,11 @@
         android:layout_alignParentBottom="true"
         android:layout_alignStart="@+id/CameraPreview" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Print Logs"
+        android:id="@+id/printLogs"
+        android:layout_above="@id/triggerWarning"/>
+
 </RelativeLayout>

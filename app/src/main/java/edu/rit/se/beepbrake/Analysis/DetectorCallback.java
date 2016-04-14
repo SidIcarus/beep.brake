@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public interface DetectorCallback {
 
-    public void setCurrentFrame(Mat currentFrame);
-    public void setCurrentFoundRect(Mat m, Rect r);
-    public void setCurrentFoundLanes(double[][] lanesCoord);
+    void setCurrentFrame(Mat currentFrame);
+    void setCurrentFoundRect(Mat m, Rect r);
+    void setCurrentFoundLanes(double[][] lanesCoord);
 }

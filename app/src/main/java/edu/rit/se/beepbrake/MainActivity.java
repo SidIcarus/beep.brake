@@ -1,12 +1,7 @@
 package edu.rit.se.beepbrake;
 
-import android.content.Context;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.hardware.SensorManager;
@@ -21,20 +16,17 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.objdetect.CascadeClassifier;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
 import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
-import edu.rit.se.beepbrake.Analysis.Detector.SimpleLaneDetector;
+import edu.rit.se.beepbrake.Analysis.Detector.HaarLoader;
+import edu.rit.se.beepbrake.Analysis.Detector.CropLaneDetector;
+import edu.rit.se.beepbrake.Analysis.Detector.LaneDetector;
 import edu.rit.se.beepbrake.Analysis.FrameAnalyzer;
 import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 import edu.rit.se.beepbrake.Analysis.LoaderCallback;
-import edu.rit.se.beepbrake.Web.WebManager;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 import edu.rit.se.beepbrake.Segment.*;
 import edu.rit.se.beepbrake.DecisionMaking.DecisionManager;
@@ -51,10 +43,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     private CameraPreview mCameraPreview;
     private FrameAnalyzer mCarAnalyzer;
     private FrameAnalyzer mLaneAnalyzer;
-
-    // Haar cascade
-    private String CASCADE_XML = "visionarynet_cars_and_truck_cascade_web_haar.xml";
-    private int CASCADE_ID = R.raw.visionarynet_cars_and_truck_cascade_web_haar;
 
     //Buffer
     private BufferManager bufMan;
@@ -86,17 +74,18 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         mLoaderCallback = new LoaderCallback(this, mCameraView);
 
         //load cascade
-        CascadeClassifier cascade = loadCascade();
+        HaarLoader loader = HaarLoader.getInstance();
+        CascadeClassifier cascade = loader.loadHaar(this, HaarLoader.cascades.CAR_3);
 
         //construct frame analyzer and start thread
         Detector carDetect = new CarDetector(cascade, this);
         mCarAnalyzer = new FrameAnalyzer(carDetect);
 
         //construct lane detector
-        Detector laneDetector = new SimpleLaneDetector(this);
+        Detector laneDetector = new CropLaneDetector(this);
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
 
-        Button warning = (Button) findViewById(R.id.triggerWarning);
+        final Button warning = (Button) findViewById(R.id.triggerWarning);
         warning.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,6 +93,13 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
             }
         });
 
+        final Button printLogs = (Button) findViewById(R.id.printLogs);
+        printLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TempLogger.printLogs();
+            }
+        });
 
     }
 
@@ -213,42 +209,4 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         this.mCameraPreview.setLinesToDraw(lanesCoord);
     }
 
-    /**
-     * On create loads the cascade resource to feed into the car detector
-     * Must be in the activity to access raw resources
-     * @return
-     */
-    private CascadeClassifier loadCascade(){
-        CascadeClassifier cascadeClassifier = null;
-        try {
-            // load cascade file from application resources
-            InputStream is = getResources().openRawResource(CASCADE_ID);
-            File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-            File cascadeFile = new File(cascadeDir, CASCADE_XML);
-            FileOutputStream os = new FileOutputStream(cascadeFile);
-
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            is.close();
-            os.close();
-
-            cascadeClassifier = new CascadeClassifier(cascadeFile.getAbsolutePath());
-            if (cascadeClassifier.empty()) {
-                Log.e(TAG, "Failed to load cascade classifier");
-                cascadeClassifier = null;
-            } else
-                Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
-
-            cascadeDir.delete();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
-        }
-        return cascadeClassifier;
-
-    }
 }

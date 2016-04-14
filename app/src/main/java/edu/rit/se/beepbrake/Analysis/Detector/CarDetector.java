@@ -1,5 +1,7 @@
 package edu.rit.se.beepbrake.Analysis.Detector;
 
+import android.util.Log;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
@@ -20,11 +22,14 @@ public class CarDetector implements Detector {
     private static final String TAG = "Car-Detector";
     private final CascadeClassifier mCascade;
     private Size imgSize;
+    private Size haarSize;
+    private Size maxDetectSize;
     private DetectorCallback activity;
 
     public CarDetector(CascadeClassifier cascade, DetectorCallback activity){
         this.mCascade = cascade;
         this.activity = activity;
+        this.haarSize = HaarLoader.getInstance().getTrainingSize();
     }
 
     public void detect(Mat m){
@@ -45,12 +50,18 @@ public class CarDetector implements Detector {
      */
     public void haar( Mat mat){
         if(imgSize == null){
+            //first time haar is called, haar parameters are set
             imgSize = mat.size();
+            double wfactor = imgSize.width / haarSize.width ;
+            double hfactor = imgSize.height / haarSize.height;
+            double factor = Math.min(wfactor, hfactor);
+            maxDetectSize = new Size(haarSize.width * factor,  haarSize.height * factor);
+            Log.d(TAG, "MAX Detect size: " + maxDetectSize.toString());
         }
         MatOfRect foundLocations = new MatOfRect();
         //TODO break out into constants
         // param def           Img,  Locations, scaleFactor, MinNeighbor, flag, minSize, maxSize
-        mCascade.detectMultiScale(mat, foundLocations, 1.4, 50, 0, new Size(24, 24), new Size(258, 258));
+        mCascade.detectMultiScale(mat, foundLocations, 1.2, 5, 0, haarSize, maxDetectSize);
         Rect r = this.filterLocationsFound(foundLocations);
         activity.setCurrentFoundRect(mat, r);
 

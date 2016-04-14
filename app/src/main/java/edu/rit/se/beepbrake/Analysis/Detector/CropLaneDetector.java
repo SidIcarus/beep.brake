@@ -12,7 +12,7 @@ import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 /**
  * Created by richykapadia on 1/19/16.
  */
-public class SimpleLaneDetector implements Detector {
+public class CropLaneDetector implements Detector {
 
     static final int 		CANNY_MIN = 25;	  				// edge detector minimum hysteresis threshold
     static final int 		CANNY_MAX = 150;				// edge detector maximum hysteresis threshold
@@ -34,7 +34,7 @@ public class SimpleLaneDetector implements Detector {
 
     private DetectorCallback activity;
 
-    public SimpleLaneDetector(DetectorCallback activity){
+    public CropLaneDetector(DetectorCallback activity){
         this.activity = activity;
     }
 
