@@ -32,10 +32,12 @@ public class CropLaneDetector implements Detector {
 
     private boolean sizeSet = false;
 
-    private DetectorCallback activity;
+    private DetectorCallback callback;
 
-    public CropLaneDetector(DetectorCallback activity){
-        this.activity = activity;
+
+
+    public CropLaneDetector(DetectorCallback callback){
+        this.callback = callback;
     }
 
     @Override
@@ -84,7 +86,7 @@ public class CropLaneDetector implements Detector {
         }
 
 
-        this.activity.setCurrentFoundLanes(results);
+        this.callback.setCurrentFoundLanes(results);
 
 
     }

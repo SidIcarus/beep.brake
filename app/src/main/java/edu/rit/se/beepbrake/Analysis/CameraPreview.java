@@ -7,8 +7,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import edu.rit.se.beepbrake.TempLogger;
@@ -28,17 +26,16 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
      */
 
     private ReentrantLock drawLock = new ReentrantLock();
-    private List<Rect> sFoundCars = new ArrayList<Rect>();
-    private double[][] sFoundLines = new double[0][0];
+    private final Rect foundCar= new Rect(0,0,0,0);
+    private double[][] foundLines = new double[0][0];
 
-    final Point rectPoint1 = new Point();
-    final Point rectPoint2 = new Point();
+    private final Point linePoint1 = new Point();
+    private final Point linePoint2 = new Point();
 
-    final Point linePoint1 = new Point();
-    final Point linePoint2 = new Point();
+    private final Scalar rectColor = new Scalar(0, 0, 255);
+    private final Scalar lineColor = new Scalar(0, 255, 0);
 
-    final Scalar rectColor = new Scalar(0, 0, 255);
-    final Scalar lineColor = new Scalar(0, 255, 0);
+    private final Mat display = new Mat();
 
     // context used to receive/send frame data
     private final DetectorCallback detectorCallback;
@@ -66,46 +63,48 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
 
         this.detectorCallback.setCurrentFrame(inputFrame.gray());
         //To show tracking on image
-        Mat display = new Mat();
         inputFrame.rgba().copyTo(display);
-        display = drawBox(display);
-        display = drawLines(display);
+        drawBox(display);
+        drawLines(display);
         return display;
     }
 
-    public void setPointsToDraw(Rect r){
+    public void setRectToDraw(Rect r){
         drawLock.lock();
-        sFoundCars.clear();
-        sFoundCars.add(r);
+        if( r != null) {
+            this.foundCar.x = r.x;
+            this.foundCar.y = r.y;
+            this.foundCar.height = r.height;
+            this.foundCar.width = r.width;
+        } else{
+            this.foundCar.x = 0;
+            this.foundCar.y = 0;
+            this.foundCar.height = 0;
+            this.foundCar.width = 0;
+        }
         drawLock.unlock();
     }
 
     public void setLinesToDraw(double[][] lines){
         drawLock.lock();
-        sFoundLines = lines;
+        foundLines = lines;
         drawLock.unlock();
     }
 
-    private Mat drawBox( Mat rgb ){
+    private void drawBox( Mat rgb ){
         drawLock.lock();
-        for (Rect rect : sFoundCars) {
-            if(rect != null) {
-                rectPoint1.x = rect.x;
-                rectPoint1.y = rect.y;
-                rectPoint2.x = rect.x + rect.width;
-                rectPoint2.y = rect.y + rect.height;
-                // Draw rectangle around found object
-                Imgproc.rectangle(rgb, rectPoint1, rectPoint2, rectColor, 2);
-            }
+        if( this.foundCar.area() != 0) {
+            // Draw rectangle around found object
+            Imgproc.rectangle(rgb, foundCar.br(), foundCar.tl(), rectColor, 2);
         }
+
         drawLock.unlock();
-        return rgb;
     }
 
-    private Mat drawLines( Mat rgb ) {
+    private void drawLines( Mat rgb ) {
         drawLock.lock();
-        if (sFoundLines.length > 0) {
-            for (double[] data : sFoundLines) {
+        if (foundLines.length > 0) {
+            for (double[] data : foundLines) {
                 if (data.length == 4) {
                     linePoint1.x = data[0];
                     linePoint1.y = data[1];
@@ -116,7 +115,6 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
             }
         }
         drawLock.unlock();
-        return rgb;
     }
 }
 

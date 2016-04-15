@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         mCarAnalyzer = new FrameAnalyzer(carDetect);
 
         //construct lane detector
-        Detector laneDetector = new CropLaneDetector(this);
+        Detector laneDetector = new LaneDetector();
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
 
         final Button warning = (Button) findViewById(R.id.triggerWarning);
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
      * @param r
      */
     public void setCurrentFoundRect(Mat m, Rect r){
-        this.mCameraPreview.setPointsToDraw(r);
+        this.mCameraPreview.setRectToDraw(r);
         HashMap<String, Object> data = new HashMap<String, Object>();
         if( r != null) {
             data.put("br-x", r.br().x);
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     }
 
     /**
-     * Lane detector calls this method to set the lane postions
+     * Lane detector calls this method to set the lane positions
      * @param lanesCoord
      */
     public void setCurrentFoundLanes(double[][] lanesCoord){

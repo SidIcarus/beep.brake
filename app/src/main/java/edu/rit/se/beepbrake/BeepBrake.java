@@ -32,6 +32,7 @@ public class BeepBrake extends Application {
 
     }
 
+
     @Override
     public void onTerminate() {
         super.onTerminate();

@@ -26,7 +26,11 @@ public class HaarLoader {
     public enum cascades {VISIONARY_CAR_TRUCK, OPENCV_FULLBODY, OPENCV_UPPERBODY, CAR_3 } ;
     public static HaarLoader instance;
 
+    // haar params
     private Size trainingSize;
+    private double scaleFactor;
+    private int minNeighbor;
+    private int flag;
 
     private HaarLoader(){};
 
@@ -46,6 +50,10 @@ public class HaarLoader {
                 xml = "visionarynet_cars_and_truck_cascade_web_haar.xml";
                 id = R.raw.visionarynet_cars_and_truck_cascade_web_haar;
                 this.trainingSize = new Size(32, 22);
+                // Doesn't find anything!
+                this.scaleFactor = 1.2;
+                this.minNeighbor = 5;
+                this.flag = 1;
 
                 return loadCascade(context, xml, id);
 
@@ -53,6 +61,10 @@ public class HaarLoader {
                 xml = "haarcascade_fullbody.xml";
                 id = R.raw.haarcascade_fullbody;
                 this.trainingSize = new Size(14, 28);
+                // TODO Run test results (if we want to use it to demp)
+                this.scaleFactor = 1.2;
+                this.minNeighbor = 5;
+                this.flag = 0;
 
                 return loadCascade(context, xml, id);
 
@@ -60,6 +72,10 @@ public class HaarLoader {
                 xml = "haarcascade_upperbody.xml";
                 id = R.raw.haarcascade_upperbody;
                 this.trainingSize = new Size(22, 18);
+                // TODO Run test results (if we want to use it to demp)
+                this.scaleFactor = 1.2;
+                this.minNeighbor = 5;
+                this.flag = 0;
 
                 return loadCascade(context, xml, id);
 
@@ -67,6 +83,11 @@ public class HaarLoader {
                 xml = "cars3.xml";
                 id = R.raw.cars3;
                 this.trainingSize = new Size(20, 20);
+                //Works well ~14 size iterations
+                // min 98 ms     Max 491 ms      med: 190 ms    avg: 189 ms
+                this.scaleFactor = 1.2;
+                this.minNeighbor = 5;
+                this.flag = 0;
 
                 return loadCascade(context, xml, id);
             default:
@@ -109,7 +130,24 @@ public class HaarLoader {
 
     }
 
+    /**
+     * Haar params when running
+     */
+
     public Size getTrainingSize(){
         return this.trainingSize;
+    }
+
+
+    public int getMinNeighbor(){
+        return this.minNeighbor;
+    }
+
+    public double getScaleFactor(){
+        return this.scaleFactor;
+    }
+
+    public int getFlag(){
+        return flag;
     }
 }
