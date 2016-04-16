@@ -22,7 +22,6 @@ import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.Analysis.Detector.HaarLoader;
-import edu.rit.se.beepbrake.Analysis.Detector.CropLaneDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.LaneDetector;
 import edu.rit.se.beepbrake.Analysis.FrameAnalyzer;
 import edu.rit.se.beepbrake.Analysis.DetectorCallback;
@@ -191,13 +190,13 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         this.mCameraPreview.setRectToDraw(r);
         HashMap<String, Object> data = new HashMap<String, Object>();
         if( r != null) {
-            data.put("br-x", r.br().x);
-            data.put("br-y", r.br().y);
-            data.put("tl-x", r.tl().x);
-            data.put("tl-y", r.tl().y);
+            data.put(Constants.CAR_POS_X, r.x);
+            data.put(Constants.CAR_POS_Y, r.y);
+            data.put(Constants.CAR_POS_WIDTH, r.width);
+            data.put(Constants.CAR_POS_HEIGHT, r.height);
         }
         if(this.segSync.isRunning()) {
-            this.segSync.makeSegment(m, new HashMap<String, Object>());
+            this.segSync.makeSegment(m, data);
         }
     }
 
