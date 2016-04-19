@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.hardware.SensorManager;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 
         Initialize();
 
@@ -84,6 +87,15 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         Detector laneDetector = new LaneDetector();
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
 
+
+        final Button warning = (Button) findViewById(R.id.triggerWarning);
+        warning.setVisibility(View.INVISIBLE);
+
+        final Button printLogs = (Button) findViewById(R.id.printLogs);
+        printLogs.setVisibility(View.INVISIBLE);
+
+
+        /**
         final Button warning = (Button) findViewById(R.id.triggerWarning);
         warning.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
                 TempLogger.printLogs();
             }
         });
-
+        **/
     }
 
     @Override
