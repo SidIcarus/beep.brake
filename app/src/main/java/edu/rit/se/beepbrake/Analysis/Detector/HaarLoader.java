@@ -24,7 +24,7 @@ public class HaarLoader {
     private static String TAG = "HaarLoader";
 
     public enum cascades {VISIONARY_CAR_TRUCK, OPENCV_FULLBODY, OPENCV_UPPERBODY, CAR_3 } ;
-    public static HaarLoader instance;
+    private static HaarLoader instance;
 
     // haar params
     private Size trainingSize;
