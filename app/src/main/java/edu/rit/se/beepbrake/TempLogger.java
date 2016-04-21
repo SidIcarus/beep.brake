@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TempLogger {
 
-    public static boolean LOGGING = true;
+    public static boolean LOGGING = false;
 
     public static String TAG = "TempLogger";
     //TODO If we use this logger separate constants out to another file

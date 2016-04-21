@@ -74,7 +74,7 @@ public class CarDetector implements Detector {
      * send points to draw to the UI Logic
      * @param mat - greyscale image
      */
-    public void haar( Mat mat){ //should be private
+    private void haar( Mat mat){
         if (imgSize.area() == 0) {
             //first time haar is called, haar parameters are set
             imgSize.width = mat.size().width;
