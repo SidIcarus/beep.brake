@@ -14,7 +14,7 @@ public class Segment {
 
     private Segment nextSeg;
     private Segment prevSeg;
-    private Mat img;
+    private final Mat img;
 
     ConcurrentHashMap<String, Object> calculatedData;
     long createdAt;
@@ -22,7 +22,9 @@ public class Segment {
     public Segment(ConcurrentHashMap<String, Object> map, Mat img) {
         calculatedData = map;
         createdAt = new Date().getTime();
-        this.img = img;
+        this.img = new Mat();
+        img.copyTo(this.img);
+
     }
 
     public Segment getNextSeg() {
