@@ -86,6 +86,7 @@ public class FrameAnalyzer implements Runnable {
     }
 
     public void resumeDetection(){
+        bRunning = true;
         (new Thread(this)).start();
     }
 

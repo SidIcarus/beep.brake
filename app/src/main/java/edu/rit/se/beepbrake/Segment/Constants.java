@@ -17,10 +17,10 @@ public class Constants {
 
     /* MOCK JSON PARSING */
     public static final String MOCK_SEGMENT_JSON = "mock-segment-data";
-    public static final String CAR_POS_X1_JSON = "br-x";
-    public static final String CAR_POS_Y1_JSON = "br-y";
-    public static final String CAR_POS_X2_JSON = "tl-x";
-    public static final String CAR_POS_Y2_JSON = "tl-x";
+    public static final String CAR_POS_X = "bottomLeft_x";
+    public static final String CAR_POS_Y = "bottomLeft_y";
+    public static final String CAR_POS_WIDTH = "Rect_Width";
+    public static final String CAR_POS_HEIGHT = "Rect_Height";
 
 
 }

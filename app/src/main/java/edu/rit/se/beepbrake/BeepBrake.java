@@ -3,6 +3,7 @@ package edu.rit.se.beepbrake;
 import android.app.Application;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.util.Log;
 
 import edu.rit.se.beepbrake.Web.WebManager;
 
@@ -28,6 +29,20 @@ public class BeepBrake extends Application {
         connectionIntent.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         this.registerReceiver(webMan, connectionIntent);
 
-        
+
+    }
+
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        TempLogger.printLogs();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        TempLogger.printLogs();
+        Log.d("Beep.Brake", "Low Memory");
     }
 }

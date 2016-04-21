@@ -1,17 +1,13 @@
 package edu.rit.se.beepbrake;
 
-import android.content.Context;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.hardware.SensorManager;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -21,20 +17,16 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.objdetect.CascadeClassifier;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
 import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
-import edu.rit.se.beepbrake.Analysis.Detector.SimpleLaneDetector;
+import edu.rit.se.beepbrake.Analysis.Detector.HaarLoader;
+import edu.rit.se.beepbrake.Analysis.Detector.LaneDetector;
 import edu.rit.se.beepbrake.Analysis.FrameAnalyzer;
 import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 import edu.rit.se.beepbrake.Analysis.LoaderCallback;
-import edu.rit.se.beepbrake.Web.WebManager;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 import edu.rit.se.beepbrake.Segment.*;
 import edu.rit.se.beepbrake.DecisionMaking.DecisionManager;
@@ -52,10 +44,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     private FrameAnalyzer mCarAnalyzer;
     private FrameAnalyzer mLaneAnalyzer;
 
-    // Haar cascade
-    private String CASCADE_XML = "visionarynet_cars_and_truck_cascade_web_haar.xml";
-    private int CASCADE_ID = R.raw.visionarynet_cars_and_truck_cascade_web_haar;
-
     //Buffer
     private BufferManager bufMan;
 
@@ -72,31 +60,43 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //keeps screen on
 
-        Initialize();
+
+        Initialize(); // Ryan made for segment initialization.
 
         // UI Element
-        mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
-        mCameraView.setMaxFrameSize(352, 288);
-        mCameraView.setVisibility(SurfaceView.VISIBLE);
+        mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview); //find by ID then CAST into the actual object
+        mCameraView.setMaxFrameSize(352, 288); // magic
+        mCameraView.setVisibility(SurfaceView.VISIBLE); // ?
 
         //Set listener and callback
-        mCameraPreview = new CameraPreview(this);
-        mCameraView.setCvCameraViewListener(mCameraPreview);
-        mLoaderCallback = new LoaderCallback(this, mCameraView);
+        mCameraPreview = new CameraPreview(this); //this drives the app to connect to camera
+        mCameraView.setCvCameraViewListener(mCameraPreview); //any change to camera view object triggers call
+        mLoaderCallback = new LoaderCallback(this, mCameraView); // load OpenCv lib (checks device for OpenCv
 
         //load cascade
-        CascadeClassifier cascade = loadCascade();
+        HaarLoader loader = HaarLoader.getInstance(); // get xml resource file and put in HAAR object
+        CascadeClassifier cascade = loader.loadHaar(this, HaarLoader.cascades.CAR_3);
 
         //construct frame analyzer and start thread
         Detector carDetect = new CarDetector(cascade, this);
         mCarAnalyzer = new FrameAnalyzer(carDetect);
 
         //construct lane detector
-        Detector laneDetector = new SimpleLaneDetector(this);
+        Detector laneDetector = new LaneDetector();
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
 
-        Button warning = (Button) findViewById(R.id.triggerWarning);
+
+        final Button warning = (Button) findViewById(R.id.triggerWarning);
+        warning.setVisibility(View.INVISIBLE);
+
+        final Button printLogs = (Button) findViewById(R.id.printLogs);
+        printLogs.setVisibility(View.INVISIBLE);
+
+
+        /**
+        final Button warning = (Button) findViewById(R.id.triggerWarning);
         warning.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,7 +104,14 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
             }
         });
 
-
+        final Button printLogs = (Button) findViewById(R.id.printLogs);
+        printLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TempLogger.printLogs();
+            }
+        });
+        **/
     }
 
     @Override
@@ -192,63 +199,25 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
      * @param r
      */
     public void setCurrentFoundRect(Mat m, Rect r){
-        this.mCameraPreview.setPointsToDraw(r);
+        this.mCameraPreview.setRectToDraw(r);
         HashMap<String, Object> data = new HashMap<String, Object>();
         if( r != null) {
-            data.put("br-x", r.br().x);
-            data.put("br-y", r.br().y);
-            data.put("tl-x", r.tl().x);
-            data.put("tl-y", r.tl().y);
+            data.put(Constants.CAR_POS_X, r.x);
+            data.put(Constants.CAR_POS_Y, r.y);
+            data.put(Constants.CAR_POS_WIDTH, r.width);
+            data.put(Constants.CAR_POS_HEIGHT, r.height);
         }
         if(this.segSync.isRunning()) {
-            this.segSync.makeSegment(m, new HashMap<String, Object>());
+            this.segSync.makeSegment(m, data);
         }
     }
 
     /**
-     * Lane detector calls this method to set the lane postions
+     * Lane detector calls this method to set the lane positions
      * @param lanesCoord
      */
     public void setCurrentFoundLanes(double[][] lanesCoord){
         this.mCameraPreview.setLinesToDraw(lanesCoord);
     }
 
-    /**
-     * On create loads the cascade resource to feed into the car detector
-     * Must be in the activity to access raw resources
-     * @return
-     */
-    private CascadeClassifier loadCascade(){
-        CascadeClassifier cascadeClassifier = null;
-        try {
-            // load cascade file from application resources
-            InputStream is = getResources().openRawResource(CASCADE_ID);
-            File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-            File cascadeFile = new File(cascadeDir, CASCADE_XML);
-            FileOutputStream os = new FileOutputStream(cascadeFile);
-
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            is.close();
-            os.close();
-
-            cascadeClassifier = new CascadeClassifier(cascadeFile.getAbsolutePath());
-            if (cascadeClassifier.empty()) {
-                Log.e(TAG, "Failed to load cascade classifier");
-                cascadeClassifier = null;
-            } else
-                Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
-
-            cascadeDir.delete();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
-        }
-        return cascadeClassifier;
-
-    }
 }

@@ -50,6 +50,11 @@ public class DiskWriter extends Thread implements Runnable{
     private ConcurrentLinkedQueue<Segment> segments;
 
     /**
+     * Bytes to write
+     */
+    private final MatOfByte buf = new MatOfByte();
+
+    /**
      * Constructor
      */
     public DiskWriter(long id, Context con) {
@@ -224,7 +229,6 @@ public class DiskWriter extends Thread implements Runnable{
             MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
             //Imgcodecs.imwrite(filepath, seg.getImg(), param);
 
-            MatOfByte buf = new MatOfByte();
             Imgcodecs.imencode(filepath, seg.getImg(), buf, param);
 
             ZipEntry ze = new ZipEntry(imgName);

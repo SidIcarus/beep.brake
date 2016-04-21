@@ -34,14 +34,17 @@ public class AccelerometerDecision extends Decision{
 
 
         while(running){
-            requestSegment();
+
+            if( !requestSegment() ){
+                continue;
+            }
 
             if (curSeg.getDataObject(Constants.ACCEL_Z) != null) {
                 zVal = (Double) curSeg.getDataObject(Constants.ACCEL_Z);
                 //oldzVal = (Double)curSeg.getPrevSeg().getDataObject(Constants.ACCEL_Z);
                 //diffzVal = oldzVal - zVal;
 
-                if (zVal < -11 || zVal > 11) {
+                if (zVal < -18 || zVal > 18) {
                     warn();
                 }
             }
