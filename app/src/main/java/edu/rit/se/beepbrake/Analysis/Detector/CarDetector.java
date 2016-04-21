@@ -74,16 +74,16 @@ public class CarDetector implements Detector {
      * send points to draw to the UI Logic
      * @param mat - greyscale image
      */
-    public void haar( Mat mat){
+    public void haar( Mat mat){ //should be private
         if (imgSize.area() == 0) {
             //first time haar is called, haar parameters are set
             imgSize.width = mat.size().width;
             imgSize.height = mat.size().height;
-            double wfactor = imgSize.width / haarSize.width;
+            double wfactor = imgSize.width / haarSize.width; // what is the biggest scale factor that will fit screen
             double hfactor = imgSize.height / haarSize.height;
             double factor = Math.min(wfactor, hfactor);
 
-            this.maxDetectSize.width = haarSize.width * factor;
+            this.maxDetectSize.width = haarSize.width * factor; //how many image scale factors can be used.
             this.maxDetectSize.height = haarSize.height * factor;
             Log.d(TAG, "MAX Detect size: " + maxDetectSize.toString());
 
@@ -97,6 +97,8 @@ public class CarDetector implements Detector {
         // param def           Img,  Locations, scaleFactor, MinNeighbor, flag, minSize, maxSize
         Imgproc.blur(analyze, analyze, blurSize);
         mCascade.detectMultiScale(analyze, foundLocations, scaleFactor, minNeighbor, flag, haarSize, maxDetectSize);
+        //flag tells what version of haar (?)
+
 
         Rect r = this.filterLocationsFound(foundLocations);
         activity.setCurrentFoundRect(mat, r);

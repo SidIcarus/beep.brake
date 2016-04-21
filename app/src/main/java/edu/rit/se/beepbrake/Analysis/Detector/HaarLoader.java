@@ -32,7 +32,7 @@ public class HaarLoader {
     private int minNeighbor;
     private int flag;
 
-    private HaarLoader(){};
+    private HaarLoader(){};  // this is where it is a singleton (because its private)
 
     public static HaarLoader getInstance(){
         if( instance == null){
@@ -44,7 +44,7 @@ public class HaarLoader {
 
     public CascadeClassifier loadHaar(Context context, cascades haar){
         String xml;
-        int id;
+        int id; //tells where the file is (used by Android)
         switch (haar){
             case VISIONARY_CAR_TRUCK:
                 xml = "visionarynet_cars_and_truck_cascade_web_haar.xml";
@@ -85,11 +85,11 @@ public class HaarLoader {
                 this.trainingSize = new Size(20, 20);
                 //Works well ~14 size iterations
                 // min 98 ms     Max 491 ms      med: 190 ms    avg: 189 ms
-                this.scaleFactor = 1.2;
-                this.minNeighbor = 5;
+                this.scaleFactor = 1.2; // this is the step size in scaling 1.2x per step
+                this.minNeighbor = 5; // neighbors can't be closer than 5 px
                 this.flag = 0;
 
-                return loadCascade(context, xml, id);
+                return loadCascade(context, xml, id); // need to return param because they are different for different cases.
             default:
                 return null;
 
@@ -98,6 +98,7 @@ public class HaarLoader {
 
     private static CascadeClassifier loadCascade(Context context, String xml, int resourceId){
         CascadeClassifier cascadeClassifier = null;
+        // overall, what this class does is load the xml file and puts it in memory
         try {
             // load cascade file from application resources
             InputStream is = context.getResources().openRawResource(resourceId);

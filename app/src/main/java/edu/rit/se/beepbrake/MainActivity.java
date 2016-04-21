@@ -60,23 +60,23 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //keeps screen on
 
 
-        Initialize();
+        Initialize(); // Ryan made for segment initialization.
 
         // UI Element
-        mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
-        mCameraView.setMaxFrameSize(352, 288);
-        mCameraView.setVisibility(SurfaceView.VISIBLE);
+        mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview); //find by ID then CAST into the actual object
+        mCameraView.setMaxFrameSize(352, 288); // magic
+        mCameraView.setVisibility(SurfaceView.VISIBLE); // ?
 
         //Set listener and callback
-        mCameraPreview = new CameraPreview(this);
-        mCameraView.setCvCameraViewListener(mCameraPreview);
-        mLoaderCallback = new LoaderCallback(this, mCameraView);
+        mCameraPreview = new CameraPreview(this); //this drives the app to connect to camera
+        mCameraView.setCvCameraViewListener(mCameraPreview); //any change to camera view object triggers call
+        mLoaderCallback = new LoaderCallback(this, mCameraView); // load OpenCv lib (checks device for OpenCv
 
         //load cascade
-        HaarLoader loader = HaarLoader.getInstance();
+        HaarLoader loader = HaarLoader.getInstance(); // get xml resource file and put in HAAR object
         CascadeClassifier cascade = loader.loadHaar(this, HaarLoader.cascades.CAR_3);
 
         //construct frame analyzer and start thread
