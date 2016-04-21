@@ -13,10 +13,10 @@ public class AccelerometerDecision extends Decision{
 
     public AccelerometerDecision(DecisionManager decMan, BufferManager bufMan){
 
-        super(decMan, bufMan);
+        super(decMan, bufMan); // extends constructor from decision and creates a decision object
     }
 
-    public void run(){
+    public void run(){  // defines the run method of the thread
         double zVal;
         double oldzVal;
         double diffzVal;
@@ -35,16 +35,16 @@ public class AccelerometerDecision extends Decision{
 
         while(running){
 
-            if( !requestSegment() ){
+            if( !requestSegment() ){ // if you didn't get a good segment, continue looking for a segment
                 continue;
             }
-
-            if (curSeg.getDataObject(Constants.ACCEL_Z) != null) {
+            // segment must be good now.
+            if (curSeg.getDataObject(Constants.ACCEL_Z) != null) { // don't test unless Z value is available in this segment
                 zVal = (Double) curSeg.getDataObject(Constants.ACCEL_Z);
                 //oldzVal = (Double)curSeg.getPrevSeg().getDataObject(Constants.ACCEL_Z);
                 //diffzVal = oldzVal - zVal;
 
-                if (zVal < -18 || zVal > 18) {
+                if (zVal < -18 || zVal > 18) { // ? in units of m/s^2
                     warn();
                 }
             }

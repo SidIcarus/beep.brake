@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         //load cascade
         HaarLoader loader = HaarLoader.getInstance(); // get xml resource file and put in HAAR object
-        CascadeClassifier cascade = loader.loadHaar(this, HaarLoader.cascades.CAR_3);
+        CascadeClassifier cascade = loader.loadHaar(this, HaarLoader.cascades.BANANNA);
 
         //construct frame analyzer and start thread
         Detector carDetect = new CarDetector(cascade, this);
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
      * @param currentFrame
      */
     public void setCurrentFrame(Mat currentFrame){
-        this.mCarAnalyzer.addFrameToAnalyze(currentFrame);
+        this.mCarAnalyzer.addFrameToAnalyze(currentFrame); // two different threads
         this.mLaneAnalyzer.addFrameToAnalyze(currentFrame);
     }
 

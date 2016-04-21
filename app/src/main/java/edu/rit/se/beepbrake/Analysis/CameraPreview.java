@@ -25,7 +25,7 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
      * Drawing logic variables
      */
 
-    private ReentrantLock drawLock = new ReentrantLock();
+    private ReentrantLock drawLock = new ReentrantLock(); //don't try to draw when getting new points from this function
     private final Rect foundCar= new Rect(0,0,0,0);
     private double[][] foundLines = new double[0][0];
 
@@ -61,9 +61,9 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
 
-        this.detectorCallback.setCurrentFrame(inputFrame.gray());
+        this.detectorCallback.setCurrentFrame(inputFrame.gray()); //grey image sent to detector
         //To show tracking on image
-        inputFrame.rgba().copyTo(display);
+        inputFrame.rgba().copyTo(display);  // display is a single matrix that is private and final
         drawBox(display);
         drawLines(display);
         return display;

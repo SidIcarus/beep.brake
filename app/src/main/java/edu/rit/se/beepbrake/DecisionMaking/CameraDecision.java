@@ -49,13 +49,18 @@ public class CameraDecision extends Decision{
                 double[] data = new double[] {x,y,w,h};
                 curr.set(data);
 
-                carRear.x = curr.br().x - curr.width / 2;
+                carRear.x = curr.br().x - curr.width / 2; // mid point of bottom line of car.
+                // used to calculate distance from bottom of screen to car
+                // idea is to not detect cars that are far left or far right.
+
                 carRear.y = curr.br().y;
 
                 int y2 = curSeg.getImg().height();
                 int x2 = curSeg.getImg().width() / 2;
                 double dist = Math.sqrt( Math.pow(carRear.x - x2, 2) + Math.pow(carRear.y - y2, 2) );
 
+
+                // warn if the detected rectangle is too big (1/6 th) of screen. AND height of rectangle is too tall (you must be too close).
                 if( curr.area() > (curSeg.getImg().size().area() / 6) && dist < curSeg.getImg().height() / 5){
                     warn();
                 }
@@ -74,5 +79,7 @@ public class CameraDecision extends Decision{
         curSeg.addDataObject("CameraWarning", "true");
         decMan.warn();
     }
+
+
 }
 

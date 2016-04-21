@@ -23,7 +23,7 @@ public class HaarLoader {
 
     private static String TAG = "HaarLoader";
 
-    public enum cascades {VISIONARY_CAR_TRUCK, OPENCV_FULLBODY, OPENCV_UPPERBODY, CAR_3 } ;
+    public enum cascades {VISIONARY_CAR_TRUCK, OPENCV_FULLBODY, OPENCV_UPPERBODY, CAR_3,BANANNA } ;
     public static HaarLoader instance;
 
     // haar params
@@ -85,6 +85,16 @@ public class HaarLoader {
                 this.trainingSize = new Size(20, 20);
                 //Works well ~14 size iterations
                 // min 98 ms     Max 491 ms      med: 190 ms    avg: 189 ms
+                this.scaleFactor = 1.2; // this is the step size in scaling 1.2x per step
+                this.minNeighbor = 5; // neighbors can't be closer than 5 px
+                this.flag = 0;
+
+                return loadCascade(context, xml, id); // need to return param because they are different for different cases.
+
+            case BANANNA:
+                xml = "bananna_cascade.xml";
+                id = R.raw.bannana_cascade;
+                this.trainingSize = new Size(80, 40); // should be 40,80 but only works on 20, 20.
                 this.scaleFactor = 1.2; // this is the step size in scaling 1.2x per step
                 this.minNeighbor = 5; // neighbors can't be closer than 5 px
                 this.flag = 0;

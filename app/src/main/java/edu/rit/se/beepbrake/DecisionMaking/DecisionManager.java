@@ -19,7 +19,7 @@ public class DecisionManager {
 
         decisions = new ArrayList<Decision>();
 
-        //Add decisions to the list
+        //Add decisions to the list e.g. for new sensors or sensor fusion
         decisions.add(new CameraDecision(this, this.bufMan));
         decisions.add(new AccelerometerDecision(this, this.bufMan));
 
@@ -32,15 +32,17 @@ public class DecisionManager {
         Magic number needs to be removed and replaced with config value declaring
         time between auditory warnings
         */
-
+            // prevent beeping more than once per second
         if(lastWarn == null || curTime.after(new Date(lastWarn.getTime() + 1000))) {
             //Driver alert beep
             ToneGenerator tone = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-            tone.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 200);
+            tone.startTone(ToneGenerator.TONE_DTMF_8, 200);
         }
-        bufMan.warningTriggered();
+        bufMan.warningTriggered(); // trigger to that the buffer knows to keep adding event frames
         lastWarn = curTime;
     }
+
+    // eaçh subsystem has its on onResume housecleaning
 
     public void onResume(){
         for(int i = 0; i < decisions.size(); i++){
