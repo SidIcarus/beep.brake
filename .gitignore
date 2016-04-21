@@ -47,3 +47,4 @@ import-summary.txt
 *.ipr
 *~
 *.swp
+*.so

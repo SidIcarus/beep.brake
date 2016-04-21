@@ -22,7 +22,6 @@ import edu.rit.se.beepbrake.TempLogger;
 public class FrameAnalyzer implements Runnable {
 
     private static final String TAG = "Frame Analyzer Thread";
-    private volatile boolean bDetecting;
     private volatile boolean bRunning;
     // haar classifier
     private static CascadeClassifier mCascadeClassifier;
@@ -44,7 +43,6 @@ public class FrameAnalyzer implements Runnable {
     public FrameAnalyzer(Detector detector){
         mDetector = detector;
         mFrameLock = new ReentrantLock();
-        bDetecting = true;
         bRunning = true;
         analyzerId = numAnalyzer;
         numAnalyzer++;
@@ -65,7 +63,6 @@ public class FrameAnalyzer implements Runnable {
                 mCurrentFrame = null;
                 mFrameLock.unlock();
             }
-            while( !bDetecting );
         }
         Log.d(TAG, "Finished Running!");
     }
@@ -85,16 +82,13 @@ public class FrameAnalyzer implements Runnable {
     }
 
     public void pauseDetection(){
-        bDetecting = false;
+        bRunning = false;
     }
 
     public void resumeDetection(){
-        bDetecting = true;
+        (new Thread(this)).start();
     }
 
-    public void destroy(){
-        bRunning = false;
-    }
 
     public String toString(){
         switch (this.analyzerId){

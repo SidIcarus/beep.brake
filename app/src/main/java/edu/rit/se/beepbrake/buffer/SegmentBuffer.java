@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.rit.se.beepbrake.Segment.*;
+import edu.rit.se.beepbrake.Segment.Segment;
 
 public class SegmentBuffer {
 
@@ -31,9 +31,19 @@ public class SegmentBuffer {
     private long lastWarningTime;
 
     /**
+     * The timestamp of the first warning for this event
+     */
+    private long firstWarningTime;
+
+    /**
      * Maximum amount of time (in millis) between segments to allow before removing old ones
      */
     private final int timediff = 6000;
+
+    /**
+     * Max length (in millis) of an event
+     */
+    private final int maxtime = 20000;
 
     /**
      * Lock to ensure the buffer is not saved while a Segment is being added
@@ -97,6 +107,7 @@ public class SegmentBuffer {
             bufferLock.lock();
             lastWarningTime = newest.getCreatedAt();
             if(!activeWarning) {
+                firstWarningTime = lastWarningTime;
                 activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
                 activeWriter.start();
             }
@@ -113,10 +124,12 @@ public class SegmentBuffer {
         while(newest.getCreatedAt() - oldest.getCreatedAt() > timediff) {
             bufferLock.lock();
             if(activeWarning) {
-                //End the warning state if it's been long enough since the last warning segment
-                if(oldest.getCreatedAt() - lastWarningTime > timediff) {
+                //End the warning state if it's been long enough since the last warning segment, or is too long of an event
+                if(oldest.getCreatedAt() - lastWarningTime > timediff || oldest.getCreatedAt() - firstWarningTime > maxtime) {
+                    Log.d("bufer system", "Prune is ending the event: o: " + oldest.getCreatedAt() + " n: " + newest.getCreatedAt());
                     activeWarning = false;
                     activeWriter.signalEnd();
+                    activeWriter = null;
                 } else {
                     activeWriter.addSegment(oldest);
                 }
@@ -126,5 +139,30 @@ public class SegmentBuffer {
             oldest = oldest.getNextSeg();
             bufferLock.unlock();
         }
+    }
+
+    /**
+     * Clear the current buffer. Used to remove stale data when the app is paused.
+     */
+    public void clear() {
+        bufferLock.lock();
+        if(activeWarning) {
+            //If a warning is active, flush the buffer into the DiskWriter, then close the event
+            while(oldest != newest) {
+                activeWriter.addSegment(oldest);
+                oldest = oldest.getNextSeg();
+                oldest.setPrevSeg(null);
+            }
+            //Send the last segment
+            activeWriter.addSegment(oldest);
+            activeWriter.signalEnd();
+            activeWarning = false;
+        }
+
+        //Reset values to defaults
+        oldest = null;
+        newest = null;
+        activeWriter = null;
+        bufferLock.unlock();
     }
 }

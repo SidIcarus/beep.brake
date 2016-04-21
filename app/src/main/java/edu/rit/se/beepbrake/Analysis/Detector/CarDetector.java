@@ -1,23 +1,16 @@
 package edu.rit.se.beepbrake.Analysis.Detector;
 
-import android.graphics.Camera;
-
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import edu.rit.se.beepbrake.Analysis.AnalysisActivity;
-import edu.rit.se.beepbrake.Analysis.CameraPreview;
-import edu.rit.se.beepbrake.Analysis.Detector.Detector;
+import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 import edu.rit.se.beepbrake.TempLogger;
-import edu.rit.se.beepbrake.TempMainActivity;
 
 /**
  * Created by richykapadia on 1/11/16.
@@ -27,9 +20,9 @@ public class CarDetector implements Detector {
     private static final String TAG = "Car-Detector";
     private final CascadeClassifier mCascade;
     private Size imgSize;
-    private TempMainActivity activity;
+    private DetectorCallback activity;
 
-    public CarDetector(CascadeClassifier cascade, TempMainActivity activity){
+    public CarDetector(CascadeClassifier cascade, DetectorCallback activity){
         this.mCascade = cascade;
         this.activity = activity;
     }

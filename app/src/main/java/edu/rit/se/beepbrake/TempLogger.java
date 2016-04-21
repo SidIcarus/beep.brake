@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TempLogger {
 
+    public static boolean LOGGING = false;
+
     public static String TAG = "TempLogger";
     //TODO If we use this logger separate constants out to another file
     //COUNTS
@@ -53,6 +55,7 @@ public class TempLogger {
      * @param markName - unique identifier for the measure to be logged
      */
     public static synchronized void addMarkTime(String markName){
+        if(!LOGGING){ return;}
         validateLogLen();
         Long l = System.currentTimeMillis();
         if(!runningLogs.containsKey(markName)){
@@ -75,6 +78,7 @@ public class TempLogger {
      * @param value
      */
     public static synchronized void addValueMark(String markName, Long value){
+        if(!LOGGING){ return;}
         validateLogLen();
         //place directly in stored
         if(!storedLogs.containsKey(markName)){
@@ -89,6 +93,7 @@ public class TempLogger {
      * @param markName - unique identifier for count
      */
     public static synchronized void incrementCount(String markName){
+        if(!LOGGING){ return;}
         validateLogLen();
         if(!countLogs.containsKey(markName)){
             AtomicInteger aInt = new AtomicInteger(0);
@@ -100,6 +105,7 @@ public class TempLogger {
 
 
     private static synchronized void validateLogLen(){
+        if(!LOGGING){ return;}
         if(numLogs >= MAX_LOG_LEN ){
             printLogs();
             //clear logs
@@ -112,6 +118,7 @@ public class TempLogger {
     }
 
     public static synchronized void printLogs(){
+        if(!LOGGING){ return;}
         bPrintingLogs = true;
         Log.d(TAG, "Num Logs: " + numLogs);
         //total frames counts
@@ -189,6 +196,7 @@ public class TempLogger {
 
 
     public static void printMeasures(ArrayList<Long> durr){
+        if(!LOGGING){ return;}
         //Stats for slack time
         Collections.sort(durr);
         long min = 0, max = 0, med = 0, avg = 0;

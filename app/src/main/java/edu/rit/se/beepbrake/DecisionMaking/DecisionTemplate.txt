@@ -56,8 +56,9 @@ public class DecisionTemplate extends Decision{
     */
 
         while(!this.interrupted()){
-            requestSegment();
-
+            if(running){
+                requestSegment();
+            }
         }
     }
 

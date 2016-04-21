@@ -23,10 +23,6 @@ public class DecisionManager {
         decisions.add(new CameraDecision(this, this.bufMan));
         decisions.add(new AccelerometerDecision(this, this.bufMan));
 
-        //Start all decision threads
-        for(int i = 0; i < decisions.size(); i++){
-            decisions.get(i).start();
-        }
     }
 
     public void warn(){
@@ -40,7 +36,7 @@ public class DecisionManager {
         if(lastWarn == null || curTime.after(new Date(lastWarn.getTime() + 1000))) {
             //Driver alert beep
             ToneGenerator tone = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-            tone.startTone(ToneGenerator.TONE_DTMF_S, 200);
+            tone.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 200);
         }
         bufMan.warningTriggered();
         lastWarn = curTime;
@@ -48,13 +44,14 @@ public class DecisionManager {
 
     public void onResume(){
         for(int i = 0; i < decisions.size(); i++){
-            decisions.get(i).start();
+            decisions.get(i).setRunning(true);
+            (new Thread(decisions.get(i))).start();
         }
     }
 
     public void onPause(){
         for(int i = 0; i < decisions.size(); i++){
-            decisions.get(i).interrupt();
+            decisions.get(i).setRunning(false);
         }
     }
 }

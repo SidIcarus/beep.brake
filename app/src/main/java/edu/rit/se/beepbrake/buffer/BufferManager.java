@@ -38,4 +38,11 @@ public class BufferManager {
     public void warningTriggered() {
         buffer.triggerWarning();
     }
+
+    /**
+     * Clear the buffer while the app is not in use
+     */
+    public void onPause() {
+        buffer.clear();
+    }
 }

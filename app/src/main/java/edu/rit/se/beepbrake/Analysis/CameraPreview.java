@@ -1,15 +1,10 @@
 package edu.rit.se.beepbrake.Analysis;
 
-import android.util.Log;
-
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -17,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import edu.rit.se.beepbrake.TempLogger;
-import edu.rit.se.beepbrake.TempMainActivity;
 
 /**
  * Created by richykapadia on 9/21/15
@@ -46,13 +40,11 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     final Scalar rectColor = new Scalar(0, 0, 255);
     final Scalar lineColor = new Scalar(0, 255, 0);
 
-    private Size READ_SIZE = new Size(640,360);
-
     // context used to receive/send frame data
-    private TempMainActivity analysisActivity;
+    private final DetectorCallback detectorCallback;
 
-    public CameraPreview(TempMainActivity activity){
-        analysisActivity = activity;
+    public CameraPreview(DetectorCallback detectorCallback){
+        this.detectorCallback = detectorCallback;
     }
 
     @Override
@@ -66,11 +58,13 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     }
 
     @Override
+    /**
+     * Main loop that runs the application
+     */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
-        Mat analyzeFrame = new Mat();
-        Imgproc.cvtColor(inputFrame.rgba(), analyzeFrame, Imgproc.COLOR_RGBA2GRAY);
-        this.analysisActivity.setCurrentFrame(analyzeFrame);
+
+        this.detectorCallback.setCurrentFrame(inputFrame.gray());
         //To show tracking on image
         Mat display = new Mat();
         inputFrame.rgba().copyTo(display);

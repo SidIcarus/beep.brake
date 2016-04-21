@@ -4,6 +4,8 @@ package edu.rit.se.beepbrake.DecisionMaking;
  * Created by Ryan on 3/3/16.
  */
 
+import android.util.Log;
+
 import edu.rit.se.beepbrake.Segment.Constants;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
@@ -28,19 +30,25 @@ public class AccelerometerDecision extends Decision{
          * of time.
          */
 
-        while(!this.interrupted()){
+        Log.d("AccelDec", "running");
+
+
+        while(running){
             requestSegment();
 
-            if(curSeg.getDataObject(Constants.ACCEL_Z) != null) {
+            if (curSeg.getDataObject(Constants.ACCEL_Z) != null) {
                 zVal = (Double) curSeg.getDataObject(Constants.ACCEL_Z);
                 //oldzVal = (Double)curSeg.getPrevSeg().getDataObject(Constants.ACCEL_Z);
                 //diffzVal = oldzVal - zVal;
 
-                if (zVal < -7 || zVal > 7) {
+                if (zVal < -11 || zVal > 11) {
                     warn();
                 }
             }
         }
+
+        Log.d("AccelDec", "Finished");
+
     }
 
     private void warn(){

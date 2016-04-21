@@ -19,17 +19,9 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Print Stats"
-        android:id="@+id/statsButton"
+        android:text="Trigger Warning"
+        android:id="@+id/triggerWarning"
         android:layout_alignParentBottom="true"
         android:layout_alignStart="@+id/CameraPreview" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Write to Disk"
-        android:id="@+id/writeToDisk"
-        android:layout_above="@+id/statsButton"
-        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
