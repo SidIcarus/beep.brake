@@ -10,9 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-/**
- * Created by richykapadia on 4/4/16.
- */
+// Created by richykapadia on 4/4/16.
 public class UploadThread implements Runnable {
 
     private final URL url;
@@ -25,9 +23,9 @@ public class UploadThread implements Runnable {
 
     private static String getFileExtension(File file) {
         String fileName = file.getName();
-        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
-            return fileName.substring(fileName.lastIndexOf(".") + 1);
-        else return "";
+
+        return (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) ?
+                fileName.substring(fileName.lastIndexOf(".") + 1) : "";
     }
 
     @Override
@@ -35,17 +33,16 @@ public class UploadThread implements Runnable {
         //scan for files in event dir
         ArrayList<File> fileList = new ArrayList<File>();
         File uploadDir = new File(eventDir);
-        if (!uploadDir.isDirectory()) {
-            return;
-        }
+        if (!uploadDir.isDirectory()) return;
+
+        //TODO: change this to ask for what to upload here instead of this shenanigans
+
         // write segment (dir) --> timestamp (dir) --> event zip (file)
         for (File ts : uploadDir.listFiles()) {
             if (ts.isDirectory()) {
                 for (File event : ts.listFiles()) {
                     //zips should be here
-                    if ("zip".equals(getFileExtension(event))) {
-                        fileList.add(event);
-                    }
+                    if ("zip".equals(getFileExtension(event))) fileList.add(event);
                 }
             }
         }
@@ -53,9 +50,7 @@ public class UploadThread implements Runnable {
 
         for (File f : fileList) {
             //double check wifi connection before starting upload
-            if (WebManager.getInstance().hasWifi()) {
-                uploadFile(f);
-            }
+            if (WebManager.getInstance().hasWifi()) uploadFile(f);
         }
     }
 
@@ -131,14 +126,8 @@ public class UploadThread implements Runnable {
                 f.delete();
                 parent.delete();
             }
-        } catch (IOException e) {
-            Log.e("Web", e.getMessage());
-        } catch (Exception e) {
-            Log.e("Web", e.getMessage());
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
+        } catch (IOException e) { Log.e("Web", e.getMessage());
+        } catch (Exception e) { Log.e("Web", e.getMessage());
+        } finally { if (connection != null) connection.disconnect(); }
     }
 }

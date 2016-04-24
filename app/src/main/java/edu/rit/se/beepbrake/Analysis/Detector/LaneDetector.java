@@ -10,9 +10,6 @@ import org.opencv.core.Mat;
  */
 public class LaneDetector implements Detector {
 
-
     @Override
-    public void detect(Mat m) {
-
-    }
+    public void detect(Mat m) { }
 }

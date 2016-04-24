@@ -1,9 +1,6 @@
 package edu.rit.se.beepbrake.Segment;
 
-/**
- * Created by Bradley on 1/11/2016.
- */
-
+// Created by Bradley on 1/11/2016.
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -12,7 +9,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 import java.util.HashMap;
-
 
 public class AccelerometerSensor implements SensorEventListener {
 
@@ -35,33 +31,24 @@ public class AccelerometerSensor implements SensorEventListener {
     public void send(Float x, Float y, Float z) {
         HashMap<String, Object> data = new HashMap<String, Object>();
 
-        if (x != null) {
-            data.put(Constants.ACCEL_X, x);
-        }
-        if (y != null) {
-            data.put(Constants.ACCEL_Y, y);
-        }
-        if (z != null) {
-            data.put(Constants.ACCEL_Z, z);
-        }
+        if (x != null)  data.put(Constants.ACCEL_X, x);
+
+        if (y != null) data.put(Constants.ACCEL_Y, y);
+
+        if (z != null) data.put(Constants.ACCEL_Z, z);
 
         segSync.UpdateDataAgg(data);
     }
 
     public void onResume() {
-        if (checkAvailability()) {
-            manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        }
+        if (checkAvailability()) manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void onPause() {
-        if (checkAvailability()) {
-            manager.unregisterListener(this);
-        }
+        if (checkAvailability()) manager.unregisterListener(this);
     }
 
     public void onSensorChanged(SensorEvent event) {
-
         Float x = event.values[0];
         Float y = event.values[1];
         Float z = event.values[2];
@@ -69,16 +56,10 @@ public class AccelerometerSensor implements SensorEventListener {
         send(x, y, z);
     }
 
-    public void onAccuracyChanged(Sensor s, int i) {
-
-    }
+    public void onAccuracyChanged(Sensor s, int i) { }
 
     private boolean checkAvailability() {
         PackageManager pm = context.getPackageManager();
-        if (pm.hasSystemFeature(pm.FEATURE_SENSOR_ACCELEROMETER)) {
-            return true;
-        } else {
-            return false;
-        }
+        return pm.hasSystemFeature(pm.FEATURE_SENSOR_ACCELEROMETER);
     }
 }

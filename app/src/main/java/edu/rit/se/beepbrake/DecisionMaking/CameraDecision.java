@@ -1,7 +1,6 @@
 package edu.rit.se.beepbrake.DecisionMaking;
 
-//created by Ryan 2/8/16
-
+// Created by Ryan 2/8/16
 
 import android.util.Log;
 
@@ -11,13 +10,11 @@ import org.opencv.core.Rect;
 import edu.rit.se.beepbrake.Segment.Constants;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
-
 public class CameraDecision extends Decision {
 
     private static final String TAG = "CAMERA-DECISION";
 
-    private final Rect curr;
-    private final Rect prev;
+    private final Rect curr, prev;
     private final Point carRear;
 
     public CameraDecision(DecisionManager decMan, BufferManager bufMan) {
@@ -28,14 +25,11 @@ public class CameraDecision extends Decision {
     }
 
     public void run() {
-
         Log.d(TAG, "Running");
 
         //Analysis loop
         while (running) {
-            if (!requestSegment()) {
-                continue;
-            }
+            if (!requestSegment()) continue;
 
             //Check for position data, lol maybe change json
             // TODO: "pos" : [x1,y1,x2,y2] (segment writes obj address)
@@ -56,18 +50,12 @@ public class CameraDecision extends Decision {
                 int x2 = curSeg.getImg().width() / 2;
                 double dist = Math.sqrt(Math.pow(carRear.x - x2, 2) + Math.pow(carRear.y - y2, 2));
 
-                if (curr.area() > (curSeg.getImg().size().area() / 6) && dist < curSeg.getImg().height() / 5) {
-                    warn();
-                }
-
+                if (curr.area() > (curSeg.getImg().size().area() / 6) && dist < curSeg.getImg().height() / 5) warn();
 
                 prev.set(data);
             }
-
         }
-
         Log.d(TAG, "Finished");
-
     }
 
     private void warn() {
@@ -75,4 +63,3 @@ public class CameraDecision extends Decision {
         decMan.warn();
     }
 }
-

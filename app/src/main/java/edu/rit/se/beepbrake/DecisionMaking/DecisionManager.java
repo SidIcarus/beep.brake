@@ -26,6 +26,7 @@ public class DecisionManager {
 
     }
 
+    // TODO: have the call to change the color of the square to red here
     public void warn() {
         Date curTime = new Date();
 

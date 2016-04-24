@@ -10,9 +10,7 @@ import java.util.ArrayList;
 
 import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 
-/**
- * Created by richykapadia on 1/19/16.
- */
+// Created by richykapadia on 1/19/16.
 public class CropLaneDetector implements Detector {
 
     static final int CANNY_MIN = 25;                    // edge detector minimum hysteresis threshold
@@ -35,10 +33,7 @@ public class CropLaneDetector implements Detector {
 
     private DetectorCallback callback;
 
-
-    public CropLaneDetector(DetectorCallback callback) {
-        this.callback = callback;
-    }
+    public CropLaneDetector(DetectorCallback callback) { this.callback = callback; }
 
     private static double[][] filterOutLines(Mat lines) {
 
@@ -48,9 +43,7 @@ public class CropLaneDetector implements Detector {
         // One line on the road creates 2 found edges with the hough transform
         for (int i = 0; i < lines.rows(); i++) {
             //line is already paired, keep going
-            if (leftLinePairsByIndex.contains(i)) {
-                continue;
-            }
+            if (leftLinePairsByIndex.contains(i)) continue;
 
             //calc angle
             double[] data = lines.get(i, 0);
@@ -96,24 +89,16 @@ public class CropLaneDetector implements Detector {
             double[] data = lines.get(leftLinePairsByIndex.get(i), 0);
             double[] data2 = lines.get(leftLinePairsByIndex.get(i + 1), 0);
             //compare x0 x0 and x1 x1
-            if (data[0] > data2[0] || data[2] > data2[2]) {
-                filteredLines[i] = data;
-            } else {
-                filteredLines[i] = data2;
-            }
+            filteredLines[i] = (data[0] > data2[0] || data[2] > data2[2]) ? data : data2;
         }
-
         return filteredLines;
-
-
     }
 
     @Override
     public void detect(Mat m) {
         setSize(m);
-        if (!this.sizeSet || m == null || m.empty()) {
-            return;
-        }
+        if (!this.sizeSet || m == null || m.empty()) return;
+
         Mat copy = new Mat();
         m.copyTo(copy);
         //divide img in right/left half
@@ -152,11 +137,7 @@ public class CropLaneDetector implements Detector {
             results[i] = data;
             i++;
         }
-
-
         this.callback.setCurrentFoundLanes(results);
-
-
     }
 
     /**

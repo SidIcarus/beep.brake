@@ -1,8 +1,6 @@
 package edu.rit.se.beepbrake.Segment;
 
-/**
- * Created by Bradley on 1/11/2016.
- */
+// v
 
 import org.opencv.core.Mat;
 
@@ -21,7 +19,6 @@ public class SegmentSync {
     private BufferManager buf;
     private ReentrantLock lock = new ReentrantLock();
     private boolean isRunning;
-
 
     public SegmentSync(BufferManager bm) {
         buf = bm;
@@ -49,9 +46,8 @@ public class SegmentSync {
             ArrayList<Object> data = tempAgg.get(pair.getKey());
             Double avgData = 0.0;
 
-            for (int i = 0; i < data.size(); i++) {
-                avgData += ((Number) data.get(i)).doubleValue();
-            }
+            for (int i = 0; i < data.size(); i++) avgData += ((Number) data.get(i)).doubleValue();
+
             avgData = avgData / data.size();
             segMap.put(name, avgData);
         }
@@ -111,7 +107,5 @@ public class SegmentSync {
         singleData = null;
     }
 
-    public boolean isRunning() {
-        return isRunning;
-    }
+    public boolean isRunning() { return isRunning; }
 }

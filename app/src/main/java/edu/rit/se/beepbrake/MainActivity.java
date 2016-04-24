@@ -34,13 +34,18 @@ import edu.rit.se.beepbrake.Segment.GPSSensor;
 import edu.rit.se.beepbrake.Segment.SegmentSync;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
+/*
+TODO: SharedPreferences - save Array<Str> UploadUID + UploadStatus (the POST return # 100/200/400) This will be stored in mem until it has a chance to be written to SP.
+the only time it will be saving to the SP will be when the activity has to close and there has been a failure and or something that has not been uploaded yet so as to
+try it again when the app starts again
+
+TODO: SP - log when we upload the UID for the device that we are creating uploaded it
+ */
 public class MainActivity extends AppCompatActivity implements DetectorCallback {
 
     private static final String TAG = "Main-Activity";
 
-    static {
-        System.loadLibrary("opencv_java3");
-    }
+    static { System.loadLibrary("opencv_java3"); }
 
     // Image Analysis Stuff
     private BaseLoaderCallback mLoaderCallback;
@@ -65,20 +70,20 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //keeps screen on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        Initialize();
 
-        Initialize(); // Ryan made for segment initialization.
-
+        // TODO: Move elsewhere
         // UI Element
-        mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview); //find by ID then CAST into the actual object
-        mCameraView.setMaxFrameSize(352, 288); // magic
-        mCameraView.setVisibility(SurfaceView.VISIBLE); // ?
+        mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview);
+        mCameraView.setMaxFrameSize(352, 288);
+        mCameraView.setVisibility(SurfaceView.VISIBLE);
 
         //Set listener and callback
-        mCameraPreview = new CameraPreview(this); //this drives the app to connect to camera
-        mCameraView.setCvCameraViewListener(mCameraPreview); //any change to camera view object triggers call
-        mLoaderCallback = new LoaderCallback(this, mCameraView); // load OpenCv lib (checks device for OpenCv
+        mCameraPreview = new CameraPreview(this);
+        mCameraView.setCvCameraViewListener(mCameraPreview);
+        mLoaderCallback = new LoaderCallback(this, mCameraView);
 
         //load cascade
         HaarLoader loader = HaarLoader.getInstance(); // get xml resource file and put in HAAR object
@@ -98,23 +103,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         final Button printLogs = (Button) findViewById(R.id.printLogs);
         printLogs.setVisibility(View.INVISIBLE);
-
-
-        /**
-         final Button warning = (Button) findViewById(R.id.triggerWarning);
-         warning.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View v) {
-        decMan.warn();
-        }
-        });
-
-         final Button printLogs = (Button) findViewById(R.id.printLogs);
-         printLogs.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View v) {
-        TempLogger.printLogs();
-        }
-        });
-         **/
     }
 
     @Override
@@ -132,15 +120,12 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        if (id == R.id.action_settings) return true;
 
         return super.onOptionsItemSelected(item);
     }
 
     public void Initialize() {
-        //Buffer init
         bufMan = new BufferManager(this);
 
         //Data Acquisition init
@@ -148,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         gpsSen = new GPSSensor(this, segSync);
         aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
 
-        //Decision init
         decMan = new DecisionManager(bufMan);
     }
 
@@ -166,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         //Decision
         decMan.onResume();
-
     }
 
     protected void onPause() {
@@ -184,46 +167,29 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         //Decision
         decMan.onPause();
-
     }
 
-    /**
-     * Feeds the frame into the analyzers
-     *
-     * @param currentFrame
-     */
+    // Feeds the frame into the analyzers
     public void setCurrentFrame(Mat currentFrame) {
         this.mCarAnalyzer.addFrameToAnalyze(currentFrame);
         this.mLaneAnalyzer.addFrameToAnalyze(currentFrame);
     }
 
-    /**
-     * Car detector calls this method to set the position of the car
-     *
-     * @param m -
-     * @param r
-     */
+    // Car detector calls this method to set the position of the car
     public void setCurrentFoundRect(Mat m, Rect r) {
         this.mCameraPreview.setRectToDraw(r);
         HashMap<String, Object> data = new HashMap<String, Object>();
+
         if (r != null) {
             data.put(Constants.CAR_POS_X, r.x);
             data.put(Constants.CAR_POS_Y, r.y);
             data.put(Constants.CAR_POS_WIDTH, r.width);
             data.put(Constants.CAR_POS_HEIGHT, r.height);
         }
-        if (this.segSync.isRunning()) {
-            this.segSync.makeSegment(m, data);
-        }
+        if (this.segSync.isRunning()) this.segSync.makeSegment(m, data);
     }
 
-    /**
-     * Lane detector calls this method to set the lane positions
-     *
-     * @param lanesCoord
-     */
-    public void setCurrentFoundLanes(double[][] lanesCoord) {
-        this.mCameraPreview.setLinesToDraw(lanesCoord);
-    }
+    // Lane detector calls this method to set the lane positions
+    public void setCurrentFoundLanes(double[][] lanesCoord) { this.mCameraPreview.setLinesToDraw(lanesCoord); }
 
 }

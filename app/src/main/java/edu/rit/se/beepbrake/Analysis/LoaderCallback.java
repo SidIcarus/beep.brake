@@ -7,9 +7,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.InstallCallbackInterface;
 import org.opencv.android.JavaCameraView;
 
-/**
- * Created by richykapadia on 9/20/15.
- */
+// Created by richykapadia on 9/20/15.
 public class LoaderCallback extends BaseLoaderCallback {
 
     private JavaCameraView view;

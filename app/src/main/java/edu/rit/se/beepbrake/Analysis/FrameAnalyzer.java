@@ -10,7 +10,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
 import edu.rit.se.beepbrake.TempLogger;
 
-
 /**
  * Created by richykapadia on 9/24/15.
  * <p/>
@@ -46,10 +45,7 @@ public class FrameAnalyzer implements Runnable {
         numAnalyzer++;
     }
 
-
-    /**
-     * Analyze the most recent frame
-     */
+    // Analyze the most recent frame
     @Override
     public void run() {
         Log.d(TAG, "Started Running!");
@@ -65,18 +61,13 @@ public class FrameAnalyzer implements Runnable {
         Log.d(TAG, "Finished Running!");
     }
 
-
-    /**
-     * Analyze the most recent mat
-     *
-     * @param mat - current img
-     */
-    public void addFrameToAnalyze(Mat mat) {
+    // Analyze the most recent mat (current image)
+    public void addFrameToAnalyze(Mat curImg) {
         //if not being analyzed
         if (!mFrameLock.isLocked()) {
             //then set
             TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
-            this.mCurrentFrame = mat;
+            this.mCurrentFrame = curImg;
         }
     }
 
@@ -89,7 +80,6 @@ public class FrameAnalyzer implements Runnable {
         (new Thread(this)).start();
     }
 
-
     public String toString() {
         switch (this.analyzerId) {
             case 0:
@@ -99,6 +89,5 @@ public class FrameAnalyzer implements Runnable {
             default:
                 return "Unknown";
         }
-
     }
 }

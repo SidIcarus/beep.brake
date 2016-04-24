@@ -25,21 +25,15 @@ public class WebManager extends BroadcastReceiver {
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
     //Singleton implementation
-    private WebManager() {
-    }
+    private WebManager() { }
 
     public static WebManager getInstance() {
-        if (instance == null) {
-            instance = new WebManager();
-        }
+        if (instance == null) instance = new WebManager();
+
         return instance;
     }
 
-    /**
-     * Set this in the Main Activity before setting the listeners
-     *
-     * @param connectionManager
-     */
+    // Set this in the Main Activity before setting the listeners
     public void setConnectionManager(ConnectivityManager connectionManager) {
         this.connectionManager = connectionManager;
     }
@@ -50,12 +44,7 @@ public class WebManager extends BroadcastReceiver {
         return wifiConnected;
     }
 
-    /**
-     * Callback function listening to wifi
-     *
-     * @param context
-     * @param intent
-     */
+    // Callback function listening to wifi
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("Web", "onReceive");
@@ -66,25 +55,16 @@ public class WebManager extends BroadcastReceiver {
         if (hasWifi()) {
             Log.d("Web", "Connection!");
             uploadFiles();
-        } else {
-            Log.d("Web", "No Connection!");
-        }
+        } else Log.d("Web", "No Connection!");
     }
 
-    /**
-     * starts a low priority thread to scan for zip events to upload
-     * and sends them to the server
-     */
+    // starts a low priority thread to scan for zip events to upload and sends them to the server
     private void uploadFiles() {
         try {
             URL url = new URL(upload_url);
             Thread t = new Thread(new UploadThread(url, SEGMENT_DIR));
             t.setPriority(Thread.MIN_PRIORITY);
             t.start();
-        } catch (IOException e) {
-            Log.e("Web", e.getMessage());
-        }
+        } catch (IOException e) { Log.e("Web", e.getMessage()); }
     }
-
-
 }

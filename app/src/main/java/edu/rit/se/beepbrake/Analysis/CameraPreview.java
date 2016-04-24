@@ -16,6 +16,9 @@ import edu.rit.se.beepbrake.TempLogger;
  * <p/>
  * Temporary UI logic used to draw rects over imgs
  */
+
+// TODO: create a function to change the color of the box here
+// TODO: look for a more optimal way of having a box drawn to the screen
 public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private final static String TAG = "Camera-Preview";
@@ -27,31 +30,21 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
     private final Mat display = new Mat();
     // context used to receive/send frame data
     private final DetectorCallback detectorCallback;
-    /**
-     * Drawing logic variables
-     */
 
+    // Drawing logic variables
     private ReentrantLock drawLock = new ReentrantLock();
     private double[][] foundLines = new double[0][0];
 
-    public CameraPreview(DetectorCallback detectorCallback) {
-        this.detectorCallback = detectorCallback;
-    }
+    public CameraPreview(DetectorCallback detectorCallback) { this.detectorCallback = detectorCallback; }
 
     @Override
-    public void onCameraViewStarted(int width, int height) {
-
-    }
+    public void onCameraViewStarted(int width, int height) { }
 
     @Override
-    public void onCameraViewStopped() {
+    public void onCameraViewStopped() { }
 
-    }
-
+    //Main loop that runs the application
     @Override
-    /**
-     * Main loop that runs the application
-     */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
 
@@ -87,10 +80,8 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
 
     private void drawBox(Mat rgb) {
         drawLock.lock();
-        if (this.foundCar.area() != 0) {
-            // Draw rectangle around found object
-            Imgproc.rectangle(rgb, foundCar.br(), foundCar.tl(), rectColor, 2);
-        }
+        // Draw rectangle around found object
+        if (this.foundCar.area() != 0) Imgproc.rectangle(rgb, foundCar.br(), foundCar.tl(), rectColor, 2);
 
         drawLock.unlock();
     }

@@ -23,23 +23,18 @@ public class HaarLoader {
     private static String TAG = "HaarLoader";
     private static HaarLoader instance;
 
-    ;
     // haar params
     private Size trainingSize;
     private double scaleFactor;
-    private int minNeighbor;
-    private int flag;
-    private HaarLoader() {
-    }
+    private int minNeighbor, flag;
+
+    private HaarLoader() { }
 
     public static HaarLoader getInstance() {
-        if (instance == null) {
-            instance = new HaarLoader();
-        }
+        if (instance == null) instance = new HaarLoader();
+
         return instance;
     }
-
-    ;  // this is where it is a singleton (because its private)
 
     private static CascadeClassifier loadCascade(Context context, String xml, int resourceId) {
         CascadeClassifier cascadeClassifier = null;
@@ -130,9 +125,7 @@ public class HaarLoader {
         }
     }
 
-    /**
-     * Haar params when running
-     */
+    // Haar params when running
 
     public Size getTrainingSize() {
         return this.trainingSize;

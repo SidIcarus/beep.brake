@@ -1,7 +1,4 @@
-/**
- * Created by Ryan Bega on 2/10/16.
- */
-
+// Created by Ryan Bega on 2/10/16.
 package edu.rit.se.beepbrake.DecisionMaking;
 
 import edu.rit.se.beepbrake.Segment.Segment;
@@ -32,13 +29,11 @@ abstract class Decision implements Runnable {
                 }
                 Thread.sleep(50);
             }
-        } catch (InterruptedException e) {
-            return false;
-        }
+        } catch (InterruptedException e) { return false; }
+
         return false;
     }
 
-    protected void setRunning(boolean running) {
-        this.running = running;
-    }
+    protected void setRunning(boolean running) { this.running = running; }
+
 }

@@ -7,9 +7,7 @@ import android.util.Log;
 
 import edu.rit.se.beepbrake.Web.WebManager;
 
-/**
- * Created by richykapadia on 4/11/16.
- */
+// Created by richykapadia on 4/11/16.
 public class BeepBrake extends Application {
 
     //Web manager
@@ -28,8 +26,6 @@ public class BeepBrake extends Application {
         connectionIntent = new IntentFilter();
         connectionIntent.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         this.registerReceiver(webMan, connectionIntent);
-
-
     }
 
 

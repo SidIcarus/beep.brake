@@ -13,28 +13,22 @@ import org.opencv.objdetect.CascadeClassifier;
 import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 import edu.rit.se.beepbrake.TempLogger;
 
-/**
- * Created by richykapadia on 1/11/16.
- */
+// Created by richykapadia on 1/11/16.
 public class CarDetector implements Detector {
 
     private static final String TAG = "Car-Detector";
     private final CascadeClassifier mCascade;
 
     private final Size haarSize;
-    private final int minNeighbor;
     private final double scaleFactor;
-    private final int flag;
+    private final int minNeighbor, flag;
 
     // Any opencv obj being used:
-    private final Size blurSize;
+    private final Size blurSize, imgSize, maxDetectSize;
     private final Point midPoint;
-    private final Size imgSize;
-    private final Size maxDetectSize;
     private final Rect detectedCar;
     private final Mat analyze;
     private final MatOfRect foundLocations;
-
 
     private DetectorCallback activity;
 
@@ -57,9 +51,7 @@ public class CarDetector implements Detector {
     }
 
     public void detect(Mat m) {
-        if (m == null || m.empty()) {
-            return;
-        }
+        if (m == null || m.empty()) return;
 
         TempLogger.addMarkTime(TempLogger.HAAR_TIME);
         this.haar(m);
@@ -98,35 +90,11 @@ public class CarDetector implements Detector {
         mCascade.detectMultiScale(analyze, foundLocations, scaleFactor, minNeighbor, flag, haarSize, maxDetectSize);
         //flag tells what version of haar (?)
 
-
         Rect r = this.filterLocationsFound(foundLocations);
         activity.setCurrentFoundRect(mat, r);
-
     }
 
     private Rect filterLocationsFound(MatOfRect loc) {
-        //TODO replace with actual driving pt (between lanes)
-
-
-
-        /*
-        //find the closest largest rect to the 'drive pt'
-        double minDist = Double.MAX_VALUE;
-        List<Rect> rectList = loc.toList();
-        Rect currRect = null;
-        for(Rect r : rectList){
-           //calc dist to mid pt
-            double delta_x = Math.pow(Math.abs(pt.x - r.x), 2);
-            double delta_y = Math.pow(Math.abs(pt.y - r.y), 2);
-            double dist = Math.sqrt(delta_x + delta_y);
-            if( dist < minDist){
-                minDist = dist;
-                currRect = r;
-            }
-        }
-        */
-
-
         // Pick Largest
         double largest = 0;
         Rect currRect = null;
@@ -138,13 +106,8 @@ public class CarDetector implements Detector {
             }
         }
 
-        if (currRect != null) {
-            Log.d(TAG, currRect.size().toString());
-        }
-
+        if (currRect != null) Log.d(TAG, currRect.size().toString());
 
         return currRect;
-
     }
-
 }
