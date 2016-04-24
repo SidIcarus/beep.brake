@@ -9,14 +9,14 @@ import android.util.Log;
 import edu.rit.se.beepbrake.Segment.Constants;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
-public class AccelerometerDecision extends Decision{
+public class AccelerometerDecision extends Decision {
 
-    public AccelerometerDecision(DecisionManager decMan, BufferManager bufMan){
+    public AccelerometerDecision(DecisionManager decMan, BufferManager bufMan) {
 
         super(decMan, bufMan);
     }
 
-    public void run(){
+    public void run() {
         double zVal;
         double oldzVal;
         double diffzVal;
@@ -33,9 +33,9 @@ public class AccelerometerDecision extends Decision{
         Log.d("AccelDec", "running");
 
 
-        while(running){
+        while (running) {
 
-            if( !requestSegment() ){
+            if (!requestSegment()) {
                 continue;
             }
 
@@ -54,7 +54,7 @@ public class AccelerometerDecision extends Decision{
 
     }
 
-    private void warn(){
+    private void warn() {
         curSeg.addDataObject("CrashDetected", "true");
         decMan.warn();
     }

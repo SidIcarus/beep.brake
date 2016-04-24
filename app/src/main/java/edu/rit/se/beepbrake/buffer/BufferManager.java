@@ -1,8 +1,8 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
-import android.util.Log;
-import edu.rit.se.beepbrake.Segment.*;
+
+import edu.rit.se.beepbrake.Segment.Segment;
 
 public class BufferManager {
     private SegmentBuffer buffer;
@@ -17,6 +17,7 @@ public class BufferManager {
 
     /**
      * Request the latest segment for analyzation (Called by DecisionMaker)
+     *
      * @return segment - the most recent segment
      */
     public Segment getNewestSegment() {
@@ -25,6 +26,7 @@ public class BufferManager {
 
     /**
      * Add a segment (Sent from synchronizer)
+     *
      * @param seg - new segment
      */
     public void addSegment(Segment seg) {

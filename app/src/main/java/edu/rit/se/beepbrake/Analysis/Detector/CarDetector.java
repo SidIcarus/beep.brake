@@ -10,8 +10,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
-import java.util.List;
-
 import edu.rit.se.beepbrake.Analysis.DetectorCallback;
 import edu.rit.se.beepbrake.TempLogger;
 
@@ -40,7 +38,7 @@ public class CarDetector implements Detector {
 
     private DetectorCallback activity;
 
-    public CarDetector(CascadeClassifier cascade, DetectorCallback activity){
+    public CarDetector(CascadeClassifier cascade, DetectorCallback activity) {
         this.mCascade = cascade;
         this.activity = activity;
         this.haarSize = HaarLoader.getInstance().getTrainingSize();
@@ -55,11 +53,11 @@ public class CarDetector implements Detector {
         this.maxDetectSize = new Size();
         this.foundLocations = new MatOfRect();
         this.midPoint = new Point();
-        this.blurSize = new Size(5,5);
+        this.blurSize = new Size(5, 5);
     }
 
-    public void detect(Mat m){
-        if( m == null || m.empty()){
+    public void detect(Mat m) {
+        if (m == null || m.empty()) {
             return;
         }
 
@@ -72,9 +70,10 @@ public class CarDetector implements Detector {
     /**
      * detect img
      * send points to draw to the UI Logic
+     *
      * @param mat - greyscale image
      */
-    private void haar( Mat mat){
+    private void haar(Mat mat) {
         if (imgSize.area() == 0) {
             //first time haar is called, haar parameters are set
             imgSize.width = mat.size().width;
@@ -87,8 +86,8 @@ public class CarDetector implements Detector {
             this.maxDetectSize.height = haarSize.height * factor;
             Log.d(TAG, "MAX Detect size: " + maxDetectSize.toString());
 
-            this.midPoint.x = imgSize.width /2;
-            this.midPoint.y = imgSize.height /2;
+            this.midPoint.x = imgSize.width / 2;
+            this.midPoint.y = imgSize.height / 2;
         }
         // Important copy to prevent memory leaks!!
         // buffer holds on to mat object preventing the native copy from being collected
@@ -105,7 +104,7 @@ public class CarDetector implements Detector {
 
     }
 
-    private Rect filterLocationsFound(MatOfRect loc){
+    private Rect filterLocationsFound(MatOfRect loc) {
         //TODO replace with actual driving pt (between lanes)
 
 
@@ -131,15 +130,15 @@ public class CarDetector implements Detector {
         // Pick Largest
         double largest = 0;
         Rect currRect = null;
-        for(Rect r : loc.toList()){
+        for (Rect r : loc.toList()) {
             //calc dist to mid pt
-            if( largest < r.area() ){
+            if (largest < r.area()) {
                 largest = r.area();
                 currRect = r;
             }
         }
 
-        if( currRect != null) {
+        if (currRect != null) {
             Log.d(TAG, currRect.size().toString());
         }
 

@@ -8,31 +8,28 @@ import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.Log;
 
-
 import java.io.IOException;
 import java.net.URL;
 
 /**
  * Created by richykapadia on 3/22/16.
- *
+ * <p/>
  * Implemented as a singleton since only one instance is needed to listen for wifi
- *
  */
 public class WebManager extends BroadcastReceiver {
 
     private static WebManager instance;
-
+    static private String SEGMENT_DIR = Environment.getExternalStorageDirectory() + "/write_segments/";
     // set once instead of allocating on callback
     private ConnectivityManager connectionManager;
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
-    static private String SEGMENT_DIR = Environment.getExternalStorageDirectory() + "/write_segments/";
-
     //Singleton implementation
-    private WebManager(){}
+    private WebManager() {
+    }
 
-    public static WebManager getInstance(){
-        if(instance == null){
+    public static WebManager getInstance() {
+        if (instance == null) {
             instance = new WebManager();
         }
         return instance;
@@ -40,13 +37,14 @@ public class WebManager extends BroadcastReceiver {
 
     /**
      * Set this in the Main Activity before setting the listeners
+     *
      * @param connectionManager
      */
-    public void setConnectionManager(ConnectivityManager connectionManager){
+    public void setConnectionManager(ConnectivityManager connectionManager) {
         this.connectionManager = connectionManager;
     }
 
-    public boolean hasWifi(){
+    public boolean hasWifi() {
         NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
         boolean wifiConnected = (activeNetwork != null) && (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
         return wifiConnected;
@@ -54,6 +52,7 @@ public class WebManager extends BroadcastReceiver {
 
     /**
      * Callback function listening to wifi
+     *
      * @param context
      * @param intent
      */
@@ -63,12 +62,11 @@ public class WebManager extends BroadcastReceiver {
         triggerUpload();
     }
 
-    public void triggerUpload(){
-        if( hasWifi() ){
+    public void triggerUpload() {
+        if (hasWifi()) {
             Log.d("Web", "Connection!");
             uploadFiles();
-        }
-        else{
+        } else {
             Log.d("Web", "No Connection!");
         }
     }

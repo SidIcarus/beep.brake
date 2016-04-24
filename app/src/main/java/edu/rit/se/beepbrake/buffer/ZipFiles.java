@@ -1,6 +1,7 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
@@ -20,7 +21,7 @@ public class ZipFiles {
     }
 
     public void zip() {
-        try  {
+        try {
             BufferedInputStream origin;
             FileOutputStream dest = new FileOutputStream(_zipFile);
 
@@ -28,7 +29,7 @@ public class ZipFiles {
 
             byte data[] = new byte[BUFFER];
 
-            for(int i=0; i < _files.length; i++) {
+            for (int i = 0; i < _files.length; i++) {
                 Log.e("buferSystem-zipfiles", "Adding: " + _files[i]);
                 FileInputStream fi = new FileInputStream(_files[i]);
                 origin = new BufferedInputStream(fi, BUFFER);
@@ -42,7 +43,7 @@ public class ZipFiles {
             }
 
             out.close();
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

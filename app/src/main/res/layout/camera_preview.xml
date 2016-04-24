@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <org.opencv.android.JavaCameraView
+        android:id="@+id/CameraPreview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:visibility="gone"
-        android:id="@+id/CameraPreview"
-        opencv:show_fps="true"
-        opencv:camera_id="any" />
+        opencv:camera_id="any"
+        opencv:show_fps="true" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Trigger Warning"
         android:id="@+id/triggerWarning"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/CameraPreview" />
-
-    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Print Logs"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/CameraPreview"
+        android:text="Trigger Warning" />
+
+    <Button
         android:id="@+id/printLogs"
-        android:layout_above="@id/triggerWarning"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/triggerWarning"
+        android:text="Print Logs" />
 
 </RelativeLayout>

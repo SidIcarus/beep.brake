@@ -4,15 +4,13 @@ package edu.rit.se.beepbrake.Segment;
  * Created by Bradley on 1/11/2016.
  */
 
-import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.content.Context;
 
-import java.util.Date;
 import java.util.HashMap;
 
 
@@ -23,35 +21,35 @@ public class AccelerometerSensor implements SensorEventListener {
     private Sensor Accelerometer;
     private SegmentSync segSync;
 
-    public AccelerometerSensor(Context context, SensorManager manager, SegmentSync segSync){
+    public AccelerometerSensor(Context context, SensorManager manager, SegmentSync segSync) {
         this.context = context;
         this.manager = manager;
 
-        if(checkAvailability()) {
+        if (checkAvailability()) {
             this.Accelerometer = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             this.manager.registerListener(this, Accelerometer, manager.SENSOR_DELAY_NORMAL);
             this.segSync = segSync;
         }
     }
 
-    public void send(Float x, Float y, Float z){
+    public void send(Float x, Float y, Float z) {
         HashMap<String, Object> data = new HashMap<String, Object>();
 
-        if(x != null){
+        if (x != null) {
             data.put(Constants.ACCEL_X, x);
         }
-        if(y != null){
+        if (y != null) {
             data.put(Constants.ACCEL_Y, y);
         }
-        if(z != null){
+        if (z != null) {
             data.put(Constants.ACCEL_Z, z);
         }
 
         segSync.UpdateDataAgg(data);
     }
 
-    public void onResume(){
-        if(checkAvailability()) {
+    public void onResume() {
+        if (checkAvailability()) {
             manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
@@ -62,7 +60,7 @@ public class AccelerometerSensor implements SensorEventListener {
         }
     }
 
-    public void onSensorChanged(SensorEvent event){
+    public void onSensorChanged(SensorEvent event) {
 
         Float x = event.values[0];
         Float y = event.values[1];
@@ -75,11 +73,11 @@ public class AccelerometerSensor implements SensorEventListener {
 
     }
 
-    private boolean checkAvailability(){
+    private boolean checkAvailability() {
         PackageManager pm = context.getPackageManager();
-        if(pm.hasSystemFeature(pm.FEATURE_SENSOR_ACCELEROMETER)){
+        if (pm.hasSystemFeature(pm.FEATURE_SENSOR_ACCELEROMETER)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

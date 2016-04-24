@@ -3,10 +3,14 @@ package edu.rit.se.beepbrake.Segment;
 /**
  * Created by Bradley on 1/11/2016.
  */
+
 import android.Manifest;
-import android.content.pm.PackageManager;
-import android.location.*;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import java.util.HashMap;
@@ -29,7 +33,7 @@ public class GPSSensor implements LocationListener {
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
 
         provider = locationManager.getBestProvider(criteria, true);
-        if(checkPermission()) {
+        if (checkPermission()) {
             locationManager.requestLocationUpdates(provider, 100, 0, this);
         }
     }
@@ -75,28 +79,28 @@ public class GPSSensor implements LocationListener {
 
     }
 
-    public void onResume(){
-        if(checkPermission()) {
+    public void onResume() {
+        if (checkPermission()) {
             locationManager.requestLocationUpdates(provider, 100, 0, this);
         }
     }
 
-    public void onPause(){
-        if(checkPermission()) {
+    public void onPause() {
+        if (checkPermission()) {
             locationManager.removeUpdates(this);
         }
     }
 
-    private boolean checkPermission(){
+    private boolean checkPermission() {
         PackageManager pm = context.getPackageManager();
         int hasPermission = pm.checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, context.getPackageName());
-        if(hasPermission == pm.PERMISSION_GRANTED) {
+        if (hasPermission == pm.PERMISSION_GRANTED) {
             return true;
-        }else if( hasPermission == pm.PERMISSION_DENIED){
+        } else if (hasPermission == pm.PERMISSION_DENIED) {
             //TODO warn the user GPS doesn't work
 
             return false;
-        }else{
+        } else {
             return false;
         }
     }

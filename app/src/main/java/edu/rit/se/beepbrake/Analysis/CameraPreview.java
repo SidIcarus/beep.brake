@@ -13,34 +13,28 @@ import edu.rit.se.beepbrake.TempLogger;
 
 /**
  * Created by richykapadia on 9/21/15
- *
+ * <p/>
  * Temporary UI logic used to draw rects over imgs
- *
  */
 public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private final static String TAG = "Camera-Preview";
-
+    private final Rect foundCar = new Rect(0, 0, 0, 0);
+    private final Point linePoint1 = new Point();
+    private final Point linePoint2 = new Point();
+    private final Scalar rectColor = new Scalar(0, 0, 255);
+    private final Scalar lineColor = new Scalar(0, 255, 0);
+    private final Mat display = new Mat();
+    // context used to receive/send frame data
+    private final DetectorCallback detectorCallback;
     /**
      * Drawing logic variables
      */
 
     private ReentrantLock drawLock = new ReentrantLock();
-    private final Rect foundCar= new Rect(0,0,0,0);
     private double[][] foundLines = new double[0][0];
 
-    private final Point linePoint1 = new Point();
-    private final Point linePoint2 = new Point();
-
-    private final Scalar rectColor = new Scalar(0, 0, 255);
-    private final Scalar lineColor = new Scalar(0, 255, 0);
-
-    private final Mat display = new Mat();
-
-    // context used to receive/send frame data
-    private final DetectorCallback detectorCallback;
-
-    public CameraPreview(DetectorCallback detectorCallback){
+    public CameraPreview(DetectorCallback detectorCallback) {
         this.detectorCallback = detectorCallback;
     }
 
@@ -69,14 +63,14 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
         return display;
     }
 
-    public void setRectToDraw(Rect r){
+    public void setRectToDraw(Rect r) {
         drawLock.lock();
-        if( r != null) {
+        if (r != null) {
             this.foundCar.x = r.x;
             this.foundCar.y = r.y;
             this.foundCar.height = r.height;
             this.foundCar.width = r.width;
-        } else{
+        } else {
             this.foundCar.x = 0;
             this.foundCar.y = 0;
             this.foundCar.height = 0;
@@ -85,15 +79,15 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
         drawLock.unlock();
     }
 
-    public void setLinesToDraw(double[][] lines){
+    public void setLinesToDraw(double[][] lines) {
         drawLock.lock();
         foundLines = lines;
         drawLock.unlock();
     }
 
-    private void drawBox( Mat rgb ){
+    private void drawBox(Mat rgb) {
         drawLock.lock();
-        if( this.foundCar.area() != 0) {
+        if (this.foundCar.area() != 0) {
             // Draw rectangle around found object
             Imgproc.rectangle(rgb, foundCar.br(), foundCar.tl(), rectColor, 2);
         }
@@ -101,7 +95,7 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
         drawLock.unlock();
     }
 
-    private void drawLines( Mat rgb ) {
+    private void drawLines(Mat rgb) {
         drawLock.lock();
         if (foundLines.length > 0) {
             for (double[] data : foundLines) {
