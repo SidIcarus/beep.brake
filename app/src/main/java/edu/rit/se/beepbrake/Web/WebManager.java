@@ -25,6 +25,7 @@ public class WebManager extends BroadcastReceiver {
     // set once instead of allocating on callback
     private ConnectivityManager connectionManager;
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
+    private String device_reg = "http://magikarpets.se.rit.edu:3000/api/newDevice";
 
     static private String SEGMENT_DIR = Environment.getExternalStorageDirectory() + "/write_segments/";
 
@@ -66,6 +67,8 @@ public class WebManager extends BroadcastReceiver {
     public void triggerUpload(){
         if( hasWifi() ){
             Log.d("Web", "Connection!");
+            // TODO: Check Device Registration
+
             uploadFiles();
         }
         else{
