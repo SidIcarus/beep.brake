@@ -2,6 +2,7 @@ package edu.rit.se.beepbrake.activities;
 
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,10 +35,13 @@ import edu.rit.se.beepbrake.Segment.Constants;
 import edu.rit.se.beepbrake.Segment.GPSSensor;
 import edu.rit.se.beepbrake.Segment.SegmentSync;
 import edu.rit.se.beepbrake.buffer.BufferManager;
+import edu.rit.se.beepbrake.utils.Utilities;
 
 /*
-TODO: SharedPreferences - save Array<Str> UploadUID + UploadStatus (the POST return # 100/200/400) This will be stored in mem until it has a chance to be written to SP.
-the only time it will be saving to the SP will be when the activity has to close and there has been a failure and or something that has not been uploaded yet so as to
+TODO: SharedPreferences - save Array<Str> UploadUID + UploadStatus (the POST return #
+100/200/400) This will be stored in mem until it has a chance to be written to SP.
+the only time it will be saving to the SP will be when the activity has to close and there has
+been a failure and or something that has not been uploaded yet so as to
 try it again when the app starts again
 
 TODO: SP - log when we upload the UID for the device that we are creating uploaded it
@@ -66,9 +70,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     //Decision Objects
     private DecisionManager decMan;
 
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_preview);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -87,7 +89,8 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         mLoaderCallback = new LoaderCallback(this, mCameraView);
 
         //load cascade
-        HaarLoader loader = HaarLoader.getInstance(); // get xml resource file and put in HAAR object
+        HaarLoader loader =
+            HaarLoader.getInstance(); // get xml resource file and put in HAAR object
         CascadeClassifier cascade = loader.loadHaar(this, HaarLoader.cascades.CAR_3);
 
         //construct frame analyzer and start thread
@@ -98,23 +101,27 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         Detector laneDetector = new LaneDetector();
         mLaneAnalyzer = new FrameAnalyzer(laneDetector);
 
-
         final Button warning = (Button) findViewById(R.id.triggerWarning);
         warning.setVisibility(View.INVISIBLE);
 
         final Button printLogs = (Button) findViewById(R.id.printLogs);
         printLogs.setVisibility(View.INVISIBLE);
+
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.camera_preview);
+
+        // Demo'd getting it
+        Utilities.setEULAStatus(this, true);
+        Utilities.showEULASnack(this, coordinatorLayout);
+
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -132,7 +139,8 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         //Data Acquisition init
         segSync = new SegmentSync(bufMan);
         gpsSen = new GPSSensor(this, segSync);
-        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE), segSync);
+        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE),
+            segSync);
 
         decMan = new DecisionManager(bufMan);
     }
@@ -191,6 +199,8 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     }
 
     // Lane detector calls this method to set the lane positions
-    public void setCurrentFoundLanes(double[][] lanesCoord) { this.mCameraPreview.setLinesToDraw(lanesCoord); }
+    public void setCurrentFoundLanes(double[][] lanesCoord) {
+        this.mCameraPreview.setLinesToDraw(lanesCoord);
+    }
 
 }

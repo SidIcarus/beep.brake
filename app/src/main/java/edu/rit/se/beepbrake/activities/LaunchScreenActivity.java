@@ -38,6 +38,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
         @Override protected void onPreExecute() {
             super.onPreExecute();
             intent = new Intent(LaunchScreenActivity.this, MainActivity.class);
+//            intent.setAction(Intent.);
         }
 
         // Use this method to load background data that the app needs.
