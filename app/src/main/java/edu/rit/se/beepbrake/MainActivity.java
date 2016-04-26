@@ -19,6 +19,7 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import java.util.HashMap;
 
+import edu.rit.se.beepbrake.Analysis.AnalysisManager;
 import edu.rit.se.beepbrake.Analysis.CameraPreview;
 import edu.rit.se.beepbrake.Analysis.Detector.CarDetector;
 import edu.rit.se.beepbrake.Analysis.Detector.Detector;
@@ -31,18 +32,11 @@ import edu.rit.se.beepbrake.buffer.BufferManager;
 import edu.rit.se.beepbrake.Segment.*;
 import edu.rit.se.beepbrake.DecisionMaking.DecisionManager;
 
-public class MainActivity extends AppCompatActivity implements DetectorCallback {
+public class MainActivity extends AppCompatActivity{
 
     static{ System.loadLibrary("opencv_java3"); }
 
     private static final String TAG = "Main-Activity";
-
-    // Image Analysis Stuff
-    private BaseLoaderCallback mLoaderCallback;
-    private JavaCameraView mCameraView;
-    private CameraPreview mCameraPreview;
-    private FrameAnalyzer mCarAnalyzer;
-    private FrameAnalyzer mLaneAnalyzer;
 
     //Buffer
     private BufferManager bufMan;
@@ -55,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     //Decision Objects
     private DecisionManager decMan;
 
+    //analysis
+    private AnalysisManager analysisManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,28 +62,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         Initialize(); // Ryan made for segment initialization.
 
-        // UI Element
-        mCameraView = (JavaCameraView) findViewById(R.id.CameraPreview); //find by ID then CAST into the actual object
-        mCameraView.setMaxFrameSize(352, 288); // magic
-        mCameraView.setVisibility(SurfaceView.VISIBLE); // ?
-
-        //Set listener and callback
-        mCameraPreview = new CameraPreview(this); //this drives the app to connect to camera
-        mCameraView.setCvCameraViewListener(mCameraPreview); //any change to camera view object triggers call
-        mLoaderCallback = new LoaderCallback(this, mCameraView); // load OpenCv lib (checks device for OpenCv
-
-        //load cascade
-        HaarLoader loader = HaarLoader.getInstance(); // get xml resource file and put in HAAR object
-        CascadeClassifier cascade = loader.loadHaar(this, HaarLoader.cascades.CAR_3);
-
-        //construct frame analyzer and start thread
-        Detector carDetect = new CarDetector(cascade, this);
-        mCarAnalyzer = new FrameAnalyzer(carDetect);
-
-        //construct lane detector
-        Detector laneDetector = new LaneDetector();
-        mLaneAnalyzer = new FrameAnalyzer(laneDetector);
-
 
         final Button warning = (Button) findViewById(R.id.triggerWarning);
         warning.setVisibility(View.INVISIBLE);
@@ -94,24 +69,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         final Button printLogs = (Button) findViewById(R.id.printLogs);
         printLogs.setVisibility(View.INVISIBLE);
 
-
-        /**
-        final Button warning = (Button) findViewById(R.id.triggerWarning);
-        warning.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                decMan.warn();
-            }
-        });
-
-        final Button printLogs = (Button) findViewById(R.id.printLogs);
-        printLogs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TempLogger.printLogs();
-            }
-        });
-        **/
     }
 
     @Override
@@ -147,14 +104,15 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         //Decision init
         decMan = new DecisionManager(bufMan);
+
+        this.analysisManager = new AnalysisManager(this, segSync);
+        this.analysisManager.initialize();
     }
 
     protected void onResume(){
         super.onResume();
 
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
-        mCarAnalyzer.resumeDetection();
-        mLaneAnalyzer.resumeDetection();
+        this.analysisManager.onResume();
 
         //Data Acquisition onResume
         segSync.onResume();
@@ -168,8 +126,9 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
     protected void onPause(){
         super.onPause();
-        mCarAnalyzer.pauseDetection();
-        mLaneAnalyzer.pauseDetection();
+
+        //Analysis onPause
+        this.analysisManager.onPause();
 
         //Data Acquisition onPause
         segSync.onPause();
@@ -182,42 +141,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         //Decision
         decMan.onPause();
 
-    }
-
-    /**
-     * Feeds the frame into the analyzers
-     * @param currentFrame
-     */
-    public void setCurrentFrame(Mat currentFrame){
-        this.mCarAnalyzer.addFrameToAnalyze(currentFrame);
-        this.mLaneAnalyzer.addFrameToAnalyze(currentFrame);
-    }
-
-    /**
-     * Car detector calls this method to set the position of the car
-     * @param m -
-     * @param r
-     */
-    public void setCurrentFoundRect(Mat m, Rect r){
-        this.mCameraPreview.setRectToDraw(r);
-        HashMap<String, Object> data = new HashMap<String, Object>();
-        if( r != null) {
-            data.put(Constants.CAR_POS_X, r.x);
-            data.put(Constants.CAR_POS_Y, r.y);
-            data.put(Constants.CAR_POS_WIDTH, r.width);
-            data.put(Constants.CAR_POS_HEIGHT, r.height);
-        }
-        if(this.segSync.isRunning()) {
-            this.segSync.makeSegment(m, data);
-        }
-    }
-
-    /**
-     * Lane detector calls this method to set the lane positions
-     * @param lanesCoord
-     */
-    public void setCurrentFoundLanes(double[][] lanesCoord){
-        this.mCameraPreview.setLinesToDraw(lanesCoord);
     }
 
 }
