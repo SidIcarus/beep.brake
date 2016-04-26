@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- EULA Section Template
+    TODO: If child/parent expand is implemented, this will be deleted
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <!-- Change padding from static number to variable. -->
+    <TextView
+        android:id="@+id/eula_section_id"
+        style="?android:listSeparatorTextViewStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/eula_section_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- Padding and line spacing needs to be added to this. -->
+    <TextView
+        android:id="@+id/eula_section_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</RelativeLayout>

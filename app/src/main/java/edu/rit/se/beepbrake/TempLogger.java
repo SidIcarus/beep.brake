@@ -10,11 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by richykapadia on 1/11/16.
- *
+ * <p/>
  * Testing/logging performance concerns
  * 1) analyzing the most recent frame
  * 2) number of frames skipped
- *
  */
 public class TempLogger {
 
@@ -54,16 +53,16 @@ public class TempLogger {
      *
      * @param markName - unique identifier for the measure to be logged
      */
-    public static synchronized void addMarkTime(String markName){
-        if(!LOGGING){ return;}
+    public static synchronized void addMarkTime(String markName) {
+        if (!LOGGING) return;
+
         validateLogLen();
         Long l = System.currentTimeMillis();
-        if(!runningLogs.containsKey(markName)){
-            runningLogs.put(markName, l);
-        }else{
-           //calc diff and store
+        if (!runningLogs.containsKey(markName)) runningLogs.put(markName, l);
+        else {
+            //calc diff and store
             Long durr = l - runningLogs.get(markName);
-            if(!storedLogs.containsKey(markName)){
+            if (!storedLogs.containsKey(markName)) {
                 storedLogs.put(markName, new ArrayList<Long>());
             }
             storedLogs.get(markName).add(durr);
@@ -77,25 +76,27 @@ public class TempLogger {
      * @param markName
      * @param value
      */
-    public static synchronized void addValueMark(String markName, Long value){
-        if(!LOGGING){ return;}
+    public static synchronized void addValueMark(String markName, Long value) {
+        if (!LOGGING) return;
+
         validateLogLen();
         //place directly in stored
-        if(!storedLogs.containsKey(markName)){
-            storedLogs.put(markName, new ArrayList<Long>());
-        }
+        if (!storedLogs.containsKey(markName)) storedLogs.put(markName, new ArrayList<Long>());
+
         storedLogs.get(markName).add(value);
         numLogs++;
     }
 
     /**
      * increment a count by 1 every time this is called per unique markName
+     *
      * @param markName - unique identifier for count
      */
-    public static synchronized void incrementCount(String markName){
-        if(!LOGGING){ return;}
+    public static synchronized void incrementCount(String markName) {
+        if (!LOGGING) return;
+
         validateLogLen();
-        if(!countLogs.containsKey(markName)){
+        if (!countLogs.containsKey(markName)) {
             AtomicInteger aInt = new AtomicInteger(0);
             countLogs.put(markName, aInt);
             numLogs++;
@@ -104,33 +105,31 @@ public class TempLogger {
     }
 
 
-    private static synchronized void validateLogLen(){
-        if(!LOGGING){ return;}
-        if(numLogs >= MAX_LOG_LEN ){
+    private static synchronized void validateLogLen() {
+        if (!LOGGING) return;
+
+        if (numLogs >= MAX_LOG_LEN) {
             printLogs();
             //clear logs
-            for(String key : storedLogs.keySet()){
-                storedLogs.get(key).clear();
-            }
+            for (String key : storedLogs.keySet()) storedLogs.get(key).clear();
+
             storedLogs.clear();
             numLogs = 0;
         }
     }
 
-    public static synchronized void printLogs(){
-        if(!LOGGING){ return;}
+    public static synchronized void printLogs() {
+        if (!LOGGING) return;
+
         bPrintingLogs = true;
         Log.d(TAG, "Num Logs: " + numLogs);
         //total frames counts
         int total = 0;
         int analyzed = 0;
         int missed = 0;
-        if(countLogs.containsKey(TOTAL_FRAMES)){
-            total = countLogs.get(TOTAL_FRAMES).get();
-        }
-        if(countLogs.containsKey(ANALYZED_FRAMES)) {
-            analyzed = countLogs.get(ANALYZED_FRAMES).get();
-        }
+        if (countLogs.containsKey(TOTAL_FRAMES)) total = countLogs.get(TOTAL_FRAMES).get();
+        if (countLogs.containsKey(ANALYZED_FRAMES)) analyzed = countLogs.get(ANALYZED_FRAMES).get();
+
         missed = total - analyzed;
 
         Log.d(TAG, "------------------FRAME COUNTS------------------");
@@ -139,22 +138,20 @@ public class TempLogger {
         Log.d(TAG, "Missed: " + missed);
 
         ArrayList<Long> haarTime = new ArrayList<>();
-        if(storedLogs.containsKey(HAAR_TIME)){
-            haarTime = storedLogs.get(HAAR_TIME);
-        }
+        if (storedLogs.containsKey(HAAR_TIME)) haarTime = storedLogs.get(HAAR_TIME);
+
         Long min = 0l;
         Long max = 0l;
         Long avg = 0l;
         Long med = 0l;
 
         Collections.sort(haarTime);
-        if( !haarTime.isEmpty() ){
+        if (!haarTime.isEmpty()) {
             min = haarTime.get(0);
             max = haarTime.get(haarTime.size() - 1);
             med = haarTime.get(haarTime.size() / 2);
-            for( Long l : haarTime){
-                avg += l;
-            }
+            for (Long l : haarTime) avg += l;
+
             avg = avg / haarTime.size();
         }
 
@@ -168,47 +165,46 @@ public class TempLogger {
 
         Log.d(TAG, "------------------ Car Slack Time Stats ------------------");
         ArrayList<Long> slackDur = new ArrayList<>();
-        if( storedLogs.containsKey(SLACK_TIME + "CarDetector")){
+        if (storedLogs.containsKey(SLACK_TIME + "CarDetector")) {
             slackDur = storedLogs.get(SLACK_TIME + "CarDetector");
             printMeasures(slackDur);
         }
 
         Log.d(TAG, "------------------ Lane Slack Time Stats ------------------");
         slackDur = new ArrayList<>();
-        if( storedLogs.containsKey(SLACK_TIME + "LaneDetector")){
+        if (storedLogs.containsKey(SLACK_TIME + "LaneDetector")) {
             slackDur = storedLogs.get(SLACK_TIME + "LaneDetector");
             printMeasures(slackDur);
         }
 
         //clear logs
-        for(String key : storedLogs.keySet()){
-            storedLogs.get(key).clear();
-        }
+        for (String key : storedLogs.keySet()) storedLogs.get(key).clear();
+
         storedLogs.clear();
 
         bPrintingLogs = false;
     }
 
 
-    public static boolean isPrintingLogs(){
+    public static boolean isPrintingLogs() {
         return bPrintingLogs;
     }
 
 
-    public static void printMeasures(ArrayList<Long> durr){
-        if(!LOGGING){ return;}
+    public static void printMeasures(ArrayList<Long> durr) {
+        if (!LOGGING) return;
+
         //Stats for slack time
         Collections.sort(durr);
         long min = 0, max = 0, med = 0, avg = 0;
-        if( !durr.isEmpty() && durr.size() != 0){
+        if (!durr.isEmpty() && durr.size() != 0) {
             min = durr.get(0);
             max = durr.get(durr.size() - 1);
             med = durr.get(durr.size() / 2);
 
             avg = 0l;
-            for( Long l : durr){
-                avg += l;
-            }
+            for (Long l : durr) avg += l;
+
             avg = avg / durr.size();
         }
 

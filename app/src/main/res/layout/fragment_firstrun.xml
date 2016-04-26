@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/firstrun_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/firstrun_welcome_text"/>
+
+    <android.support.v7.widget.AppCompatCheckedTextView
+        android:id="@+id/firstrun_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:checkMark="?android:attr/listChoiceIndicatorSingle"
+        android:gravity="center"
+        android:text="@string/firstrun_checkbox_eula"/>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/firstrun_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Continue"/>
+
+</RelativeLayout>

@@ -1,6 +1,5 @@
 package edu.rit.se.beepbrake.Web;
 
-import android.content.AsyncTaskLoader;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -10,66 +9,59 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
-import edu.rit.se.beepbrake.buffer.DiskWriter;
-
-/**
- * Created by richykapadia on 4/4/16.
- */
+// Created by richykapadia on 4/4/16.
 public class UploadThread implements Runnable {
 
     private final URL url;
     private final String eventDir;
 
-    public UploadThread(URL url, String eventDir){
+    public UploadThread(URL url, String eventDir) {
         this.url = url;
         this.eventDir = eventDir;
     }
 
+    private static String getFileExtension(File file) {
+        String fileName = file.getName();
+
+        return (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) ?
+                fileName.substring(fileName.lastIndexOf(".") + 1) : "";
+    }
 
     @Override
     public void run() {
         //scan for files in event dir
         ArrayList<File> fileList = new ArrayList<File>();
         File uploadDir = new File(eventDir);
-        if(!uploadDir.isDirectory()){ return; }
+        if (!uploadDir.isDirectory()) return;
+
+        //TODO: change this to ask for what to upload here instead of this shenanigans
+
         // write segment (dir) --> timestamp (dir) --> event zip (file)
-        for( File ts : uploadDir.listFiles() ){
-            if( ts.isDirectory() ){
-                for( File event : ts.listFiles()){
+        for (File ts : uploadDir.listFiles()) {
+            if (ts.isDirectory()) {
+                for (File event : ts.listFiles()) {
                     //zips should be here
-                    if( "zip".equals(getFileExtension(event))){
-                        fileList.add(event);
-                    }
+                    if ("zip".equals(getFileExtension(event))) fileList.add(event);
                 }
             }
         }
 
 
-        for(File f : fileList ){
+        for (File f : fileList) {
             //double check wifi connection before starting upload
-            if( WebManager.getInstance().hasWifi() ) {
-                uploadFile(f);
-            }
+            if (WebManager.getInstance().hasWifi()) uploadFile(f);
         }
     }
-
-    private static String getFileExtension(File file) {
-        String fileName = file.getName();
-        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
-            return fileName.substring(fileName.lastIndexOf(".")+1);
-        else return "";
-    }
-
 
     /**
      * multipart post with the zip file (event) in the "file" part
      * expects 204 back - delete event off the phone
      * otherwise - re-queue upload on next wifi connection
+     *
      * @param f - zip file to upload
      */
-    private void uploadFile(File f){
+    private void uploadFile(File f) {
         // minetype
         String boundary = "apiclient-" + System.currentTimeMillis();
         String mimeType = "multipart/form-data;charset=utf-8;boundary=" + boundary;
@@ -100,17 +92,16 @@ public class UploadThread implements Runnable {
 
             int maxBufferSize = 1024;
             int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-            byte[ ] buffer = new byte[bufferSize];
+            byte[] buffer = new byte[bufferSize];
 
             // read file and write it into form...
             int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 
-            while (bytesRead > 0)
-            {
+            while (bytesRead > 0) {
                 outputStream.write(buffer, 0, bufferSize);
                 bytesAvailable = fileInputStream.available();
-                bufferSize = Math.min(bytesAvailable,maxBufferSize);
-                bytesRead = fileInputStream.read(buffer, 0,bufferSize);
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
             }
             outputStream.writeBytes("\r\n");
             outputStream.writeBytes("--" + boundary + "--\r\n");
@@ -135,14 +126,8 @@ public class UploadThread implements Runnable {
                 f.delete();
                 parent.delete();
             }
-        }catch (IOException e){
-            Log.e("Web", e.getMessage());
-        }catch (Exception e){
-            Log.e("Web", e.getMessage());
-        }finally {
-            if (connection != null){
-                connection.disconnect();
-            }
-        }
+        } catch (IOException e) { Log.e("Web", e.getMessage());
+        } catch (Exception e) { Log.e("Web", e.getMessage());
+        } finally { if (connection != null) connection.disconnect(); }
     }
 }

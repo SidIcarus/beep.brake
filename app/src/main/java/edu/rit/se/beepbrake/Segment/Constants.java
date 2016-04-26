@@ -3,6 +3,7 @@ package edu.rit.se.beepbrake.Segment;
 /**
  * Created by richykapadia on 2/16/16.
  */
+// Move to resource files
 public class Constants {
 
     /* SEGMENT KEYS */

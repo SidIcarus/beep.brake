@@ -1,8 +1,8 @@
 package edu.rit.se.beepbrake.Segment;
 
-/**
- * Created by Bradley on 1/11/2016.
- */
+// v
+
+import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,18 +11,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opencv.core.Mat;
-
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class SegmentSync {
-    private BufferManager buf;
-
     ConcurrentHashMap<String, ArrayList<Object>> aggData;
     ConcurrentHashMap<String, Object> singleData;
+    private BufferManager buf;
     private ReentrantLock lock = new ReentrantLock();
     private boolean isRunning;
-
 
     public SegmentSync(BufferManager bm) {
         buf = bm;
@@ -50,9 +46,8 @@ public class SegmentSync {
             ArrayList<Object> data = tempAgg.get(pair.getKey());
             Double avgData = 0.0;
 
-            for (int i = 0; i < data.size(); i++) {
-                avgData += ((Number) data.get(i)).doubleValue();
-            }
+            for (int i = 0; i < data.size(); i++) avgData += ((Number) data.get(i)).doubleValue();
+
             avgData = avgData / data.size();
             segMap.put(name, avgData);
         }
@@ -100,19 +95,17 @@ public class SegmentSync {
         lock.unlock();
     }
 
-    public void onResume(){
+    public void onResume() {
         isRunning = true;
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
     }
 
-    public void onPause(){
+    public void onPause() {
         isRunning = false;
         aggData = null;
         singleData = null;
     }
 
-    public boolean isRunning(){
-        return isRunning;
-    }
+    public boolean isRunning() { return isRunning; }
 }

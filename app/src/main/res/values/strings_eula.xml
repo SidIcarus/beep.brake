@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Resource File Name: strings_eula.xml
+Layout: fragment_eula.xml
+Fragment: EULADialogFragment.java
+Note: Preceding section numbering get set when sections are generated.
+-->
+<resources>
+    <string name="eula_title">Terms and Conditions</string>
+
+    <!-- First line of EULA. Replace $1$s w/ app_name -->
+    <string name="eula_notice">End User License Agreement for %1$s</string>
+
+    <!-- First Paragraph of EULA. Replace $1$s, ($1$s), $1$s w/ company_name, (app_name), company_name -->
+    <string name="eula_disclaimer">IMPORTANT. READ CAREFULLY: This End User License Agreement (“EULA”) is a legal agreement between you (either an individual or a single entity) and %1$s (%2$s) for software, owned by %3$s and its affiliated companies and its third party suppliers and licensors, that accompanies this EULA, which includes computer software and may include associated media, “online” or electronic documentation in connection with your use of this Device (“Software”)</string>
+
+    <!-- Titles gets uppercase'd when sections are generated -->
+    <string-array name="eula_section_titles">
+
+        <item>grant of license</item>
+
+        <item>reservation of rights and ownership</item>
+
+        <item>limitations on end user rights</item>
+
+        <item>consent to use of data</item>
+
+    </string-array>
+
+    <string-array name="eula_section_contents">
+
+        <item>Lorem ipsum dolor sit amet, ius ea aeque clita regione. Quo vitae dolorem an, no est saepe sanctus probatus, ne mundi habemus omittantur pro. Everti aliquid te eam. Veritus corrumpit mnesarchum quo an."</item>
+
+        <item>No aeque intellegam philosophia qui. Nec cu laboramus urbanitas. Ea eam posse movet quaestio. Quodsi detraxit hendrerit at ius, eam probo dignissim ne, clita consequuntur id vix. Ei vel saepe facilisi indoctum, sit ut mucius volumus. Menandri explicari per cu, duo suscipit nominati aliquando ne.</item>
+
+        <item>Sea cu velit ignota disputationi, te invidunt pertinax sea. Sit alienum complectitur cu. Ad iudicabit principes has, mea novum causae latine cu. Mea ad utamur reformidans, an eum iudico timeam aliquip, mei ut accusam voluptatum sadipscing. Est id possit gloriatur, pri nostro maiorum.</item>
+
+        <item>Pro in ipsum putant oportere. Id pro eirmod oblique scriptorem, has affert facete ne. Oblique debitis nostrum an nec, sit ut mentitum torquatos dissentiunt, at commune consectetuer quo. Has cu integre recteque omittantur, id dicunt reprehendunt sit. Ius eius lorem ex, eu quo erat error corrumpit.</item>
+
+    </string-array>
+</resources>

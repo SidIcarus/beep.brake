@@ -2,10 +2,11 @@ package edu.rit.se.beepbrake.DecisionMaking;
 
 //created by RyanBega 2/8/16
 
-import java.util.Date;
-import java.util.ArrayList;
-import android.media.ToneGenerator;
 import android.media.AudioManager;
+import android.media.ToneGenerator;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
@@ -14,7 +15,7 @@ public class DecisionManager {
     private Date lastWarn;
     private BufferManager bufMan;
 
-    public DecisionManager(BufferManager bufMan){
+    public DecisionManager(BufferManager bufMan) {
         this.bufMan = bufMan;
 
         decisions = new ArrayList<Decision>();
@@ -25,7 +26,8 @@ public class DecisionManager {
 
     }
 
-    public void warn(){
+    // TODO: have the call to change the color of the square to red here
+    public void warn() {
         Date curTime = new Date();
 
         /*
@@ -33,7 +35,7 @@ public class DecisionManager {
         time between auditory warnings
         */
 
-        if(lastWarn == null || curTime.after(new Date(lastWarn.getTime() + 1000))) {
+        if (lastWarn == null || curTime.after(new Date(lastWarn.getTime() + 1000))) {
             //Driver alert beep
             ToneGenerator tone = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
             tone.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 200);
@@ -42,15 +44,15 @@ public class DecisionManager {
         lastWarn = curTime;
     }
 
-    public void onResume(){
-        for(int i = 0; i < decisions.size(); i++){
+    public void onResume() {
+        for (int i = 0; i < decisions.size(); i++) {
             decisions.get(i).setRunning(true);
             (new Thread(decisions.get(i))).start();
         }
     }
 
-    public void onPause(){
-        for(int i = 0; i < decisions.size(); i++){
+    public void onPause() {
+        for (int i = 0; i < decisions.size(); i++) {
             decisions.get(i).setRunning(false);
         }
     }
