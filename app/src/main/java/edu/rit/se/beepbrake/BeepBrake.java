@@ -28,7 +28,6 @@ public class BeepBrake extends Application {
         this.registerReceiver(webMan, connectionIntent);
     }
 
-
     @Override
     public void onTerminate() {
         super.onTerminate();

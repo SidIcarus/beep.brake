@@ -1,5 +1,33 @@
-<resources>
-    <string name="app_name">beep.brake</string>
+<resources xmlns:xliff="http://schemas.android.com/tools">
+    <string name="app_name">Beep.Brake</string>
+    <string name="company_name">Beep.Brake.Company</string>
+
+    <string name="hello_sample_fragment">Hello blank fragment</string>
+    <string name="accessibility">accessibility</string>
+    <string name="btn_positive">Agree</string>
+
     <string name="action_settings">Settings</string>
-    <string name="title_activity_web">WebActivity</string>
+
+    <!-- Menu -->
+    <string name="action_day_night_yes">Night Mode</string>
+    <string name="action_day_night_no">Day Mode</string>
+    <string name="action_bottom_sheet_dialog">Bottom Sheet Dialog</string>
+    <string name="action_read_prefs">Read Prefs</string>
+    <string name="action_accept_eula">Accept EULA</string>
+    <string name="action_decline_eula">Decline EULA</string>
+
+    <!-- Night / Day Mode theme text -->
+
+    <string name="text_for_day_night_mode_night_no">NightMode: AppCompatDelegate.MODE_NIGHT_NO</string>
+    <string name="text_for_day_night_mode_night_yes">NightMode: AppCompatDelegate.MODE_NIGHT_YES</string>
+    <string name="text_for_day_night_mode_night_auto">NightMode: AppCompatDelegate.MODE_NIGHT_AUTO</string>
+
+    <!-- Preferences -->
+
+    <string name="bottom_modal_name">List</string>
+
+    <!-- FirstRun -->
+
+    <string name="firstrun_text_title">Welcome! to Beep.Brake</string>
+    <string name="firstrun_checkbox_eula">Accept le EULA pls</string>
 </resources>

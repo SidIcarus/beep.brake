@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Layout File Name: fragment_eula.xml
+Resource: strings_eula.xml
+Fragment: EULADialogFragment.java
+Note: Any modifications for the EULA text, more than likely, should be done in strings_eula.xml
+    Or, within EULADialogFragment.populateEULAContent().
+TODO: Create style for the EULA text
+-->
+<android.support.v7.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_eula"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical"
+    android:fadeScrollbars="true"
+    tools:context=".eula.EULADialogFragment">
+
+    <TextView
+        android:id="@+id/eula_notice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/eula_notice"/>
+
+    <TextView
+        android:id="@+id/eula_disclaimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/eula_disclaimer"/>
+
+    <!-- Add Scrollview here, ya? -->
+
+    <include layout="@layout/toolbar"/>
+
+</android.support.v7.widget.RecyclerView>
