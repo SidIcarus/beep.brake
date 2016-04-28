@@ -67,12 +67,13 @@ public class DecisionTemplate extends Decision{
     *
     * Append a note to the current segment saying that a warning was triggered.
     *
-    * Call the warning method on the Decision Manager which will alert the
-    * User and tell the Buffer Manager to write the current stored data to disk.
+    * The decision super class has a warning method which will alert the decision
+    * manager. This method can be overloaded to add additional tags to the segment,
+    * such as labeling which decision algorithm triggered the warning.
     */
 
-    private void warn(){
+    protected void warn(){
         curSeg.addDataObject("DecisionTemplate", "true");
-        decMan.warn();
+        super.warn();
     }
 }
