@@ -67,4 +67,13 @@ public class WebManager extends BroadcastReceiver {
             t.start();
         } catch (IOException e) { Log.e("Web", e.getMessage()); }
     }
+
+    public void registerDevice(){
+        try {
+            URL url = new URL(device_reg);
+            Thread t = new Thread(new DeviceRegistration(url, "hardcodedfakeid"));
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.start();
+        } catch (IOException e) { Log.e("Web", e.getMessage()); }
+    }
 }
