@@ -28,7 +28,7 @@
         <!-- TODO: Have the text here be set programmatically -->
         <TextView
             style="@style/TextAppearance.AppCompat.Title"
-            android:id="@+id/launch_text_version"
+            android:id="@+id/launch_text_app_version"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

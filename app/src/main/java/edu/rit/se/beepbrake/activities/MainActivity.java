@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         setContentView(R.layout.activity_main);
 //        setContentView(R.layout.camera_preview);
         Utilities.hideStatusBar(getWindow());
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         initBottomSheet();

@@ -1,7 +1,6 @@
 package edu.rit.se.beepbrake.web;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.rit.se.beepbrake.utils.SharedPreferencesDirector;
+import edu.rit.se.beepbrake.utils.Preferences;
 
 // Created by richykapadia on 4/4/16.
 public class UploadThread implements Runnable {

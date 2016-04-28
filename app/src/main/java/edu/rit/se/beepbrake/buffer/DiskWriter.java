@@ -20,25 +20,26 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import edu.rit.se.beepbrake.segment.Segment;
+import edu.rit.se.beepbrake.utils.Preferences;
 import edu.rit.se.beepbrake.web.WebManager;
 
 // TODO: Have diskwriter pull from SharedPreferences for writing
 public class DiskWriter extends Thread implements Runnable {
     private final String path;
 
-    // Bytes to write
+    /** Bytes to write */
     private final MatOfByte buf = new MatOfByte();
 
-    // Application context. Needed to make private app files
+    /** Application context. Needed to make private app files */
     private Context context;
 
-    // Signal that all segments for this event have been put into the queue
+    /** Signal that all segments for this event have been put into the queue */
     private boolean endReached;
 
-    // ID for the event being written - same as timestamp of first segment
+    /** ID for the event being written - same as timestamp of first segment */
     private long eventId;
 
-    // Queue of segments to write to disk
+    /** Queue of segments to write to disk */
     private ConcurrentLinkedQueue<Segment> segments;
 
     public DiskWriter(long id, Context con) {
@@ -59,8 +60,12 @@ public class DiskWriter extends Thread implements Runnable {
     public void run() {
         Log.d("bufer System", "DiskWriter starting");
         //File name format: 'androidID'_'eventID'
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        String baseName = deviceId + "_" + String.valueOf(eventId);
+
+        // String deviceID = Preferences.getSetting(context, "androidid", "42");
+
+        String androidID =
+            Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String baseName = androidID + "_" + String.valueOf(eventId);
         String fileName = baseName + ".json";
         FileOutputStream fos;
         ZipOutputStream zos;
@@ -77,13 +82,15 @@ public class DiskWriter extends Thread implements Runnable {
             // TODO: Change here to pull from shared prefs
 
             //Print file header
-            json.append("{\"deviceid\":\"" + deviceId + "\",");
+            json.append("{\"deviceid\":\"" + androidID + "\",");
             //hardware type
             json.append("\"hardware\":\"" + Build.DISPLAY + "\",");
             //OS version
             json.append("\"osversion\":\"" + Build.VERSION.RELEASE + "\",");
             //App version
-            json.append("\"appversion\":\"" + context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName + "\",");
+            json.append("\"appversion\":\"" + context.getPackageManager()
+                                                     .getPackageInfo(context.getPackageName(),
+                                                         0).versionName + "\",");
             //Local event ID
             json.append("\"eventdata\":" + String.valueOf(eventId) + ",");
             //Local Timezone]
@@ -103,8 +110,8 @@ public class DiskWriter extends Thread implements Runnable {
                     //If the list is currently empty, wait, then try again
                     sleep(1000);
                 } else {
-                    if (first)  first = false;
-                    else        json.append(",");
+                    if (first) first = false;
+                    else json.append(",");
 
                     writeSegment(s, json, zos);
                 }
@@ -137,10 +144,16 @@ public class DiskWriter extends Thread implements Runnable {
         }
     }
 
-    // Signal that the event is over and all segments have been added
+    private class JSONBuilder {
+        StringBuilder json = new StringBuilder();
+
+
+    }
+
+    /** Signal that the event is over and all segments have been added */
     public void signalEnd() { endReached = true; }
 
-    // Add a segment to the queue to be written to disk
+    /** Add a segment to the queue to be written to disk */
     public void addSegment(Segment seg) { segments.add(seg); }
 
     private void writeConfiguration(StringBuilder json) throws IOException {
@@ -159,7 +172,8 @@ public class DiskWriter extends Thread implements Runnable {
      *
      * @param seg - the segment to read
      */
-    private void writeSegment(Segment seg, StringBuilder json, ZipOutputStream zip) throws IOException {
+    private void writeSegment(Segment seg, StringBuilder json, ZipOutputStream zip)
+        throws IOException {
         Log.d("bufer system", "Start of writeSegment");
         //Segment header
         // TODO: change to pull from string resources
@@ -188,7 +202,8 @@ public class DiskWriter extends Thread implements Runnable {
             json.append(",{\"key\":\"" + k + "\",\"value\":");
             Object data = seg.getDataObject(k);
             //Need to add Quotation marks around Strings
-            keyValue = (data.getClass() == String.class) ? "\"" + data.toString() + "\"" : data.toString();
+            keyValue =
+                (data.getClass() == String.class) ? "\"" + data.toString() + "\"" : data.toString();
 
             json.append(keyValue);
             json.append("}");
@@ -197,5 +212,4 @@ public class DiskWriter extends Thread implements Runnable {
         //Segment closing
         json.append("]}");
     }
-
 }
