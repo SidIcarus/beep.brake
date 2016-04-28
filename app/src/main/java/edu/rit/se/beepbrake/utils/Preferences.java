@@ -56,13 +56,7 @@ public class Preferences {
         }
 
         /**
-         *
-         * @param ctx
          * @param type {@link Type} #Type is
-         * @param name
-         * @param defaultVal
-         * @param optDefaultVal
-         * @return
          */
         private static Object get(Context ctx, @Type int type, String name, Object defaultVal,
             Object optDefaultVal) {
@@ -198,10 +192,14 @@ public class Preferences {
         return (Boolean) settings.get(ctx, settings.Type.BOOL, name, defaultValue);
     }
 
-    public static Date getSetting(Context ctx, String name) {
-        return (Date) settings
-            .get(ctx, settings.Type.DATE, name, new Date(System.currentTimeMillis()),
-                TimeZone.getDefault());
+    /** If !useGivenDefaults: defaultDate = today's date, defaultZone = TimeZone.getDefault() */
+    public static Date getSetting(Context ctx, String name, Date defaultDate, TimeZone defaultZone,
+        Boolean useGivenDefaults) {
+        if (!useGivenDefaults) {
+            defaultDate = new Date(System.currentTimeMillis());
+            defaultZone = TimeZone.getDefault();
+        }
+        return (Date) settings.get(ctx, settings.Type.DATE, name, defaultDate, defaultZone);
     }
 
     public static Float getSetting(Context ctx, String name, Float defaultValue) {

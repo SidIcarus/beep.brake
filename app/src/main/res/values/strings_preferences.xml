@@ -3,8 +3,9 @@
     <string name="device_id">deviceid</string>
     <string name="device_os">osversion</string>
     <string name="device_bootloader">device_bootloader</string>
-    <string name="device_board"></string>
+    <string name="device_board">device_board</string>
 
+    <string name="device_write_path">device_write_path</string>
 
     <string name="app_version">appversion</string>
     <string name="eula_status">eula_status</string>
