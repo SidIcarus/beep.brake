@@ -36,9 +36,7 @@ public class DecisionManager {
         if(lastWarn == null || curTime.after(new Date(lastWarn.getTime() + 1000))) {
             //Driver alert beep
             ToneGenerator tone = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-            for(int i = 0; i < 3; i++) {
-                tone.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 200);
-            }
+            tone.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 200);
         }
         bufMan.warningTriggered();
         lastWarn = curTime;
