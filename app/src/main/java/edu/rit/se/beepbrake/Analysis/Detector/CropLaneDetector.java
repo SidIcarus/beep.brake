@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Analysis.Detector;
+package edu.rit.se.beepbrake.analysis.Detector;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -8,7 +8,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 
-import edu.rit.se.beepbrake.Analysis.DetectorCallback;
+import edu.rit.se.beepbrake.analysis.DetectorCallback;
 
 // Created by richykapadia on 1/19/16.
 public class CropLaneDetector implements Detector {

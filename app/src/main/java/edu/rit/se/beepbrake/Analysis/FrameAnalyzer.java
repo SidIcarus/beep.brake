@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Analysis;
+package edu.rit.se.beepbrake.analysis;
 
 import android.util.Log;
 
@@ -7,8 +7,8 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.rit.se.beepbrake.Analysis.Detector.Detector;
-import edu.rit.se.beepbrake.TempLogger;
+import edu.rit.se.beepbrake.analysis.Detector.Detector;
+import edu.rit.se.beepbrake.utils.TempLogger;
 
 /**
  * Created by richykapadia on 9/24/15.

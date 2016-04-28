@@ -25,8 +25,6 @@ public class FragmentDirector {
         }};
     }
 
-
-
     private FragmentManager fManager;
 
     @AppFragments private int currentFragment;

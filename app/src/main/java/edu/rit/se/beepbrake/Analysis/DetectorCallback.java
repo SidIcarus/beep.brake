@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Analysis;
+package edu.rit.se.beepbrake.analysis;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;

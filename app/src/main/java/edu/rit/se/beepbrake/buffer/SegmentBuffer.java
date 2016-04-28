@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.rit.se.beepbrake.Segment.Segment;
+import edu.rit.se.beepbrake.segment.Segment;
 
 public class SegmentBuffer {
 

@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Web;
+package edu.rit.se.beepbrake.web;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -51,6 +51,8 @@ public class WebManager extends BroadcastReceiver {
         triggerUpload();
     }
 
+    // TODO: Implement Producer / Consumer pattern here with Upload thread
+    // This is the consumer
     public void triggerUpload() {
         if (hasWifi()) {
             Log.d("Web", "Connection!");

@@ -54,19 +54,19 @@ public abstract class PreferenceFragment2 extends DialogFragment {
         setStyle(android.support.v4.app.DialogFragment.STYLE_NORMAL, R.style.AppTheme_DayNight);
         try {
             Constructor<PreferenceManager> c =
-                    PreferenceManager.class.getDeclaredConstructor(Activity.class, int.class);
+                PreferenceManager.class.getDeclaredConstructor(Activity.class, int.class);
             c.setAccessible(true);
             mPreferenceManager = c.newInstance(this.getActivity(), FIRST_REQUEST_CODE);
         } catch (Exception e) { }
     }
 
     @Override public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup,
-                                       Bundle savedInstanceState) {
+        Bundle savedInstanceState) {
         ListView listView = new ListView(getActivity());
         listView.setId(android.R.id.list);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             final int horizontalPadding =
-                    (int) (HC_HORIZONTAL_PADDING * getResources().getDisplayMetrics().density);
+                (int) (HC_HORIZONTAL_PADDING * getResources().getDisplayMetrics().density);
             listView.setPadding(horizontalPadding, 0, horizontalPadding, 0);
         }
         return listView;
@@ -126,8 +126,7 @@ public abstract class PreferenceFragment2 extends DialogFragment {
         super.onActivityResult(requestCode, resultCode, data);
         try {
             Method m = PreferenceManager.class
-                    .getDeclaredMethod("dispatchActivityResult", int.class, int.class,
-                                       Intent.class);
+                .getDeclaredMethod("dispatchActivityResult", int.class, int.class, Intent.class);
             m.setAccessible(true);
             m.invoke(mPreferenceManager, requestCode, resultCode, data);
         } catch (Exception e) { }
@@ -137,8 +136,8 @@ public abstract class PreferenceFragment2 extends DialogFragment {
 
     public void setPreferenceScreen(PreferenceScreen screen) {
         try {
-            Method m = PreferenceManager.class
-                    .getDeclaredMethod("setPreferences", PreferenceScreen.class);
+            Method m =
+                PreferenceManager.class.getDeclaredMethod("setPreferences", PreferenceScreen.class);
             m.setAccessible(true);
             boolean result = (Boolean) m.invoke(mPreferenceManager, screen);
             if (result && (screen != null)) {
@@ -160,10 +159,10 @@ public abstract class PreferenceFragment2 extends DialogFragment {
         requirePreferenceManager();
         try {
             Method m = PreferenceManager.class
-                    .getDeclaredMethod("inflateFromIntent", Intent.class, PreferenceScreen.class);
+                .getDeclaredMethod("inflateFromIntent", Intent.class, PreferenceScreen.class);
             m.setAccessible(true);
             PreferenceScreen screen =
-                    (PreferenceScreen) m.invoke(mPreferenceManager, intent, getPreferenceScreen());
+                (PreferenceScreen) m.invoke(mPreferenceManager, intent, getPreferenceScreen());
             setPreferenceScreen(screen);
         } catch (Exception e) { }
     }
@@ -172,11 +171,11 @@ public abstract class PreferenceFragment2 extends DialogFragment {
         requirePreferenceManager();
         try {
             Method m = PreferenceManager.class
-                    .getDeclaredMethod("inflateFromResource", Context.class, int.class,
-                                       PreferenceScreen.class);
+                .getDeclaredMethod("inflateFromResource", Context.class, int.class,
+                    PreferenceScreen.class);
             m.setAccessible(true);
             PreferenceScreen screen = (PreferenceScreen) m
-                    .invoke(mPreferenceManager, getActivity(), resId, getPreferenceScreen());
+                .invoke(mPreferenceManager, getActivity(), resId, getPreferenceScreen());
             setPreferenceScreen(screen);
         } catch (Exception e) { }
     }
@@ -216,13 +215,13 @@ public abstract class PreferenceFragment2 extends DialogFragment {
         View rawListView = root.findViewById(android.R.id.list);
         if (!(rawListView instanceof ListView)) {
             throw new RuntimeException(
-                    "Content has view with id attribute 'android.R.id.list' that is not a " +
-                    "ListView class");
+                "Content has view with id attribute 'android.R.id.list' that is not a " +
+                "ListView class");
         }
         mList = (ListView) rawListView;
         if (mList == null) {
             throw new RuntimeException(
-                    "Your content must have a ListView whose id attribute is 'android.R.id.list'");
+                "Your content must have a ListView whose id attribute is 'android.R.id.list'");
         }
         mHandler.sendEmptyMessage(MSG_REQUEST_FOCUS);
     }

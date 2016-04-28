@@ -19,9 +19,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import edu.rit.se.beepbrake.Segment.Segment;
-import edu.rit.se.beepbrake.Web.WebManager;
-
+import edu.rit.se.beepbrake.segment.Segment;
+import edu.rit.se.beepbrake.web.WebManager;
 
 // TODO: Have diskwriter pull from SharedPreferences for writing
 public class DiskWriter extends Thread implements Runnable {
@@ -44,7 +43,9 @@ public class DiskWriter extends Thread implements Runnable {
 
     public DiskWriter(long id, Context con) {
         this.eventId = id;
-        this.path = Environment.getExternalStorageDirectory() + "/write_segments/" + String.valueOf(eventId) + "/";
+
+        // TODO: Check for external storage permission + if there is an external storage
+        this.path = Environment.getExternalStorageDirectory() + "/write_segments/";
         this.context = con;
         this.segments = new ConcurrentLinkedQueue<>();
         this.endReached = false;
@@ -72,6 +73,8 @@ public class DiskWriter extends Thread implements Runnable {
             //open the Zip File
             FileOutputStream zip_file = new FileOutputStream(path + baseName + ".zip");
             zos = new ZipOutputStream(new BufferedOutputStream(zip_file));
+
+            // TODO: Change here to pull from shared prefs
 
             //Print file header
             json.append("{\"deviceid\":\"" + deviceId + "\",");
@@ -122,6 +125,9 @@ public class DiskWriter extends Thread implements Runnable {
             zos.write(json.toString().getBytes());
             zos.close();
 
+            //TODO: implement producer consumer pattern with webmanager
+            // This is the producer
+
             //Queue Upload
             WebManager.getInstance().triggerUpload();
 
@@ -138,7 +144,7 @@ public class DiskWriter extends Thread implements Runnable {
     public void addSegment(Segment seg) { segments.add(seg); }
 
     private void writeConfiguration(StringBuilder json) throws IOException {
-        //TODO actually read from configuration file
+        //TODO actually read from shared prefs
         json.append("\"configuration\": {");
 
         //Each configuration item
@@ -156,6 +162,7 @@ public class DiskWriter extends Thread implements Runnable {
     private void writeSegment(Segment seg, StringBuilder json, ZipOutputStream zip) throws IOException {
         Log.d("bufer system", "Start of writeSegment");
         //Segment header
+        // TODO: change to pull from string resources
         json.append("{\"segtime\":" + String.valueOf(seg.getCreatedAt()));
         json.append(",\"sensordata\": [");
 

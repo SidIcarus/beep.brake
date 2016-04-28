@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Segment;
+package edu.rit.se.beepbrake.segment;
 
 // v
 

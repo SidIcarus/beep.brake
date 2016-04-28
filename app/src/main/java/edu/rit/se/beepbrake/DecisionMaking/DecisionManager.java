@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.DecisionMaking;
+package edu.rit.se.beepbrake.decisionMaking;
 
 //created by RyanBega 2/8/16
 

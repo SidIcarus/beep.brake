@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Segment;
+package edu.rit.se.beepbrake.segment;
 
 // Created by Bradley on 1/11/2016.
 import org.opencv.core.Mat;

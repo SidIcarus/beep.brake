@@ -10,8 +10,6 @@
         android:layout_height="match_parent"
         android:background="@drawable/splash_img"/>
 
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,8 +25,10 @@
             android:textColor="@android:color/primary_text_dark"
             android:textStyle="bold"/>
 
+        <!-- TODO: Have the text here be set programmatically -->
         <TextView
             style="@style/TextAppearance.AppCompat.Title"
+            android:id="@+id/launch_text_version"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

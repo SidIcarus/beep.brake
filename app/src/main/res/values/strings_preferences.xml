@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="device_id">deviceid</string>
+    <string name="device_os">osversion</string>
+    <string name="device_bootloader">device_bootloader</string>
+    <string name="device_board"></string>
+
+
+    <string name="app_version">appversion</string>
+    <string name="eula_status">eula_status</string>
+    <string name="eula_status_change_date">eula_status_date</string>
+    <string name="upload_paths">upload_paths</string>
+
+
+    <string name="warning_time">warningtime</string>
+
+
+</resources>

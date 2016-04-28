@@ -1,9 +1,9 @@
-package edu.rit.se.beepbrake.DecisionMaking;
+package edu.rit.se.beepbrake.decisionMaking;
 
 // Created by Ryan on 3/3/16.
 import android.util.Log;
 
-import edu.rit.se.beepbrake.Segment.Constants;
+import edu.rit.se.beepbrake.segment.Constants;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class AccelerometerDecision extends Decision {

@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake;
+package edu.rit.se.beepbrake.utils;
 
 import android.util.Log;
 

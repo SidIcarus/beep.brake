@@ -1,7 +1,7 @@
 // Created by Ryan Bega on 2/10/16.
-package edu.rit.se.beepbrake.DecisionMaking;
+package edu.rit.se.beepbrake.decisionMaking;
 
-import edu.rit.se.beepbrake.Segment.Segment;
+import edu.rit.se.beepbrake.segment.Segment;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 abstract class Decision implements Runnable {

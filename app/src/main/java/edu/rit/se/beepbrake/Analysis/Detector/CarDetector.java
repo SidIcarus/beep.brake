@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Analysis.Detector;
+package edu.rit.se.beepbrake.analysis.Detector;
 
 import android.util.Log;
 
@@ -10,8 +10,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
-import edu.rit.se.beepbrake.Analysis.DetectorCallback;
-import edu.rit.se.beepbrake.TempLogger;
+import edu.rit.se.beepbrake.analysis.DetectorCallback;
+import edu.rit.se.beepbrake.utils.TempLogger;
 
 // Created by richykapadia on 1/11/16.
 public class CarDetector implements Detector {

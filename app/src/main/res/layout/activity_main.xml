@@ -2,35 +2,50 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/grand_poobah"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/AppTheme.DayNight"
-    tools:context=".activities.MainActivity2">
+    tools:context=".activities.MainActivity">
 
     <!--<include layout="@layout/content_main"/>-->
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/g_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-    </android.support.design.widget.AppBarLayout>
-
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/g_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    <include layout="@layout/bottom_sheet"
-             android:id="@+id/g_bottom_sheet"/>
+    <include
+        android:id="@+id/g_bottom_sheet"
+        layout="@layout/bottom_sheet"/>
+    <!--
+    <org.opencv.android.JavaCameraView
+        android:id="@+id/CameraPreview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone"
+        opencv:camera_id="any"
+        opencv:show_fps="true"/>
+    -->
+
+    <!--
+    <Button
+        android:id="@+id/triggerWarning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/CameraPreview"
+        android:text="Trigger Warning"/>
+
+    <Button
+        android:id="@+id/printLogs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/triggerWarning"
+        android:text="Print Logs"/>
+    -->
 
 </android.support.design.widget.CoordinatorLayout>

@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.DecisionMaking;
+package edu.rit.se.beepbrake.decisionMaking;
 
 // Created by Ryan 2/8/16
 
@@ -7,7 +7,7 @@ import android.util.Log;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import edu.rit.se.beepbrake.Segment.Constants;
+import edu.rit.se.beepbrake.segment.Constants;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class CameraDecision extends Decision {

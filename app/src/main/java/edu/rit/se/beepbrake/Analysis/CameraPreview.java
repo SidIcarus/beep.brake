@@ -1,4 +1,4 @@
-package edu.rit.se.beepbrake.Analysis;
+package edu.rit.se.beepbrake.analysis;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
@@ -9,7 +9,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.rit.se.beepbrake.TempLogger;
+import edu.rit.se.beepbrake.utils.TempLogger;
 
 /**
  * Created by richykapadia on 9/21/15
