@@ -41,4 +41,9 @@ abstract class Decision implements Runnable{
     protected void setRunning(boolean running){
         this.running = running;
     }
+
+    protected void warn(){
+        curSeg.addDataObject("Warning", true);
+        decMan.warn();
+    }
 }

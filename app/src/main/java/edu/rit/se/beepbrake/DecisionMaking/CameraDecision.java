@@ -70,9 +70,9 @@ public class CameraDecision extends Decision{
 
     }
 
-    private void warn(){
+    protected void warn(){
         curSeg.addDataObject("CameraWarning", "true");
-        decMan.warn();
+        super.warn();
     }
 }
 
