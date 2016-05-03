@@ -176,5 +176,15 @@ public class Utils {
 
     public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
 
+    public static String getWritePath(Context ctx) {
+        int wDirID = R.string.write_directory;
+        String defaultWDir = ctx.getString(wDirID);
+        String wDirName = Utils.resToName(ctx.getResources(), wDirID);
+        String wDir = Preferences.getSetting(ctx, wDirName, defaultWDir);
+        String wPath = Preferences.getSetting(ctx, "write_path", ctx.getFilesDir().getPath());
+
+        return wPath + wDir;
+    }
+
     //public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
 }

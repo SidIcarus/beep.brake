@@ -23,7 +23,7 @@ public class AccelerometerSensor implements SensorEventListener {
 
         if (checkAvailability()) {
             this.Accelerometer = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            this.manager.registerListener(this, Accelerometer, manager.SENSOR_DELAY_NORMAL);
+            this.manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             this.segSync = segSync;
         }
     }
@@ -60,6 +60,6 @@ public class AccelerometerSensor implements SensorEventListener {
 
     private boolean checkAvailability() {
         PackageManager pm = context.getPackageManager();
-        return pm.hasSystemFeature(pm.FEATURE_SENSOR_ACCELEROMETER);
+        return pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER);
     }
 }

@@ -66,9 +66,9 @@ public class GPSSensor implements LocationListener {
     private boolean checkPermission() {
         PackageManager pm = context.getPackageManager();
         int hasPermission = pm.checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, context.getPackageName());
-        if (hasPermission == pm.PERMISSION_GRANTED) {
+        if (hasPermission == PackageManager.PERMISSION_GRANTED) {
             return true;
-        } else if (hasPermission == pm.PERMISSION_DENIED) {
+        } else if (hasPermission == PackageManager.PERMISSION_DENIED) {
             //TODO warn the user GPS doesn't work
 
             return false;

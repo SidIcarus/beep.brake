@@ -25,6 +25,8 @@ public class WebManager extends BroadcastReceiver {
     private ConnectivityManager connectionManager;
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
+    private final String logTag = "System.Web";
+
     //Singleton implementation
     private WebManager() { }
 
@@ -34,6 +36,13 @@ public class WebManager extends BroadcastReceiver {
         return instance;
     }
 
+    // Callback function listening to wifi
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(logTag, "onReceive");
+        triggerUpload();
+    }
+
     // Set this in the Main Activity before setting the listeners
     public void setConnectionManager(ConnectivityManager connectionManager) {
         this.connectionManager = connectionManager;
@@ -41,25 +50,17 @@ public class WebManager extends BroadcastReceiver {
 
     public boolean hasWifi() {
         NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
-        boolean wifiConnected =
-            (activeNetwork != null) && (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
-        return wifiConnected;
-    }
-
-    // Callback function listening to wifi
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        Log.d("Web", "onReceive");
-        triggerUpload();
+        return (activeNetwork != null) &&
+               (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
     }
 
     // TODO: Implement Producer / Consumer pattern here with Upload thread
     // This is the consumer
     public void triggerUpload() {
         if (hasWifi()) {
-            Log.d("Web", "Connection!");
+            Log.d(logTag, "Connection!");
             uploadFiles();
-        } else Log.d("Web", "No Connection!");
+        } else Log.d(logTag, "No Connection!");
     }
 
     // starts a low priority thread to scan for zip events to upload and sends them to the server
@@ -69,6 +70,6 @@ public class WebManager extends BroadcastReceiver {
             Thread t = new Thread(new UploadThread(url, SEGMENT_DIR));
             t.setPriority(Thread.MIN_PRIORITY);
             t.start();
-        } catch (IOException e) { Log.e("Web", e.getMessage()); }
+        } catch (IOException e) { Log.e(logTag, e.getMessage()); }
     }
 }

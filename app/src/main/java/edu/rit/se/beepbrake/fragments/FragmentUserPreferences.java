@@ -36,7 +36,7 @@ public class FragmentUserPreferences extends PreferenceFragment2
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
 
-        letterSizePref = (Preference) findPreference("letterSize");
+        letterSizePref = findPreference("letterSize");
 
         // From here this is your default user settings stuff
         return rootView;

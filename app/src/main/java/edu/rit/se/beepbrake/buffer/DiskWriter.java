@@ -3,7 +3,6 @@ package edu.rit.se.beepbrake.buffer;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.JsonWriter;
@@ -15,6 +14,7 @@ import org.opencv.core.MatOfInt;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,16 +27,14 @@ import java.util.zip.ZipOutputStream;
 import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.segment.Segment;
 import edu.rit.se.beepbrake.utils.Preferences;
-import edu.rit.se.beepbrake.utils.PreferencesHelper;
 import edu.rit.se.beepbrake.utils.Utils;
 import edu.rit.se.beepbrake.web.WebManager;
 
-// TODO: Have diskwriter pull from SharedPreferences for writing
-public class DiskWriter extends Thread implements Runnable {
+public class DiskWriter extends Thread {
     private final String path;
 
     /** Bytes to write */
-    @Nullable private final MatOfByte buf = new MatOfByte();
+    @Nullable private final MatOfByte mBuffer = new MatOfByte();
 
     /** Application context. Needed to make private app files */
     @NonNull private Context context;
@@ -50,11 +48,13 @@ public class DiskWriter extends Thread implements Runnable {
     /** Queue of segments to write to disk */
     private ConcurrentLinkedQueue<Segment> segments;
 
-    public DiskWriter(long eventID, Context context) {
+    private final String logTag = "System.Buffer";
+
+    public DiskWriter(long eventID, @NonNull Context context) {
         this.eventID = eventID;
         // TODO: Make this is a soft or weak reference
         this.context = context;
-        this.path = PreferencesHelper.getWritePath(context);
+        this.path = Utils.getWritePath(context);
         this.segments = new ConcurrentLinkedQueue<>();
         this.endReached = false;
     }
@@ -71,7 +71,7 @@ public class DiskWriter extends Thread implements Runnable {
      * Dereferences as it goes to cut down on memory usage
      */
     public void run() {
-        Log.d("bufer System", "DiskWriter starting");
+        Log.d(logTag, "Commencing DiskWriter.run()");
         //File name format: 'androidID'_'eventID'
 
         String androidID = Preferences.getSetting(context, "androidid", "42");
@@ -79,7 +79,7 @@ public class DiskWriter extends Thread implements Runnable {
         String baseName = androidID + "_" + String.valueOf(eventID);
         String fileName = baseName + ".json";
         FileOutputStream fos;
-        ZipOutputStream zos;
+        ZipOutputStream zipOut;
         StringBuilder json = new StringBuilder();
 
         try {
@@ -87,62 +87,59 @@ public class DiskWriter extends Thread implements Runnable {
             if (!writeDir.exists()) writeDir.mkdirs();
 
             //open the Zip File
-            FileOutputStream zip_file = new FileOutputStream(path + baseName + ".zip");
-            zos = new ZipOutputStream(new BufferedOutputStream(zip_file));
+            FileOutputStream fileOut = new FileOutputStream(path + baseName + ".zip");
+            zipOut = new ZipOutputStream(new BufferedOutputStream(fileOut));
 
-            // TODO: Change here to pull from shared prefs
-            String appVersion =
-                context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+            String appVersion = Utils.getAppVersion(context);
 
-            writeJson(zos, appVersion, androidID);
+            byte[] jsonBytes = getJsonBytes(zipOut, appVersion, androidID);
 
+            zipOut.putNextEntry(new ZipEntry(fileName));
 
-            ZipEntry jsonfile = new ZipEntry(fileName);
-            zos.putNextEntry(jsonfile);
-            zos.write(json.toString().getBytes());
-            zos.close();
+            zipOut.write(jsonBytes);
+            zipOut.flush();
+            zipOut.close();
 
-            //TODO: implement producer consumer pattern with webmanager
-            // This is the producer
-
-            //Queue Upload
-            // TODO: make this not get called here but have it webmanager listen for when  all
-            // the paths have been all written. Use mutex.
             WebManager.getInstance().triggerUpload();
 
         } catch (Exception e) {
-            Log.d("bufer System", "Error in main DiskWriter loop");
+            Log.d(logTag, "Error in main DiskWriter loop");
             e.printStackTrace();
         }
     }
 
-    public void writeJson(ZipOutputStream zip, String appVersion, String androidID)
+    // TODO: Get clarification on the OutputStreams / Writers
+    private byte[] getJsonBytes(ZipOutputStream zipOut, String appVersion, String androidID)
         throws IOException, InterruptedException {
-        JsonWriter writer = new JsonWriter(new OutputStreamWriter(zip, "UTF-8"));
+        try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+             JsonWriter writer = new JsonWriter(new OutputStreamWriter(byteOut, "UTF-8"))) {
 
-        writer.setIndent("  ");
-        writer.beginObject();
+            writer.setIndent("  ");
+            writer.beginObject();
 
-        writeDeviceInfo(writer, appVersion, androidID);
-        writeConfigObject(writer);
-        writeSegmentArray(writer, zip);
+            writeDeviceInfo(writer, appVersion, androidID);
+            writeConfigObject(writer);
+            writeSegmentArray(writer, zipOut);
 
-        writer.endObject()
-              .close();
+            writer.endObject()
+                  .close();
 
+            byteOut.flush();
+            return byteOut.toByteArray();
+        }
     }
 
-    public void writeDeviceInfo(JsonWriter writer, String appVersion, String androidID)
+    private void writeDeviceInfo(JsonWriter writer, String appVer, String androidID)
         throws IOException {
         writer.name("deviceid").value(androidID)
               .name("hardware").value(Build.DISPLAY)
               .name("osversion").value(Build.VERSION.RELEASE)
-              .name("appversion").value(appVersion)
+              .name("appversion").value(appVer)
               .name("eventdata").value(String.valueOf(eventID))
               .name("timezone").value(TimeZone.getDefault().getID());
     }
 
-    public void writeConfigObject(JsonWriter writer) throws IOException {
+    private void writeConfigObject(JsonWriter writer) throws IOException {
         Resources res = context.getResources();
         int wtID = R.integer.warningtime;
         writer.name("configuration").beginObject()
@@ -151,11 +148,11 @@ public class DiskWriter extends Thread implements Runnable {
               .endObject();
     }
 
-    public void writeSegmentArray(JsonWriter writer, ZipOutputStream zip)
+    private void writeSegmentArray(JsonWriter writer, ZipOutputStream zipOut)
         throws IOException, InterruptedException {
         writer.name("segments").beginArray();
 
-        Log.d("bufer system", "Starting to check for segments");
+        Log.d(logTag, "Checking for segments");
         //segment contents
         boolean first = true;
         Segment seg;
@@ -167,13 +164,13 @@ public class DiskWriter extends Thread implements Runnable {
                 if (first) first = false;
                 // else json.append(",");
 
-                writeSegmentObject(writer, seg, zip);
+                writeSegmentObject(writer, seg, zipOut);
             }
         }
-        Log.d("bufer system", "Diskwriter checking queue after being notified endReached");
+        Log.d(logTag, "Diskwriter checking queue after being notified endReached");
         //We've been notified that all segments are in the queue, but we may not have written all of
         // them to disk yet
-        while ((seg = segments.poll()) != null) writeSegmentObject(writer, seg, zip);
+        while ((seg = segments.poll()) != null) writeSegmentObject(writer, seg, zipOut);
     }
 
     /**
@@ -181,9 +178,9 @@ public class DiskWriter extends Thread implements Runnable {
      *
      * @param seg - the segment to read
      */
-    public void writeSegmentObject(JsonWriter writer, Segment seg, ZipOutputStream zip)
+    private void writeSegmentObject(JsonWriter writer, Segment seg, ZipOutputStream zipOut)
         throws IOException {
-        Log.d("System.Buffer", "Writing segmentObject");
+        Log.d(logTag, "Writing segmentObject");
 
         Long segTime = seg.getCreatedAt();
         writer.beginObject()
@@ -201,7 +198,7 @@ public class DiskWriter extends Thread implements Runnable {
                   .name("value").value(filepath)
                   .endObject();
 
-            imgToZip(zip, imgName, filepath, img);
+            imgToZip(zipOut, imgName, filepath, img);
         }
 
         String value;
@@ -216,18 +213,19 @@ public class DiskWriter extends Thread implements Runnable {
                   .name("value").value(value)
                   .endObject();
         }
+        Log.d(logTag, "segmentObject complete");
     }
 
-    private void imgToZip(ZipOutputStream zip, String imgName, String filepath, Mat img)
+    private void imgToZip(ZipOutputStream zipOut, String imgName, String filepath, Mat img)
         throws IOException {
+        Log.d(logTag, "Writing image to zip");
         MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
 
-        Imgcodecs.imencode(filepath, img, buf, param);
+        Imgcodecs.imencode(filepath, img, mBuffer, param);
 
-        ZipEntry ze = new ZipEntry(imgName);
-        zip.putNextEntry(ze);
-        zip.write(buf.toArray());
+        zipOut.putNextEntry(new ZipEntry(imgName));
+        if (mBuffer != null) zipOut.write(mBuffer.toArray());
 
-        Log.d("System.Buffer", "Wrote image to zip");
+        Log.d(logTag, "Image written to zip.");
     }
 }

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -34,24 +35,26 @@ until it has a chance to be written to SP.
 TODO: SP - log when we upload the UID for the device that we are creating uploaded it
  */
 
+@SuppressWarnings("unused")
 public class Preferences {
+
 
     /** Contains all the actual functionality. */
     private static class settings {
 
+        private static WeakReference<Context> mContext;
         private static SharedPreferences settings;
 
         /** Will instantiate the SharedPreferences singleton if it hasn't done so already. */
         private static void newInstance(Context ctx) {
             if (settings == null)
                 settings = ctx.getSharedPreferences(Preference.FILE_NAME, Context.MODE_PRIVATE);
+            if(mContext == null) mContext =  new WeakReference<>(ctx);
         }
 
-        /**
-         * @param type {@link PreferenceType} #Type is
-         */
+        @SuppressWarnings("unchecked")
         private static Object get(@NonNull Context ctx, @PreferenceType int type,
-            @NonNull String name, @Nullable Object defaultVal, @Nullable Object optDefaultVal) {
+            @Nullable String name, @Nullable Object defaultVal, @Nullable Object optDefaultVal) {
             newInstance(ctx);
 
             try {
@@ -94,27 +97,19 @@ public class Preferences {
         }
 
         /** Alias for get(Context, @Type int, String, Object, Object) */
-        private static Object get(Context ctx, @PreferenceType int type) {
+        private static Object get(@NonNull Context ctx, @PreferenceType int type) {
             return get(ctx, type, null, null, null);
         }
 
         /** Alias for get(Context, @Type int, String, Object, Object) */
-        private static Object get(Context ctx, @PreferenceType int type, String name,
-            Object defaultVal) {
+        private static Object get(@NonNull Context ctx, @PreferenceType int type, @NonNull String name,
+            @NonNull Object defaultVal) {
             return get(ctx, type, name, defaultVal, null);
         }
 
-        /**
-         *
-         * @param ctx
-         * @param type
-         * @param name
-         * @param value
-         * @param optVal
-         */
         @SuppressWarnings("unchecked")
-        private static void set(@NonNull Context ctx, @PreferenceType int type, String name,
-            Object value, Object optVal) {
+        private static void set(@NonNull Context ctx, @PreferenceType int type, @NonNull String name,
+            @Nullable Object value, @Nullable Object optVal) {
             newInstance(ctx);
 
             SharedPreferences.Editor editor = settings.edit();
@@ -167,8 +162,10 @@ public class Preferences {
 
                 // TODO: Put new error messages here
                 if (value != null) {
-                    if (e instanceof ClassCastException) errorMsg = "";
-                    if (e instanceof UnsupportedOperationException) errorMsg = "";
+                    if (e instanceof ClassCastException)
+                        errorMsg = "ClassCastException";
+                    if (e instanceof UnsupportedOperationException)
+                        errorMsg = "UnsupportedOperationException";
                 }
                 e.printStackTrace();
             }
@@ -176,14 +173,14 @@ public class Preferences {
         }
 
         /** Alias for set(Context, @Type int, String, Object, Object) */
-        private static void set(Context ctx, @PreferenceType int type, String name, Object value) {
+        private static void set(@NonNull Context ctx, @PreferenceType int type, @NonNull  String name, @NonNull Object value) {
             set(ctx, type, name, value, null);
         }
     }
 
     /** @return A Map<String, ?> that contains all of the settings */
     @SuppressWarnings("unchecked")
-    public static Map<String, ?> getSettings(Context ctx) {
+    public static Map<String, ?> getSettings(@NonNull Context ctx) {
         return (Map<String, ?>) settings.get(ctx, PreferenceType.ALL);
     }
 
