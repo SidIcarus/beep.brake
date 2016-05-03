@@ -30,7 +30,7 @@ import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.segment.*;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 import edu.rit.se.beepbrake.fragments.*;
-import edu.rit.se.beepbrake.utils.Utilities;
+import edu.rit.se.beepbrake.utils.Utils;
 
 public class MainActivity extends AppCompatActivity implements DetectorCallback {
 
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     private DecisionManager decMan;
 
     public FragmentDirector fDirector;
-    public static Utilities utilities;
+    public static Utils utilities;
     boolean showFAB = true;
 
     private int mDayNightMode = AppCompatDelegate.MODE_NIGHT_AUTO;
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
         setContentView(R.layout.activity_main);
 //        setContentView(R.layout.camera_preview);
-        Utilities.hideStatusBar(getWindow());
+        Utils.hideStatusBar(getWindow());
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     protected void onResume() {
         super.onResume();
 
-        Utilities.hideStatusBar(getWindow());
+        Utils.hideStatusBar(getWindow());
         //        utilities.resumeAnimatable();
         //        utilities.resumeNightMode(getResources());
 

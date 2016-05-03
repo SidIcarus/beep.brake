@@ -9,7 +9,7 @@ Note: Preceding section numbering get set when sections are generated.
     <string name="eula_title">Terms and Conditions</string>
 
     <!-- First line of EULA. Replace $1$s w/ app_name -->
-    <string name="eula_notice">End User License Agreement for %1$s</string>
+    <string name="eula_notice">End User License Agreement for @string/app_name</string>
 
     <!-- First Paragraph of EULA. Replace $1$s, ($1$s), $1$s w/ company_name, (app_name), company_name -->
     <string name="eula_disclaimer">IMPORTANT. READ CAREFULLY: This End User License Agreement (“EULA”) is a legal agreement between you (either an individual or a single entity) and %1$s (%2$s) for software, owned by %3$s and its affiliated companies and its third party suppliers and licensors, that accompanies this EULA, which includes computer software and may include associated media, “online” or electronic documentation in connection with your use of this Device (“Software”)</string>

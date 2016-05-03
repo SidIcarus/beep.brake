@@ -19,7 +19,8 @@ import java.net.URL;
 public class WebManager extends BroadcastReceiver {
 
     private static WebManager instance;
-    static private String SEGMENT_DIR = Environment.getExternalStorageDirectory() + "/write_segments/";
+    static private String SEGMENT_DIR =
+        Environment.getExternalStorageDirectory() + "/write_segments/";
     // set once instead of allocating on callback
     private ConnectivityManager connectionManager;
     private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
@@ -40,7 +41,8 @@ public class WebManager extends BroadcastReceiver {
 
     public boolean hasWifi() {
         NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
-        boolean wifiConnected = (activeNetwork != null) && (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
+        boolean wifiConnected =
+            (activeNetwork != null) && (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
         return wifiConnected;
     }
 

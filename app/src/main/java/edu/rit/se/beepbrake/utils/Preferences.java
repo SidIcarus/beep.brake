@@ -6,11 +6,17 @@ import android.support.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 /*
 These are to be kept in mem until it has a chance to be written to SP. (the POST return #
@@ -40,11 +46,15 @@ public class Preferences {
     /** Contains all the actual functionality. */
     private static class settings {
 
-        @IntDef({Type.INT, Type.STR, Type.FLOAT, Type.BOOL, Type.LONG, Type.STR_SET, Type.DATE, Type.ALL})
-        @Retention(RetentionPolicy.RUNTIME)
+        // @formatter:off
+        @IntDef({Type.INT, Type.STR, Type.FLOAT, Type.BOOL, Type.LONG, Type.STR_SET, Type.DATE,
+                 Type.ALL})
+        @Retention(RetentionPolicy.CLASS)
+        @Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE})
         public @interface Type {
             int INT = 0, STR = 1, FLOAT = 2, BOOL = 3, LONG = 4, STR_SET = 5, DATE = 6, ALL = 7;
         }
+        // @formatter:on
 
         private static final String PREFERENCES_FILE = "beep_brake_settings";
         private static SharedPreferences settings;
@@ -231,7 +241,12 @@ public class Preferences {
         settings.set(ctx, settings.Type.BOOL, name, value);
     }
 
-    public static void setSetting(Context ctx, String name, Date date, TimeZone zone) {
+    public static void setSetting(Context ctx, String name, Date date, TimeZone zone,
+        Boolean useGivenDefaults) {
+        if (!useGivenDefaults) {
+            date = new Date(System.currentTimeMillis());
+            zone = TimeZone.getDefault();
+        }
         settings.set(ctx, settings.Type.DATE, name, date, zone);
     }
 

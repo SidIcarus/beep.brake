@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rit.se.beepbrake.R;
-import edu.rit.se.beepbrake.utils.Utilities;
+import edu.rit.se.beepbrake.utils.Utils;
 
 public class EULADialogFragment extends AppCompatDialogFragment {
 
@@ -50,7 +50,6 @@ public class EULADialogFragment extends AppCompatDialogFragment {
 
         setupToolbar();
 
-
         if (context instanceof OnEulaCompletedListener) {
             mListener = (OnEulaCompletedListener) context;
 
@@ -68,7 +67,7 @@ public class EULADialogFragment extends AppCompatDialogFragment {
         AppCompatActivity mActivity = (AppCompatActivity) this.getActivity();
         Toolbar toolbar = (Toolbar) mActivity.findViewById(R.id.toolbar);
 
-        Utilities.toggleHideyBar(getActivity().getWindow().getDecorView());
+        Utils.toggleHideyBar(getActivity().getWindow().getDecorView());
 
         mActivity.setSupportActionBar(toolbar);
     }
@@ -80,7 +79,6 @@ public class EULADialogFragment extends AppCompatDialogFragment {
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.fragment_eula);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
 
         return view;
     }

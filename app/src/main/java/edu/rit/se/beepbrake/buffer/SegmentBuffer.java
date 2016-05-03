@@ -10,42 +10,31 @@ import edu.rit.se.beepbrake.segment.Segment;
 
 public class SegmentBuffer {
 
-    /**
-     * Maximum amount of time (in millis) between segments to allow before removing old ones
-     */
+    /** Max amount of time (in millis) between segments to allow before removing old ones */
     private final int timediff = 6000;
-    /**
-     * Max length (in millis) of an event
-     */
+
+    /** Max length (in millis) of an event */
     private final int maxtime = 20000;
-    /**
-     * Application context, used for getting file locations
-     */
+
+    /** App context, used for getting file locations */
     private Context context;
-    /**
-     * The segment most recently added to the buffer
-     */
+
+    /** The segment most recently added to the buffer */
     private Segment newest;
-    /**
-     * The oldest segment still in the buffer
-     */
+
+    /** The oldest segment still in the buffer */
     private Segment oldest;
-    /**
-     * The timestamp of the last issued warning, for determining when to stop saving segments to disk
-     */
+
+    /** The timestamp of the last issued warning, for determining when to stop saving segs to disk*/
     private long lastWarningTime;
-    /**
-     * The timestamp of the first warning for this event
-     */
+
+    /** The timestamp of the first warning for this event */
     private long firstWarningTime;
-    /**
-     * Lock to ensure the buffer is not saved while a Segment is being added
-     */
+
+    /** Lock to ensure the buffer is not saved while a Segment is being added */
     private Lock bufferLock;
 
-    /**
-     * Tracking if we are currently saving segments to disk or not
-     */
+    /** Tracking if we are currently saving segments to disk or not */
     private boolean activeWarning;
 
     private DiskWriter activeWriter;
@@ -88,9 +77,7 @@ public class SegmentBuffer {
      *
      * @return newest - the latest segment
      */
-    public Segment getNewest() {
-        return newest;
-    }
+    public Segment getNewest() { return newest; }
 
     /**
      * A warning was triggered, so write event to disk
@@ -136,9 +123,7 @@ public class SegmentBuffer {
         }
     }
 
-    /**
-     * Clear the current buffer. Used to remove stale data when the app is paused.
-     */
+    /** Clear the current buffer. Used to remove stale data when the app is paused. */
     public void clear() {
         bufferLock.lock();
         if (activeWarning) {

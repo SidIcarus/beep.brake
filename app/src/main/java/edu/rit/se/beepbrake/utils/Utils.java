@@ -1,7 +1,9 @@
 package edu.rit.se.beepbrake.utils;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -20,7 +22,7 @@ import android.content.res.Resources;
 
 import edu.rit.se.beepbrake.R;
 
-public class Utilities {
+public class Utils {
 
     public static TextView mStatusTextView;
     public static ImageView mCpuAniImageView;
@@ -31,6 +33,7 @@ public class Utilities {
     public static boolean isToolbarHidden = false;
     public static int mSDKVersion = Build.VERSION.SDK_INT;
     public static boolean isOlderThan16 = mSDKVersion < Build.VERSION_CODES.JELLY_BEAN;
+    public static boolean isOlderThan21 = mSDKVersion < Build.VERSION_CODES.LOLLIPOP;
     public static int OLD_OS_SBAR_HIDE = WindowManager.LayoutParams.FLAG_FULLSCREEN;
     public static int NEW_OS_SBAR_HIDE =
         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
@@ -157,4 +160,21 @@ public class Utilities {
         return drawable;
     }
 
+    public static String getAppVersion(Context ctx) throws PackageManager.NameNotFoundException {
+        return ctx.getPackageManager().getPackageInfo(
+            ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS).versionName;
+    }
+
+    public static void makeTransparentStatusBar(Activity activity) {
+        // Transparent Status Bar
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
+    }
+
+    public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
+
+    //public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
 }

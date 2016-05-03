@@ -1,75 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--  -->
 <resources name="settings">
-    <!-- From Settings.Secure.ANDROID_ID -->
-    <string name="androidid">deviceid</string>
+
+    <!-- Static Default values -->
+    <string name="write_directory">\/write_segments\/</string>
+    <bool name="eula_status">false</bool>
+
+    <string-array name="pref_names">
+        <item>android_id</item>
+        <item>app_version</item>
+        <item>eula_status_change_date</item>
+        <item>upload_paths</item>
+    </string-array>
 
     <!-- Info from android.os.Build -->
     <string-array name="device">
         <!-- Either a changelist number, or a label like "M4-rc20". -->
-        <item name="device_id">id</item>
+        <item>id</item>
 
         <!-- The current development codename, or the item "REL" if this is a release build.-->
-        <item name="device_os">osversion</item>
+        <item>os_version</item>
 
         <!-- The name of the underlying board, like "goldfish". -->
-        <item name="device_board">board</item>
+        <item>board</item>
 
         <!-- The system bootloader version number. -->
-        <item name="device_bootloader">bootloader</item>
+        <item>bootloader</item>
 
         <!-- The brand (e.g., carrier) the software is customized for, if any. -->
-        <item name="device_brand">brand</item>
+        <item>brand</item>
 
         <!-- The name of the instruction set (CPU type + ABI convention) of native code. -->
-        <item name="device_cpu_abi">cpu_abi</item>
+        <!--<item>cpu_abi</item>-->
 
         <!-- The name of the second instruction set (CPU type + ABI convention) of native code. -->
-        <item name="device_cpu_abi2">cpu_abi2</item>
+        <!--<item>cpu_abi2</item>-->
 
         <!-- The name of the industrial design. -->
-        <item name="device_device">device</item>
+        <item>device</item>
 
         <!-- A build ID item meant for displaying to the user -->
-        <item name="device_display">display</item>
+        <item>display</item>
 
         <!-- A item that uniquely identifies this build. -->
-        <item name="device_fingerprint">fingerprint</item>
+        <item>fingerprint</item>
 
         <!-- The name of the hardware (from the kernel command line or /proc). -->
-        <item name="device_hardware">hardware</item>
+        <item>hardware</item>
 
         <!-- The manufacturer of the product/hardware. -->
-        <item name="device_manufacturer">manufacturer</item>
+        <item>manufacturer</item>
 
         <!-- The end-user-visible name for the end product. -->
-        <item name="device_model">model</item>
+        <item>model</item>
 
         <!-- The name of the overall product. -->
-        <item name="device_product">product</item>
+        <item>product</item>
 
         <!-- The radio firmware version number. -->
-        <item name="device_radio">radio</item>
+        <item>radio</item>
 
         <!-- Comma-separated tags describing the build, like "unsigned,debug". -->
-        <item name="device_tags">tags</item>
+        <item>tags</item>
 
         <!-- The type of build, like "user" or "eng". -->
-        <item name="device_type">type</item>
+        <item>type</item>
 
         <!--  -->
-        <item name="device_user">user</item>
+        <item>user</item>
     </string-array>
 
-    <string name="device_write_path">device_write_path</string>
+    <!-- Default values -->
+    <array name="user_modifiable">
+        <item name="warning_time">10</item>
 
-    <string name="app_version">appversion</string>
-    <string name="eula_status">eula_status</string>
-    <string name="eula_status_change_date">eula_status_date</string>
-    <string name="upload_paths">upload_paths</string>
+    </array>
 
-    <string-array name="user_modifiable">
-        <item name="warning_time">warningtime</item>
+    <!-- Move this else where -->
 
+    <string-array name="uglyJson">
+        <item>deviceid</item>
+        <item>hardware</item>
+        <item>osversion</item>
+        <item>appversion</item>
+        <item>timezone</item>
     </string-array>
-
 </resources>

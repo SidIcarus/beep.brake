@@ -1,22 +1,19 @@
 package edu.rit.se.beepbrake.activities;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.view.View;
 import android.widget.TextView;
 
-import java.lang.annotation.Target;
-
 import edu.rit.se.beepbrake.R;
-import edu.rit.se.beepbrake.utils.Utilities;
+import edu.rit.se.beepbrake.utils.Preferences;
+import edu.rit.se.beepbrake.utils.Utils;
 
 public class LaunchScreenActivity extends AppCompatActivity {
 
@@ -28,33 +25,84 @@ public class LaunchScreenActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        makeTransparentStatusBar();
+        Utils.makeTransparentStatusBar(this);
 
         setContentView(R.layout.activity_launch_screen);
 
-        setLaunchAppVersionText();
+        try {
+            TextView appVer = (TextView) findViewById(R.id.launch_text_app_version);
+
+            if (appVer != null) appVer.setText(Utils.getAppVersion(this));
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         new BackgroundTask().execute();
     }
 
-    private void makeTransparentStatusBar() {
-        // Transparent Status Bar
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-            getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+    /** Where the default values for SharedPreferences get set. */
+    private void initPreferences() throws PackageManager.NameNotFoundException {
+        String[] device = getResources().getStringArray(R.array.device);
+        String prependToName = Utils.resToName(getResources(), R.array.device);
+        String val = "default value";
+
+        for (String name : device) {
+            switch (name) {
+                // @formatter:off
+                case "board":           val = Build.BOARD;              break;
+                case "bootloader":      val = Build.BOOTLOADER;         break;
+                case "brand":           val = Build.BRAND;              break;
+                case "cpu_abi":         val = Build.CPU_ABI;            break;
+                case "cpu_abi2":        val = Build.CPU_ABI2;           break;
+                /*  // I'm unsure how to integrate the non-deprecated versions of CPU_ABI/2
+                    if(Utilities.isOlderThan21) {
+                        String[] cpu_abi  = Build.SUPPORTED_32_BIT_ABIS;
+                        String[] cpu_abi2 = Build.SUPPORTED_64_BIT_ABIS;
+                    }
+                */
+                case "device":          val = Build.DEVICE;             break;
+                case "display":         val = Build.DISPLAY;            break;
+                case "fingerprint":     val = Build.FINGERPRINT;        break;
+                case "host":            val = Build.HOST;               break;
+                case "hardware":        val = Build.HARDWARE;           break;
+                case "id":              val = Build.ID;                 break;
+                case "manufacturer":    val = Build.MANUFACTURER;       break;
+                case "model":           val = Build.MODEL;              break;
+                case "product":         val = Build.PRODUCT;            break;
+                case "os_version":      val = Build.VERSION.RELEASE;    break;
+                case "radio":           val = Build.getRadioVersion();  break;
+                case "tags":            val = Build.TAGS;               break;
+                case "type":            val = Build.TYPE;               break;
+                case "user":            val = Build.USER;               break;
+                // @formatter:on
+            }
+            Preferences.setSetting(this, prependToName + name, val);
         }
 
-    }
+        String aID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        Preferences.setSetting(this, "android_id", aID);
 
-    // TODO: Figure out why it is giving me issues here
-    // unhandled exception android.content.pm.PackageManager
-    private void setLaunchAppVersionText() {
-        TextView appVer = (TextView) findViewById(R.id.launch_text_app_version);
+        Preferences.setSetting(this, "app_version", Utils.getAppVersion(this));
 
-//        String versionName = this.getPackageManager().getPackageInfo("edu.rit.se.beepbrake",
-//            PackageManager.GET_CONFIGURATIONS).versionName;
-//        appVer.setText(versionName);
+        Preferences.setSetting(this, "install_date", null, null, false);
+
+        Preferences.setSetting(this, Utils.resToName(getResources(), R.bool.eula_status),
+                               getResources().getBoolean(R.bool.eula_status));
+
+        // TODO: Check if this actually gets the right write path
+        String iWritePath =  getFilesDir().getPath();
+        Preferences.setSetting(this, "internal_write_path", iWritePath);
+
+        // TODO: Add checks for if there is external storage
+        //  then default it to "Unavailable" | iWritePath
+        String eWritePath = Environment.getExternalStorageDirectory().getPath();
+        Preferences.setSetting(this, "external_write_path", eWritePath);
+
+        Preferences.setSetting(this, Utils.resToName(getResources(), R.string.write_directory),
+                               getString(R.string.write_directory));
+
+        Preferences.setSetting(this, "write_path", eWritePath);
     }
 
     private class BackgroundTask extends AsyncTask {
@@ -62,55 +110,24 @@ public class LaunchScreenActivity extends AppCompatActivity {
 
         @Override protected void onPreExecute() {
             super.onPreExecute();
+
+            try { initPreferences(); } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+
             intent = new Intent(LaunchScreenActivity.this, MainActivity.class);
-//            intent.setAction(Intent.);
+            //            intent.setAction(Intent.);
         }
 
         // Use this method to load background data that the app needs.
         @Override protected Object doInBackground(Object[] params) {
             try {
                 Thread.sleep(SPLASH_TIME);
-                initializePreferences();
-            } catch (InterruptedException e) {
+                initPreferences();
+            } catch (PackageManager.NameNotFoundException | InterruptedException e) {
                 e.printStackTrace();
             }
             return null;
-        }
-
-        // Set the default values for the preferences here
-        private void initializePreferences() {
-
-            String ANDROID = Build.VERSION.RELEASE;
-            String BOARD = Build.BOARD;
-            String BOOTLOADER = Build.BOOTLOADER;
-            String BRAND = Build.BRAND;
-            String DEVICE = Build.DEVICE;
-            String DISPLAY = Build.DISPLAY;
-            String FINGERPRINT = Build.FINGERPRINT;
-            String HARDWARE = Build.HARDWARE;
-            String HOST = Build.HOST;
-            String ID = Build.ID;
-            String MANUFACTURER = Build.MANUFACTURER;
-            String MODEL = Build.MODEL;
-            String PRODUCT = Build.PRODUCT;
-            String RADIO = Build.getRadioVersion();
-            String TAGS = Build.TAGS;
-            String TYPE = Build.TYPE;
-            String USER = Build.USER;
-
-            /*
-            if(Utilities.mSDKVersion > Build.VERSION_CODES.LOLLIPOP) {
-                String[] CPU_ABI = Build.SUPPORTED_32_BIT_ABIS;
-                String[] CPU_ABI2 = Build.SUPPORTED_64_BIT_ABIS;
-            } else {
-                String CPU_ABI = Build.CPU_ABI;
-                String CPU_ABI2 = Build.CPU_ABI2;
-            }
-            */
-
-            String androidID =
-                Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-
         }
 
         @Override protected void onPostExecute(Object o) {

@@ -24,6 +24,7 @@
 
     <!-- Preferences -->
 
+    <string name="two_space_indent">  </string>
     <string name="bottom_modal_name">List</string>
 
     <!-- FirstRun -->

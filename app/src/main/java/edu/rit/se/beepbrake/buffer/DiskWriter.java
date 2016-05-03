@@ -2,8 +2,8 @@ package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.Settings;
+import android.util.JsonWriter;
 import android.util.Log;
 
 import org.opencv.core.MatOfByte;
@@ -14,13 +14,17 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.segment.Segment;
 import edu.rit.se.beepbrake.utils.Preferences;
+import edu.rit.se.beepbrake.utils.PreferencesHelper;
+import edu.rit.se.beepbrake.utils.Utils;
 import edu.rit.se.beepbrake.web.WebManager;
 
 // TODO: Have diskwriter pull from SharedPreferences for writing
@@ -37,20 +41,25 @@ public class DiskWriter extends Thread implements Runnable {
     private boolean endReached;
 
     /** ID for the event being written - same as timestamp of first segment */
-    private long eventId;
+    private long eventID;
 
     /** Queue of segments to write to disk */
     private ConcurrentLinkedQueue<Segment> segments;
 
-    public DiskWriter(long id, Context con) {
-        this.eventId = id;
-
-        // TODO: Check for external storage permission + if there is an external storage
-        this.path = Environment.getExternalStorageDirectory() + "/write_segments/";
-        this.context = con;
+    public DiskWriter(long eventID, Context context) {
+        this.eventID = eventID;
+        // TODO: Make this is a soft or weak reference
+        this.context = context;
+        this.path = PreferencesHelper.getWritePath(context);
         this.segments = new ConcurrentLinkedQueue<>();
         this.endReached = false;
     }
+
+    /** Signal that the event is over and all segments have been added */
+    public void signalEnd() { endReached = true; }
+
+    /** Add a segment to the queue to be written to disk */
+    public void addSegment(Segment seg) { segments.add(seg); }
 
     /**
      * Starts the thread running a diskwriter
@@ -65,7 +74,7 @@ public class DiskWriter extends Thread implements Runnable {
 
         String androidID =
             Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        String baseName = androidID + "_" + String.valueOf(eventId);
+        String baseName = androidID + "_" + String.valueOf(eventID);
         String fileName = baseName + ".json";
         FileOutputStream fos;
         ZipOutputStream zos;
@@ -80,49 +89,10 @@ public class DiskWriter extends Thread implements Runnable {
             zos = new ZipOutputStream(new BufferedOutputStream(zip_file));
 
             // TODO: Change here to pull from shared prefs
+            String appVersion =
+                context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
 
-            //Print file header
-            json.append("{\"deviceid\":\"" + androidID + "\",");
-            //hardware type
-            json.append("\"hardware\":\"" + Build.DISPLAY + "\",");
-            //OS version
-            json.append("\"osversion\":\"" + Build.VERSION.RELEASE + "\",");
-            //App version
-            json.append("\"appversion\":\"" + context.getPackageManager()
-                                                     .getPackageInfo(context.getPackageName(),
-                                                         0).versionName + "\",");
-            //Local event ID
-            json.append("\"eventdata\":" + String.valueOf(eventId) + ",");
-            //Local Timezone]
-            json.append("\"timezone\":\"" + TimeZone.getDefault().getID() + "\",");
-            writeConfiguration(json);
-
-            //Open of segments section
-            json.append("\"segments\": [");
-
-            Log.d("bufer system", "Starting to check for segments");
-            //segment contents
-            boolean first = true;
-            Segment s;
-            while (!endReached) {
-                s = segments.poll();
-                if (s == null) {
-                    //If the list is currently empty, wait, then try again
-                    sleep(1000);
-                } else {
-                    if (first) first = false;
-                    else json.append(",");
-
-                    writeSegment(s, json, zos);
-                }
-            }
-            Log.d("bufer system", "Diskwriter checking queue after being notified endReached");
-            //We've been notified that all segments are in the queue, but we may not have
-            // written all of them to disk yet
-            while ((s = segments.poll()) != null) {
-                json.append(",");
-                writeSegment(s, json, zos);
-            }
+            writeJson(zos, appVersion, androidID);
 
             //Close of segments and json
             json.append("]}");
@@ -136,6 +106,8 @@ public class DiskWriter extends Thread implements Runnable {
             // This is the producer
 
             //Queue Upload
+            // TODO: make this not get called here but have it webmanager listen for when  all
+            // the paths have been all written. Use mutex.
             WebManager.getInstance().triggerUpload();
 
         } catch (Exception e) {
@@ -144,27 +116,128 @@ public class DiskWriter extends Thread implements Runnable {
         }
     }
 
-    private class JSONBuilder {
-        StringBuilder json = new StringBuilder();
+    public void writeJson(ZipOutputStream zip, String appVersion, String androidID)
+        throws IOException {
+        JsonWriter writer = new JsonWriter(new OutputStreamWriter(zip, "UTF-8"));
+        // writer.setIndent(getString(R.string.two_space_indent));
+        writer.setIndent("  ");
 
+        writer.beginObject();
+
+        writeDeviceObject(writer, appVersion, androidID, false);
+        writeConfigurationObject(writer, false);
+
+        writeSegmentArray(writer, );
+
+        writer.endObject();
+
+        writer.beginObject();
+
+        writeDeviceObject(writer, appVersion, androidID, true);
+        writeConfigurationObject(writer, true);
+
+        writer.endObject();
+
+        writer.close();
+    }
+
+    public void writeDeviceObject(JsonWriter writer, String appVersion, String androidID,
+        boolean newJSON) throws IOException {
+
+        if (!newJSON) {
+            writer.name("deviceid").value(androidID)
+                  .name("hardware").value(Build.DISPLAY)
+                  .name("osversion").value(Build.VERSION.RELEASE)
+                  .name("appversion").value(appVersion)
+                  .name("eventdata").value(String.valueOf(eventID))
+                  .name("timezone").value(TimeZone.getDefault().getID());
+        } else {
+            writer.name("device");
+
+            writer.beginObject()
+                  .name("id").value(androidID)
+                  .name("hardware").value(Build.DISPLAY)
+                  .name("os").value(Build.VERSION.RELEASE)
+                  .name("app_version").value(appVersion)
+                  .name("event_data").value(String.valueOf(eventID))
+                  .name("timezone").value(TimeZone.getDefault().getID())
+                  .name("write_path").value(path);
+
+            writer.endObject();
+        }
+    }
+
+    public void writeConfigurationObject(JsonWriter writer, boolean newJSON) throws IOException {
+        writer.name("configuration");
+
+        String wt = newJSON ? "warning_time" : "warningtime";
+        writer.beginObject()
+              .name("wt").value(10);
+
+        // TODO: add other configuration stuff here
+
+        writer.endObject();
+    }
+
+    public void writeSegmentArray(JsonWriter writer, Segment seg, ZipOutputStream zip,
+        boolean newJSON) throws IOException {
+        writer.name("segments");
+
+        Log.d("bufer system", "Starting to check for segments");
+        //segment contents
+        boolean first = true;
+        Segment s;
+        while (!endReached) {
+            s = segments.poll();
+            //If the list is currently empty, wait, then try again
+            if (s == null) sleep(1000);
+            else {
+                if (first) first = false;
+                else json.append(",");
+
+                writeSegment(s, json, zos);
+            }
+        }
+        Log.d("bufer system", "Diskwriter checking queue after being notified endReached");
+        //We've been notified that all segments are in the queue, but we may not have
+        // written all of them to disk yet
+        while ((s = segments.poll()) != null) {
+            json.append(",");
+            writeSegment(s, json, zos);
+        }
+
+        writer.beginArray()
+              .name("time").value(String.valueOf(seg.getCreatedAt()));
 
     }
 
-    /** Signal that the event is over and all segments have been added */
-    public void signalEnd() { endReached = true; }
+    /*
+        String[] uglyJson = getResources().getStringArray(R.array.uglyJson);
 
-    /** Add a segment to the queue to be written to disk */
-    public void addSegment(Segment seg) { segments.add(seg); }
+        for (String name : uglyJson) {
+            Class<?> type = String.class;
+            Object val = "default value";
+            switch (name) {
+                case "deviceid":
+                    type = String.class;
+                    val = Settings.Secure.getString(getContentResolver(), Settings.Secure
+                    .ANDROID_ID);
+                    break;
+                case "hardware":
+                    break;
+                case "osversion":
+                    break;
+                case "appversion":
+                    break;
+                case "timezone":
+                    break;
+            }
+        }
 
-    private void writeConfiguration(StringBuilder json) throws IOException {
-        //TODO actually read from shared prefs
-        json.append("\"configuration\": {");
+     */
 
-        //Each configuration item
-        json.append("\"warningtime\":10");
+    public void writeSegmentObject(JsonWriter writer) {
 
-        //Close of config section
-        json.append("},");
     }
 
     /**
