@@ -9,6 +9,9 @@
     <string name="write_directory">\/write_segments\/</string>
     <bool name="eula_status">false</bool>
 
+     <!-- The duration (milliseconds) of the launch screen. -->
+    <integer name="SPLASH_TIME">3000</integer>
+
     <string-array name="pref_names">
         <item>android_id</item>
         <item>app_version</item>

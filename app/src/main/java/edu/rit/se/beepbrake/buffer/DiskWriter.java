@@ -78,9 +78,7 @@ public class DiskWriter extends Thread {
 
         String baseName = androidID + "_" + String.valueOf(eventID);
         String fileName = baseName + ".json";
-        FileOutputStream fos;
         ZipOutputStream zipOut;
-        StringBuilder json = new StringBuilder();
 
         try {
             File writeDir = new File(path);
@@ -109,6 +107,7 @@ public class DiskWriter extends Thread {
     }
 
     // TODO: Get clarification on the OutputStreams / Writers
+    // I feel like I'm doing something redundantly
     private byte[] getJsonBytes(ZipOutputStream zipOut, String appVersion, String androidID)
         throws IOException, InterruptedException {
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

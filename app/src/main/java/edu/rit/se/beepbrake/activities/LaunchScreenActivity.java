@@ -1,7 +1,9 @@
 package edu.rit.se.beepbrake.activities;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,12 +16,12 @@ import android.widget.TextView;
 import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.utils.Preferences;
 import edu.rit.se.beepbrake.utils.Utils;
+import edu.rit.se.beepbrake.web.WebManager;
 
 public class LaunchScreenActivity extends AppCompatActivity {
 
     static { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO); }
 
-    /** The duration (milliseconds) of the launch screen. */
     private static final int SPLASH_TIME = 3000;
 
     @SuppressWarnings("unchecked")
@@ -30,6 +32,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_launch_screen);
 
+        // Set the app version text on the launch screen
         try {
             TextView appVer = (TextView) findViewById(R.id.launch_text_app_version);
 
@@ -93,7 +96,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
                                getResources().getBoolean(R.bool.eula_status));
 
         // TODO: Check if this actually gets the right write path
-        String iWritePath =  getFilesDir().getPath();
+        String iWritePath = getFilesDir().getPath();
         Preferences.setSetting(this, "internal_write_path", iWritePath);
 
         // TODO: Add checks for if there is external storage
@@ -105,6 +108,28 @@ public class LaunchScreenActivity extends AppCompatActivity {
                                getString(R.string.write_directory));
 
         Preferences.setSetting(this, "write_path", eWritePath);
+
+        Preferences.setSetting(this, Utils.resToName(getResources(),R.string.web_upload_url),
+                               getString(R.string.web_upload_url));
+    }
+
+    private void initWifiListener() {
+        ConnectivityManager
+            connectionManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        WebManager webMan = WebManager.getInstance();
+
+        String uURLRes = Utils.resToName(getResources(), R.string.web_upload_url);
+        String uURLDefault = getString(R.string.web_upload_url);
+        String uURL = Preferences.getSetting(this, uURLRes, uURLDefault);
+
+        WebManager.initWebManager(Utils.getWritePath(this), uURL);
+        webMan.setConnectionManager(connectionManager);
+
+        // Listen on intent filter
+        IntentFilter connectionIntent = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+
+        registerReceiver(webMan, connectionIntent);
     }
 
     private class BackgroundTask extends AsyncTask {
@@ -113,20 +138,22 @@ public class LaunchScreenActivity extends AppCompatActivity {
         @Override protected void onPreExecute() {
             super.onPreExecute();
 
-            try { initPreferences(); } catch (PackageManager.NameNotFoundException e) {
+            try {
+                initPreferences();
+            } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
 
             intent = new Intent(LaunchScreenActivity.this, MainActivity.class);
-            //            intent.setAction(Intent.);
+
+            initWifiListener();
         }
 
         // Use this method to load background data that the app needs.
         @Override protected Object doInBackground(Object[] params) {
             try {
                 Thread.sleep(SPLASH_TIME);
-                initPreferences();
-            } catch (PackageManager.NameNotFoundException | InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             return null;

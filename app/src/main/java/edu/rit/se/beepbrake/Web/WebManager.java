@@ -14,27 +14,34 @@ import java.net.URL;
 /**
  * Created by richykapadia on 3/22/16.
  * <p/>
- * Implemented as a singleton since only one instance is needed to listen for wifi
+ * Implemented as a lazy singleton since only one instance is needed to listen for wifi
  */
 public class WebManager extends BroadcastReceiver {
 
-    private static WebManager instance;
-    static private String SEGMENT_DIR =
-        Environment.getExternalStorageDirectory() + "/write_segments/";
+    private String writeTo, uploadURL;
+
     // set once instead of allocating on callback
     private ConnectivityManager connectionManager;
-    private String upload_url = "http://magikarpets.se.rit.edu:3000/api/newFile";
 
     private final String logTag = "System.Web";
 
     //Singleton implementation
     private WebManager() { }
 
-    public static WebManager getInstance() {
-        if (instance == null) instance = new WebManager();
-
-        return instance;
+    private static class LazyInstance {
+        private static final WebManager instance = new WebManager();
     }
+
+    public static WebManager getInstance() { return LazyInstance.instance; }
+
+    public static void initWebManager(String writeDir, String uploadURL) {
+        getInstance().setUploadURL(uploadURL);
+        getInstance().setWriteTo(writeDir);
+    }
+
+    private void setUploadURL(String uploadURL) { this.uploadURL = uploadURL; }
+
+    private void setWriteTo(String writeTo) {this.writeTo = writeTo; }
 
     // Callback function listening to wifi
     @Override
@@ -66,8 +73,8 @@ public class WebManager extends BroadcastReceiver {
     // starts a low priority thread to scan for zip events to upload and sends them to the server
     private void uploadFiles() {
         try {
-            URL url = new URL(upload_url);
-            Thread t = new Thread(new UploadThread(url, SEGMENT_DIR));
+            URL url = new URL(uploadURL);
+            Thread t = new Thread(new UploadThread(url, writeTo));
             t.setPriority(Thread.MIN_PRIORITY);
             t.start();
         } catch (IOException e) { Log.e(logTag, e.getMessage()); }
