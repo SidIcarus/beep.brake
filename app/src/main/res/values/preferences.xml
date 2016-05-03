@@ -2,6 +2,9 @@
 <!--  -->
 <resources name="settings">
 
+    <!-- Probably can delete this -->
+    <string name="preferences_file">beep_brake_settings</string>
+
     <!-- Static Default values -->
     <string name="write_directory">\/write_segments\/</string>
     <bool name="eula_status">false</bool>
@@ -70,9 +73,11 @@
         <item>user</item>
     </string-array>
 
+    <integer name="warningtime">10</integer>
+
     <!-- Default values -->
-    <array name="user_modifiable">
-        <item name="warning_time">10</item>
+    <array name="configurations">
+        <item name="warningtime">10</item>
 
     </array>
 

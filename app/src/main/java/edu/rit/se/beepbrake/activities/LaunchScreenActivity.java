@@ -22,6 +22,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
     /** The duration (milliseconds) of the launch screen. */
     private static final int SPLASH_TIME = 3000;
 
+    @SuppressWarnings("unchecked")
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -42,6 +43,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
     }
 
     /** Where the default values for SharedPreferences get set. */
+    @SuppressWarnings("deprecated")
     private void initPreferences() throws PackageManager.NameNotFoundException {
         String[] device = getResources().getStringArray(R.array.device);
         String prependToName = Utils.resToName(getResources(), R.array.device);
@@ -130,6 +132,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
             return null;
         }
 
+        @SuppressWarnings("unchecked")
         @Override protected void onPostExecute(Object o) {
             super.onPostExecute(o);
             // Pass your loaded data here using Intent

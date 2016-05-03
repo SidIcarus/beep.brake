@@ -97,6 +97,4 @@ dependencies {
     compile 'com.android.support:animated-vector-drawable:23.3.0'
     compile 'com.android.support:support-annotations:23.3.0'
     compile project(':opencv_java3')
-
-    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }

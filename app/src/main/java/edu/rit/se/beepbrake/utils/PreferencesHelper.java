@@ -3,8 +3,6 @@ package edu.rit.se.beepbrake.utils;
 import android.content.Context;
 
 import edu.rit.se.beepbrake.R;
-import edu.rit.se.beepbrake.utils.Preferences;
-import edu.rit.se.beepbrake.utils.Utils;
 
 public class PreferencesHelper {
 
@@ -18,3 +16,5 @@ public class PreferencesHelper {
         return wPath + wDir;
     }
 }
+
+

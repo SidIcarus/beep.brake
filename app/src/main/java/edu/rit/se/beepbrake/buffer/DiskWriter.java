@@ -1,11 +1,15 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.JsonWriter;
 import android.util.Log;
 
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfInt;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -32,10 +36,10 @@ public class DiskWriter extends Thread implements Runnable {
     private final String path;
 
     /** Bytes to write */
-    private final MatOfByte buf = new MatOfByte();
+    @Nullable private final MatOfByte buf = new MatOfByte();
 
     /** Application context. Needed to make private app files */
-    private Context context;
+    @NonNull private Context context;
 
     /** Signal that all segments for this event have been put into the queue */
     private boolean endReached;
@@ -70,10 +74,8 @@ public class DiskWriter extends Thread implements Runnable {
         Log.d("bufer System", "DiskWriter starting");
         //File name format: 'androidID'_'eventID'
 
-        // String deviceID = Preferences.getSetting(context, "androidid", "42");
+        String androidID = Preferences.getSetting(context, "androidid", "42");
 
-        String androidID =
-            Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         String baseName = androidID + "_" + String.valueOf(eventID);
         String fileName = baseName + ".json";
         FileOutputStream fos;
@@ -94,8 +96,6 @@ public class DiskWriter extends Thread implements Runnable {
 
             writeJson(zos, appVersion, androidID);
 
-            //Close of segments and json
-            json.append("]}");
 
             ZipEntry jsonfile = new ZipEntry(fileName);
             zos.putNextEntry(jsonfile);
@@ -117,127 +117,63 @@ public class DiskWriter extends Thread implements Runnable {
     }
 
     public void writeJson(ZipOutputStream zip, String appVersion, String androidID)
-        throws IOException {
+        throws IOException, InterruptedException {
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(zip, "UTF-8"));
-        // writer.setIndent(getString(R.string.two_space_indent));
+
         writer.setIndent("  ");
-
         writer.beginObject();
 
-        writeDeviceObject(writer, appVersion, androidID, false);
-        writeConfigurationObject(writer, false);
+        writeDeviceInfo(writer, appVersion, androidID);
+        writeConfigObject(writer);
+        writeSegmentArray(writer, zip);
 
-        writeSegmentArray(writer, );
+        writer.endObject()
+              .close();
 
-        writer.endObject();
-
-        writer.beginObject();
-
-        writeDeviceObject(writer, appVersion, androidID, true);
-        writeConfigurationObject(writer, true);
-
-        writer.endObject();
-
-        writer.close();
     }
 
-    public void writeDeviceObject(JsonWriter writer, String appVersion, String androidID,
-        boolean newJSON) throws IOException {
-
-        if (!newJSON) {
-            writer.name("deviceid").value(androidID)
-                  .name("hardware").value(Build.DISPLAY)
-                  .name("osversion").value(Build.VERSION.RELEASE)
-                  .name("appversion").value(appVersion)
-                  .name("eventdata").value(String.valueOf(eventID))
-                  .name("timezone").value(TimeZone.getDefault().getID());
-        } else {
-            writer.name("device");
-
-            writer.beginObject()
-                  .name("id").value(androidID)
-                  .name("hardware").value(Build.DISPLAY)
-                  .name("os").value(Build.VERSION.RELEASE)
-                  .name("app_version").value(appVersion)
-                  .name("event_data").value(String.valueOf(eventID))
-                  .name("timezone").value(TimeZone.getDefault().getID())
-                  .name("write_path").value(path);
-
-            writer.endObject();
-        }
+    public void writeDeviceInfo(JsonWriter writer, String appVersion, String androidID)
+        throws IOException {
+        writer.name("deviceid").value(androidID)
+              .name("hardware").value(Build.DISPLAY)
+              .name("osversion").value(Build.VERSION.RELEASE)
+              .name("appversion").value(appVersion)
+              .name("eventdata").value(String.valueOf(eventID))
+              .name("timezone").value(TimeZone.getDefault().getID());
     }
 
-    public void writeConfigurationObject(JsonWriter writer, boolean newJSON) throws IOException {
-        writer.name("configuration");
-
-        String wt = newJSON ? "warning_time" : "warningtime";
-        writer.beginObject()
-              .name("wt").value(10);
-
-        // TODO: add other configuration stuff here
-
-        writer.endObject();
+    public void writeConfigObject(JsonWriter writer) throws IOException {
+        Resources res = context.getResources();
+        int wtID = R.integer.warningtime;
+        writer.name("configuration").beginObject()
+              .name(Utils.resToName(res, wtID)).value(res.getInteger(wtID))
+              //TODO: add other configuration stuff here
+              .endObject();
     }
 
-    public void writeSegmentArray(JsonWriter writer, Segment seg, ZipOutputStream zip,
-        boolean newJSON) throws IOException {
-        writer.name("segments");
+    public void writeSegmentArray(JsonWriter writer, ZipOutputStream zip)
+        throws IOException, InterruptedException {
+        writer.name("segments").beginArray();
 
         Log.d("bufer system", "Starting to check for segments");
         //segment contents
         boolean first = true;
-        Segment s;
+        Segment seg;
         while (!endReached) {
-            s = segments.poll();
+            seg = segments.poll();
             //If the list is currently empty, wait, then try again
-            if (s == null) sleep(1000);
+            if (seg == null) sleep(1000);
             else {
                 if (first) first = false;
-                else json.append(",");
+                // else json.append(",");
 
-                writeSegment(s, json, zos);
+                writeSegmentObject(writer, seg, zip);
             }
         }
         Log.d("bufer system", "Diskwriter checking queue after being notified endReached");
-        //We've been notified that all segments are in the queue, but we may not have
-        // written all of them to disk yet
-        while ((s = segments.poll()) != null) {
-            json.append(",");
-            writeSegment(s, json, zos);
-        }
-
-        writer.beginArray()
-              .name("time").value(String.valueOf(seg.getCreatedAt()));
-
-    }
-
-    /*
-        String[] uglyJson = getResources().getStringArray(R.array.uglyJson);
-
-        for (String name : uglyJson) {
-            Class<?> type = String.class;
-            Object val = "default value";
-            switch (name) {
-                case "deviceid":
-                    type = String.class;
-                    val = Settings.Secure.getString(getContentResolver(), Settings.Secure
-                    .ANDROID_ID);
-                    break;
-                case "hardware":
-                    break;
-                case "osversion":
-                    break;
-                case "appversion":
-                    break;
-                case "timezone":
-                    break;
-            }
-        }
-
-     */
-
-    public void writeSegmentObject(JsonWriter writer) {
-
+        //We've been notified that all segments are in the queue, but we may not have written all of
+        // them to disk yet
+        while ((seg = segments.poll()) != null) writeSegmentObject(writer, seg, zip);
     }
 
     /**
@@ -245,44 +181,53 @@ public class DiskWriter extends Thread implements Runnable {
      *
      * @param seg - the segment to read
      */
-    private void writeSegment(Segment seg, StringBuilder json, ZipOutputStream zip)
+    public void writeSegmentObject(JsonWriter writer, Segment seg, ZipOutputStream zip)
         throws IOException {
-        Log.d("bufer system", "Start of writeSegment");
-        //Segment header
-        // TODO: change to pull from string resources
-        json.append("{\"segtime\":" + String.valueOf(seg.getCreatedAt()));
-        json.append(",\"sensordata\": [");
+        Log.d("System.Buffer", "Writing segmentObject");
+
+        Long segTime = seg.getCreatedAt();
+        writer.beginObject()
+              .name("segtime").value(segTime)
+              .name("sensordata").beginArray();
 
         //Segment content
-        if (seg.getImg() != null) {
-            String imgName = String.valueOf(seg.getCreatedAt()) + ".png";
+        Mat img = seg.getImg();
+        if (img != null) {
+            String imgName = String.valueOf(segTime) + ".png";
             String filepath = path + imgName;
-            MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
-            //Imgcodecs.imwrite(filepath, seg.getImg(), param);
 
-            Imgcodecs.imencode(filepath, seg.getImg(), buf, param);
+            writer.beginObject()
+                  .name("key").value("imagename")
+                  .name("value").value(filepath)
+                  .endObject();
 
-            ZipEntry ze = new ZipEntry(imgName);
-            zip.putNextEntry(ze);
-            zip.write(buf.toArray());
-
-            json.append("{\"key\":\"imagename\",\"value\":\"" + filepath + "\"}");
-            Log.d("bufer system", "Wrote image to zip");
+            imgToZip(zip, imgName, filepath, img);
         }
 
-        String keyValue;
-        for (String k : seg.getKeys()) {
-            json.append(",{\"key\":\"" + k + "\",\"value\":");
-            Object data = seg.getDataObject(k);
+        String value;
+        for (String key : seg.getKeys()) {
+            Object data = seg.getDataObject(key);
             //Need to add Quotation marks around Strings
-            keyValue =
+            value =
                 (data.getClass() == String.class) ? "\"" + data.toString() + "\"" : data.toString();
 
-            json.append(keyValue);
-            json.append("}");
+            writer.beginObject()
+                  .name("key").value(key)
+                  .name("value").value(value)
+                  .endObject();
         }
+    }
 
-        //Segment closing
-        json.append("]}");
+    private void imgToZip(ZipOutputStream zip, String imgName, String filepath, Mat img)
+        throws IOException {
+        MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
+
+        Imgcodecs.imencode(filepath, img, buf, param);
+
+        ZipEntry ze = new ZipEntry(imgName);
+        zip.putNextEntry(ze);
+        zip.write(buf.toArray());
+
+        Log.d("System.Buffer", "Wrote image to zip");
     }
 }
