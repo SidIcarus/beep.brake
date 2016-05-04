@@ -26,14 +26,10 @@ These are to be kept in mem until it has a chance to be written to SP. (the POST
  there has
 been a failure and or something that has not been uploaded yet so as to
 try it again when the app starts again
-
-Str[] UploadUID
-Str[] UploadStatus
-
 */
 
 /*
-TODO: SharedPreferences - save Array<Str> UploadUID + UploadStatus This will be stored in mem
+TODO: SharedPreferences - save Array<Str> UploadUID This will be stored in mem
 until it has a chance to be written to SP.
 
 
@@ -54,24 +50,24 @@ public class Preferences {
         private static final Preferences instance = new Preferences();
     }
 
-    public static Preferences getInstance(boolean initialize, Context context)
-        throws PackageManager.NameNotFoundException {
+    public static Preferences getInstance(boolean initialize, Context context) {
         Preferences p = LazyInstance.instance;
         if (initialize) p.initialize(context);
         return p;
     }
 
-    public static Preferences getInstance()
-        throws PackageManager.NameNotFoundException { return getInstance(false, null); }
+    public static Preferences getInstance() { return getInstance(false, null); }
 
     public void setNewContext(Context context) {
-        if(wContext.get() != context) wContext = new WeakReference<>(context);
+        if (wContext.get() != context) wContext = new WeakReference<>(context);
     }
 
-    /** Where the default values for SharedPreferences get set. */
-    @SuppressWarnings("deprecated")
-    private void initialize(Context context) throws PackageManager.NameNotFoundException {
+    /**
+     * Where the default values for SharedPreferences get set.
+     */
+    private void initialize(Context context) {
         if (!initialized) {
+            initialized = true;
             wContext = new WeakReference<>(context);
             settings = context.getSharedPreferences(Preference.FILE_NAME, Context.MODE_PRIVATE);
 
@@ -82,47 +78,46 @@ public class Preferences {
             for (String name : device) {
                 switch (name) {
                     // @formatter:off
-                case "board":           val = Build.BOARD;              break;
-                case "bootloader":      val = Build.BOOTLOADER;         break;
-                case "brand":           val = Build.BRAND;              break;
-                case "cpu_abi":         val = Build.CPU_ABI;            break;
-                case "cpu_abi2":        val = Build.CPU_ABI2;           break;
+                    case "board": val = Build.BOARD; break;
+                    case "bootloader": val = Build.BOOTLOADER; break;
+                    case "brand": val = Build.BRAND; break;
+                    case "cpu_abi": val = Build.CPU_ABI; break;
+                    case "cpu_abi2": val = Build.CPU_ABI2; break;
                 /*  // I'm unsure how to integrate the non-deprecated versions of CPU_ABI/2
                     if(Utilities.isOlderThan21) {
                         String[] cpu_abi  = Build.SUPPORTED_32_BIT_ABIS;
                         String[] cpu_abi2 = Build.SUPPORTED_64_BIT_ABIS;
                     }
                 */
-                case "device":          val = Build.DEVICE;             break;
-                case "display":         val = Build.DISPLAY;            break;
-                case "fingerprint":     val = Build.FINGERPRINT;        break;
-                case "host":            val = Build.HOST;               break;
-                case "hardware":        val = Build.HARDWARE;           break;
-                case "id":              val = Build.ID;                 break;
-                case "manufacturer":    val = Build.MANUFACTURER;       break;
-                case "model":           val = Build.MODEL;              break;
-                case "product":         val = Build.PRODUCT;            break;
-                case "os_version":      val = Build.VERSION.RELEASE;    break;
-                case "radio":           val = Build.getRadioVersion();  break;
-                case "tags":            val = Build.TAGS;               break;
-                case "type":            val = Build.TYPE;               break;
-                case "user":            val = Build.USER;               break;
-                default:                val = "default value";          break;
-                // @formatter:on
+                    case "device": val = Build.DEVICE; break;
+                    case "display": val = Build.DISPLAY; break;
+                    case "fingerprint": val = Build.FINGERPRINT; break;
+                    case "host": val = Build.HOST; break;
+                    case "hardware": val = Build.HARDWARE; break;
+                    case "id": val = Build.ID; break;
+                    case "manufacturer": val = Build.MANUFACTURER; break;
+                    case "model": val = Build.MODEL; break;
+                    case "product": val = Build.PRODUCT; break;
+                    case "os_version": val = Build.VERSION.RELEASE; break;
+                    case "radio": val = Build.getRadioVersion(); break;
+                    case "tags": val = Build.TAGS; break;
+                    case "type": val = Build.TYPE; break;
+                    case "user": val = Build.USER; break;
+                    default: val = "default value"; break;
+                    // @formatter:on
                 }
                 setSetting(prependToName + name, val);
             }
 
             String aID =
-                Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
             setSetting("android_id", aID);
 
             setSetting("app_version", Utils.getAppVersion(context));
-
             setSetting("install_date", null, null, false);
 
             setSetting(Utils.resToName(context.getResources(), R.bool.eula_status),
-                       context.getResources().getBoolean(R.bool.eula_status));
+                    context.getResources().getBoolean(R.bool.eula_status));
 
             // TODO: Check if this actually gets the right write path
             String iWritePath = context.getFilesDir().getPath();
@@ -134,18 +129,18 @@ public class Preferences {
             setSetting("external_write_path", eWritePath);
 
             setSetting(Utils.resToName(context.getResources(), R.string.write_directory),
-                       context.getString(R.string.write_directory));
+                    context.getString(R.string.write_directory));
 
             setSetting("write_path", eWritePath);
 
             setSetting(Utils.resToName(context.getResources(), R.string.web_upload_url),
-                       context.getString(R.string.web_upload_url));
+                    context.getString(R.string.web_upload_url));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Object get(@PreferenceType int type,
-        @Nullable String name, @Nullable Object dVal, @Nullable Object optDVal) {
+    private Object get(@PreferenceType int type, @Nullable String name, @Nullable Object dVal,
+                       @Nullable Object optDVal) {
         Context ctx = this.wContext.get();
 
         try {
@@ -155,13 +150,12 @@ public class Preferences {
                 case PreferenceType.BOOL:
                     return settings.getBoolean(name, (boolean) dVal);
                 case PreferenceType.DATE:
-                    long date = getSetting(name + "_value", ((Date) dVal).getTime());
-                    String zone =
-                        getSetting(name + "_zone", ((TimeZone) optDVal).getID());
+                    Long defaultDate = (dVal != null) ? ((Date) dVal).getTime() : (new Date()).getTime();
+                    String defaultZone = (optDVal != null) ? ((TimeZone) optDVal).getID() : TimeZone.getDefault().getID();
 
                     Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(date);
-                    calendar.setTimeZone(TimeZone.getTimeZone(zone));
+                    calendar.setTimeInMillis(getSetting(name + "_value", defaultDate));
+                    calendar.setTimeZone(TimeZone.getTimeZone(getSetting(name + "_zone", defaultZone)));
 
                     return calendar.getTime();
                 case PreferenceType.FLOAT:
@@ -187,20 +181,24 @@ public class Preferences {
         return new Object();
     }
 
-    /** Alias for get(Context, @Type int, String, Object, Object) */
+    /**
+     * Alias for get(Context, @Type int, String, Object, Object)
+     */
     private Object get(@PreferenceType int type) {
         return get(type, null, null, null);
     }
 
-    /** Alias for get(Context, @Type int, String, Object, Object) */
+    /**
+     * Alias for get(Context, @Type int, String, Object, Object)
+     */
     private Object get(@PreferenceType int type, @NonNull String name,
-        @NonNull Object dVal) {
+                       @NonNull Object dVal) {
         return get(type, name, dVal, null);
     }
 
     @SuppressWarnings("unchecked")
     private void set(@PreferenceType int type, @NonNull String name,
-        @Nullable Object val, @Nullable Object optVal) {
+                     @Nullable Object val, @Nullable Object optVal) {
 
         SharedPreferences.Editor editor = settings.edit();
 
@@ -213,10 +211,10 @@ public class Preferences {
                     break;
                 case PreferenceType.DATE:
                     Date date =
-                        (val != null) ? (Date) val : new Date(System.currentTimeMillis());
+                            (val != null) ? (Date) val : new Date(System.currentTimeMillis());
 
                     TimeZone zone =
-                        (optVal != null) ? (TimeZone) optVal : TimeZone.getDefault();
+                            (optVal != null) ? (TimeZone) optVal : TimeZone.getDefault();
 
                     editor.putLong(name + "_value", date.getTime());
                     editor.putString(name + "_zone", zone.getID());
@@ -244,30 +242,21 @@ public class Preferences {
                     break;
             }
         } catch (ClassCastException | UnsupportedOperationException | NullPointerException e) {
-            String errorMsg = "An error has occurred in Preferences.set()";
-
-            if (e instanceof NullPointerException) {
-                errorMsg = "The settings value cannot be null for this operation.";
-            }
-
-            // TODO: Put new error messages here
-            if (val != null) {
-                if (e instanceof ClassCastException)
-                    errorMsg = "ClassCastException";
-                if (e instanceof UnsupportedOperationException)
-                    errorMsg = "UnsupportedOperationException";
-            }
             e.printStackTrace();
         }
         editor.apply();
     }
 
-    /** Alias for set(Context, @Type int, String, Object, Object) */
+    /**
+     * Alias for set(Context, @Type int, String, Object, Object)
+     */
     private void set(@PreferenceType int type, @NonNull String name, @NonNull Object val) {
         set(type, name, val, null);
     }
 
-    /** @return A Map<String, ?> that contains all of the settings */
+    /**
+     * @return A Map<String, ?> that contains all of the settings
+     */
     @SuppressWarnings("unchecked")
     public Map<String, ?> getSettings() { return (Map<String, ?>) get(PreferenceType.ALL); }
 
@@ -280,9 +269,11 @@ public class Preferences {
         return (Boolean) get(PreferenceType.BOOL, name, defaultValue);
     }
 
-    /** If !useGivenDefaults: defaultDate = today's date, defaultZone = TimeZone.getDefault() */
+    /**
+     * If !useGivenDefaults: defaultDate = today's date, defaultZone = TimeZone.getDefault()
+     */
     public Date getSetting(String name, Date defaultDate, TimeZone defaultZone,
-        Boolean useGivenDefaults) {
+                           Boolean useGivenDefaults) {
         if (!useGivenDefaults) {
             defaultDate = new Date(System.currentTimeMillis());
             defaultZone = TimeZone.getDefault();
@@ -319,7 +310,7 @@ public class Preferences {
     public void setSetting(String name, Boolean value) { set(PreferenceType.BOOL, name, value); }
 
     public void setSetting(String name, Date date, TimeZone zone,
-        Boolean useGivenDefaults) {
+                           Boolean useGivenDefaults) {
         if (!useGivenDefaults) {
             date = new Date(System.currentTimeMillis());
             zone = TimeZone.getDefault();

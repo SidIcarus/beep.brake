@@ -74,21 +74,26 @@ public class DiskWriter extends Thread {
         Log.d(logTag, "Commencing DiskWriter.run()");
         //File name format: 'androidID'_'eventID'
 
-        String androidID = Preferences.getSetting(context, "androidid", "42");
+        Preferences prefs = Preferences.getInstance();
+
+        String androidID = prefs.getSetting("androidid", "42");
+        String appVersion = Utils.getAppVersion(context);
 
         String baseName = androidID + "_" + String.valueOf(eventID);
         String fileName = baseName + ".json";
         ZipOutputStream zipOut;
 
-        try {
-            File writeDir = new File(path);
-            if (!writeDir.exists()) writeDir.mkdirs();
 
+        File writeDir = new File(path);
+        if (!writeDir.exists()) { //noinspection ResultOfMethodCallIgnored
+            writeDir.mkdirs();
+        }
+
+        try {
             //open the Zip File
             FileOutputStream fileOut = new FileOutputStream(path + baseName + ".zip");
             zipOut = new ZipOutputStream(new BufferedOutputStream(fileOut));
 
-            String appVersion = Utils.getAppVersion(context);
 
             byte[] jsonBytes = getJsonBytes(zipOut, appVersion, androidID);
 
@@ -100,7 +105,7 @@ public class DiskWriter extends Thread {
 
             WebManager.getInstance().triggerUpload();
 
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             Log.d(logTag, "Error in main DiskWriter loop");
             e.printStackTrace();
         }
