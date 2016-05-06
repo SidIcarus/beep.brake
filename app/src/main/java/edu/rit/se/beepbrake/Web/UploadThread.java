@@ -10,8 +10,12 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import edu.rit.se.beepbrake.utils.Preferences;
 
@@ -69,7 +73,13 @@ public class UploadThread implements Runnable {
      *
      * @param f - zip file to upload
      */
-    private void uploadFile(File f) {
+    private void uploadFile(File f){
+
+        if(!isValid(f)){
+            f.delete();
+            return;
+        }
+
         // minetype
         String boundary = "apiclient-" + System.currentTimeMillis();
         String mimeType = "multipart/form-data;charset=utf-8;boundary=" + boundary;
@@ -140,4 +150,48 @@ public class UploadThread implements Runnable {
             Log.e("Web", e.getMessage());
         } finally { if (connection != null) connection.disconnect(); }
     }
+
+    private boolean isValid(File file) {
+        ZipFile zipfile = null;
+        ZipInputStream zis = null;
+        try {
+            zipfile = new ZipFile(file);
+            zis = new ZipInputStream(new FileInputStream(file));
+            ZipEntry ze = zis.getNextEntry();
+            if(ze == null) {
+                return false;
+            }
+            while(ze != null) {
+                // if it throws an exception fetching any of the following then we know the file is corrupted.
+                zipfile.getInputStream(ze);
+                ze.getCrc();
+                ze.getCompressedSize();
+                ze.getName();
+                ze = zis.getNextEntry();
+            }
+            return true;
+        } catch (ZipException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        } finally {
+            try {
+                if (zipfile != null) {
+                    zipfile.close();
+                    zipfile = null;
+                }
+            } catch (IOException e) {
+                return false;
+            } try {
+                if (zis != null) {
+                    zis.close();
+                    zis = null;
+                }
+            } catch (IOException e) {
+                return false;
+            }
+
+        }
+    }
+
 }

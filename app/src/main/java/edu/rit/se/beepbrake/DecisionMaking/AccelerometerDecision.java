@@ -40,8 +40,8 @@ public class AccelerometerDecision extends Decision {
         Log.d("AccelDec", "Finished");
     }
 
-    private void warn() {
+    protected void warn(){
         curSeg.addDataObject("CrashDetected", "true");
-        decMan.warn();
+        super.warn();
     }
 }

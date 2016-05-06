@@ -58,8 +58,8 @@ public class CameraDecision extends Decision {
         Log.d(TAG, "Finished");
     }
 
-    private void warn() {
+    protected void warn(){
         curSeg.addDataObject("CameraWarning", "true");
-        decMan.warn();
+        super.warn();
     }
 }
