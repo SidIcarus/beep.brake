@@ -34,14 +34,9 @@ public class LaunchScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launch_screen);
 
         // Set the app version text on the launch screen
-        try {
-            TextView appVer = (TextView) findViewById(R.id.launch_text_app_version);
+        TextView appVer = (TextView) findViewById(R.id.launch_text_app_version);
 
-            if (appVer != null) appVer.setText(Utils.getAppVersion(this));
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
+        if (appVer != null) appVer.setText(Utils.getAppVersion(this));
 
         new BackgroundTask().execute();
     }
@@ -72,12 +67,8 @@ public class LaunchScreenActivity extends AppCompatActivity {
             super.onPreExecute();
             intent = new Intent(LaunchScreenActivity.this, MainActivity.class);
 
-            try {
-                Preferences p = Preferences.getInstance(true, LaunchScreenActivity.this);
-                initWifiListener(p);
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
+            Preferences p = Preferences.getInstance(true, LaunchScreenActivity.this);
+            initWifiListener(p);
         }
 
         // Use this method to load background data that the app needs.
