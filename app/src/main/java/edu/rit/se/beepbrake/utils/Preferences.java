@@ -29,8 +29,7 @@ These are to be kept in mem until it has a chance to be written to SP. (the POST
  there has
 been a failure and or something that has not been uploaded yet so as to
 try it again when the app starts again
-TODO: SharedPreferences - save Array<Str> UploadUID This will be stored in mem
-until it has a chance to be written to SP.
+TODO: SharedPreferences - save Array<Str> UploadUID This will be stored in memuntil it has a chance to be written to SP.
  */
 
 /**
