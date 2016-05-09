@@ -11,14 +11,21 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Environment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 
 import edu.rit.se.beepbrake.R;
 
@@ -54,6 +61,155 @@ public class Utils {
      you use a ContextWrapper. The Context referred to from inside that ContextWrapper is
      accessed via getBaseContext().
     */
+
+    // I think i can delete this
+    public static void closeQuietly(Closeable input) {
+        try {
+            if (input!= null ) { input.close(); }
+        } catch(IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+
+    public static File getAlbumStorageDir(String albumName) {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), albumName);
+        if (!file.mkdirs()) {
+            Log.e("System.Utils", "Directory not created");
+        }
+        return file;
+    }
+
+    public static String getAppVersion(Context ctx) {
+        String appVersion = "0.0.0";
+        try {
+            appVersion = ctx.getPackageManager().getPackageInfo(
+                    ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return appVersion;
+    }
+
+    public static String getFileExtension(File file) {
+        if (file == null || !file.isFile()) return "";
+        String fileName = file.getName();
+
+        int index = fileName.lastIndexOf('.');
+        return (index != -1 && index != 0) ? fileName.substring(index + 1) : "";
+    }
+
+    public static String getFileExtension(String file) {
+        if (file == null || file.isEmpty()) return "";
+
+        int index = file.lastIndexOf('.');
+        return (index != -1 && index != 0) ? file.substring(index + 1) : "";
+    }
+
+    public static Date getNow() { return new Date(System.currentTimeMillis()); }
+
+    public static int getStatusBarHeight(Context context) {
+        int height = (int) context.getResources().getDimension(R.dimen.statusbar_size);
+        return height;
+    }
+
+    public static int getToolbarHeight(Context context) {
+        int height = (int) context.getResources()
+                .getDimension(R.dimen.abc_action_bar_default_height_material);
+        return height;
+    }
+
+    public static String getWritePath(Context ctx) {
+        Preferences p = Preferences.getInstance();
+        int wDirID = R.string.write_directory;
+        String wDirName = resToName(ctx.getResources(), wDirID);
+
+        String wDir = p.getString(wDirName);
+        String wPath = p.getString("write_path", ctx.getFilesDir().getPath());
+
+        return wPath + wDir;
+    }
+
+    public static void hideStatusBar(Window window) { hideStatusBar(window, null); }
+
+    // should be done before setting the content view
+    public static void hideStatusBar(Window window, Toolbar toolbar) {
+        if (isOlderThan16) window.setFlags(OLD_OS_SBAR_HIDE, OLD_OS_SBAR_HIDE);
+        else window.getDecorView().setSystemUiVisibility(NEW_OS_SBAR_HIDE);
+
+        if (toolbar != null) toolbar.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+
+    /* Checks if external storage is available to at least read */
+    public static boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state) ||
+               Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+    }
+
+    /* Checks if external storage is available for read and write */
+    public static boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state);
+    }
+
+    public static void makeTransparentStatusBar(Activity activity) {
+        // Transparent Status Bar
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
+    }
+
+    //public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
+
+    public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
+
+    // needs a check to see if it is currently visible
+    public static void resumeAnimatable() {
+        Drawable drawable = mCpuAniImageView.getDrawable();
+        if (drawable instanceof Animatable) { ((Animatable) drawable).start(); }
+    }
+
+    // needs a check to see if it is currently visible
+    public static void resumeNightMode(Resources res) {
+
+        int uiMode = res.getConfiguration().uiMode;
+        int dayNightUiMode = uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
+        if (dayNightUiMode == Configuration.UI_MODE_NIGHT_NO) {
+            mDayNightMode = AppCompatDelegate.MODE_NIGHT_NO;
+            mStatusTextView.setText(R.string.text_for_day_night_mode_night_no);
+        } else if (dayNightUiMode == Configuration.UI_MODE_NIGHT_YES) {
+            mDayNightMode = AppCompatDelegate.MODE_NIGHT_YES;
+            mStatusTextView.setText(R.string.text_for_day_night_mode_night_yes);
+        } else {
+            mDayNightMode = AppCompatDelegate.MODE_NIGHT_AUTO;
+            mStatusTextView.setText(R.string.text_for_day_night_mode_night_auto);
+        }
+    }
+
+    @TargetApi(19)
+    protected static void setStatusBarTranslucent(Window window, boolean makeTranslucent) {
+        int translucentStatus = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+
+        if (makeTranslucent) window.addFlags(translucentStatus);
+        else window.clearFlags(translucentStatus);
+    }
+
+    @TargetApi(21)
+    public static void setToolbarTransparent(Window window) {
+        window.setStatusBarColor(Color.TRANSPARENT);
+    }
+
+    public static Drawable tintMyDrawable(Drawable drawable, int color) {
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, color);
+        DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN);
+        return drawable;
+    }
 
     /**
      * Detects and toggles immersive mode (also known as "hidey bar" mode).
@@ -97,104 +253,4 @@ public class Utils {
         decorView.setSystemUiVisibility(newUiOptions);
         //END_INCLUDE (set_ui_flags)
     }
-
-    @TargetApi(21)
-    public static void setToolbarTransparent(Window window) {
-        window.setStatusBarColor(Color.TRANSPARENT);
-    }
-
-    @TargetApi(19)
-    protected static void setStatusBarTranslucent(Window window, boolean makeTranslucent) {
-        int translucentStatus = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-
-        if (makeTranslucent) window.addFlags(translucentStatus);
-        else window.clearFlags(translucentStatus);
-    }
-
-    public static void hideStatusBar(Window window) { hideStatusBar(window, null); }
-
-    // should be done before setting the content view
-    public static void hideStatusBar(Window window, Toolbar toolbar) {
-        if (isOlderThan16) window.setFlags(OLD_OS_SBAR_HIDE, OLD_OS_SBAR_HIDE);
-        else window.getDecorView().setSystemUiVisibility(NEW_OS_SBAR_HIDE);
-
-        if (toolbar != null) toolbar.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
-    }
-
-    // needs a check to see if it is currently visible
-    public static void resumeAnimatable() {
-        Drawable drawable = mCpuAniImageView.getDrawable();
-        if (drawable instanceof Animatable) { ((Animatable) drawable).start(); }
-    }
-
-    // needs a check to see if it is currently visible
-    public static void resumeNightMode(Resources res) {
-
-        int uiMode = res.getConfiguration().uiMode;
-        int dayNightUiMode = uiMode & Configuration.UI_MODE_NIGHT_MASK;
-
-        if (dayNightUiMode == Configuration.UI_MODE_NIGHT_NO) {
-            mDayNightMode = AppCompatDelegate.MODE_NIGHT_NO;
-            mStatusTextView.setText(R.string.text_for_day_night_mode_night_no);
-        } else if (dayNightUiMode == Configuration.UI_MODE_NIGHT_YES) {
-            mDayNightMode = AppCompatDelegate.MODE_NIGHT_YES;
-            mStatusTextView.setText(R.string.text_for_day_night_mode_night_yes);
-        } else {
-            mDayNightMode = AppCompatDelegate.MODE_NIGHT_AUTO;
-            mStatusTextView.setText(R.string.text_for_day_night_mode_night_auto);
-        }
-    }
-
-    public static int getToolbarHeight(Context context) {
-        int height = (int) context.getResources()
-                .getDimension(R.dimen.abc_action_bar_default_height_material);
-        return height;
-    }
-
-    public static int getStatusBarHeight(Context context) {
-        int height = (int) context.getResources().getDimension(R.dimen.statusbar_size);
-        return height;
-    }
-
-    public static Drawable tintMyDrawable(Drawable drawable, int color) {
-        drawable = DrawableCompat.wrap(drawable);
-        DrawableCompat.setTint(drawable, color);
-        DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN);
-        return drawable;
-    }
-
-    public static String getAppVersion(Context ctx) {
-        String appVersion = "0.0.0";
-        try {
-            appVersion = ctx.getPackageManager().getPackageInfo(
-                    ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return appVersion;
-    }
-
-    public static void makeTransparentStatusBar(Activity activity) {
-        // Transparent Status Bar
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            activity.getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-            activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
-        }
-    }
-
-    public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
-
-    public static String getWritePath(Context ctx) {
-        Preferences p = Preferences.getInstance();
-        int wDirID = R.string.write_directory;
-        String defaultWDir = ctx.getString(wDirID);
-        String wDirName = Utils.resToName(ctx.getResources(), wDirID);
-        String wDir = p.getSetting(wDirName, defaultWDir);
-        String wPath = p.getSetting("write_path", ctx.getFilesDir().getPath());
-
-        return wPath + wDir;
-    }
-
-    //public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
 }

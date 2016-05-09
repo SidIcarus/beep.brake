@@ -23,6 +23,16 @@ import edu.rit.se.beepbrake.annotations.Preference;
 import edu.rit.se.beepbrake.annotations.PreferenceType;
 import edu.rit.se.beepbrake.constants.PreferenceConstants;
 
+/*
+These are to be kept in mem until it has a chance to be written to SP. (the POST return #
+100/200/400) the only time it will be saving to the SP will be when the activity has to close and
+ there has
+been a failure and or something that has not been uploaded yet so as to
+try it again when the app starts again
+TODO: SharedPreferences - save Array<Str> UploadUID This will be stored in mem
+until it has a chance to be written to SP.
+ */
+
 /**
  * @author Sid
  * @date 04.01.2016
@@ -76,6 +86,10 @@ public final class Preferences implements SharedPreferences {
                 //@formatter:off
                 case PreferenceType.ALL:    return mPreferences.getAll();
                 case PreferenceType.BOOL:   return mPreferences.getBoolean(key, (boolean) defValue);
+                case PreferenceType.FLOAT:  return mPreferences.getFloat(key, (float) defValue);
+                case PreferenceType.INT:    return mPreferences.getInt(key, (int) defValue);
+                case PreferenceType.LONG:   return mPreferences.getLong(key, (long) defValue);
+                case PreferenceType.STR:    return mPreferences.getString(key, (String) defValue);
                 case PreferenceType.DATE:
                     long time = mPreferences.getLong(key + "_time", ((Date)defValue).getTime());
                     TimeZone zone = TimeZone.getTimeZone(
@@ -85,10 +99,6 @@ public final class Preferences implements SharedPreferences {
                     calendar.setTimeZone(zone);
 
                     return calendar.getTime();
-                case PreferenceType.FLOAT:  return mPreferences.getFloat(key, (float) defValue);
-                case PreferenceType.INT:    return mPreferences.getInt(key, (int) defValue);
-                case PreferenceType.LONG:   return mPreferences.getLong(key, (long) defValue);
-                case PreferenceType.STR:    return mPreferences.getString(key, (String) defValue);
                 case PreferenceType.STR_SET:
                     return mPreferences.getStringSet(key, (Set<String>) defValue);
                 case PreferenceType.TIME_ZONE:
@@ -151,10 +161,12 @@ public final class Preferences implements SharedPreferences {
     @SuppressWarnings("MethodMayBeStatic") private Context getContext() { return Lazy.mContext; }
 
     /**
+     * Retrieve an Date value from the preferences.
      *
-     * @param key
-     * @param defValue
-     * @return
+     * @param key      key The name of the preference to retrieve.
+     * @param defValue Value to return if this preference does not exist.
+     *
+     * @return Returns the preference value if it exists, or defValue.
      */
     public Date getDate(String key, Date defValue) {
         return (Date) get(PreferenceType.DATE, key, defValue, null);
@@ -213,6 +225,7 @@ public final class Preferences implements SharedPreferences {
             case PreferenceType.INVALID:
             case PreferenceType.NULL:
             case PreferenceType.STR_SET:
+            case PreferenceType.TIME_ZONE:
             default: rtn = new Object();
             //@formatter:on
         }
@@ -272,8 +285,7 @@ public final class Preferences implements SharedPreferences {
 
     /**
      * Sets the context for the Preference to the AppContext. </p>
-     * It says that the initialization of Lazy.mContext is not thread safe but I can't see why it
-     * isn't.
+     * TODO: AS says that the initialization of Lazy.mContext isn't thread safe but why?
      *
      * @param context The new context to reference.
      *
@@ -374,8 +386,7 @@ public final class Preferences implements SharedPreferences {
     }
 
     /**
-     * Alias's {@link #getStringSet(String, Set<String>)} w/
-     * defValue = {@link #getStringSetDef(String)}.
+     * Alias's {@link #getStringSet(String, Set)} w/ defValue = {@link #getStringSetDef(String)}.
      *
      * @param key The name of the preference to retrieve.
      *
@@ -396,9 +407,9 @@ public final class Preferences implements SharedPreferences {
     }
 
     /**
-     *
-     * @param key The name of the preference to retrieve.
+     * @param key      The name of the preference to retrieve.
      * @param defValue Value to return if this preference does not exist.
+     *
      * @return Returns the preference value if it exists, or defValue.  Throws
      * ClassCastException if there is a preference with this name that is not
      * a long.
@@ -434,7 +445,6 @@ public final class Preferences implements SharedPreferences {
     private static void initialize(@NonNull Class<?> keysClass) {
         if (!Lazy.isInitialized) {
             HashMap<String, Preference> map;
-            boolean erred = false;
             try {
                 Preferences p = getInstance();
                 map = new HashMap<>();
@@ -447,10 +457,7 @@ public final class Preferences implements SharedPreferences {
                         if (BuildConfig.DEBUG)
                             Log.d(PreferenceConstants.logTAG, "initialize: " + e.getMessage());
                         e.printStackTrace();
-                        erred = true;
-                    } catch (RuntimeException ignore) {
-                        erred = true;
-                    }
+                    } catch (RuntimeException ignore) { }
                 }
                 // TODO: still set it if it has erred? How to verify Map integrity
                 p.setMap(map);

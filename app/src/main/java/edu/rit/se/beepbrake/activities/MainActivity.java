@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import edu.rit.se.beepbrake.analysis.*;
 import edu.rit.se.beepbrake.analysis.Detector.*;
+import edu.rit.se.beepbrake.constants.SegmentConstants;
 import edu.rit.se.beepbrake.decisionMaking.DecisionManager;
 import edu.rit.se.beepbrake.R;
 import edu.rit.se.beepbrake.segment.*;
@@ -35,32 +36,90 @@ import edu.rit.se.beepbrake.utils.Utils;
 public class MainActivity extends AppCompatActivity implements DetectorCallback {
 
     private static final String TAG = "Main-Activity";
-
-    static { System.loadLibrary("opencv_java3"); }
-
     // Image Analysis Stuff
     private BaseLoaderCallback mLoaderCallback;
     private JavaCameraView mCameraView;
     private CameraPreview mCameraPreview;
     private FrameAnalyzer mCarAnalyzer;
     private FrameAnalyzer mLaneAnalyzer;
-
     //Buffer
     private BufferManager bufMan;
-
     //Data Acquisition Objects
     private SegmentSync segSync;
     private GPSSensor gpsSen;
     private AccelerometerSensor aSen;
-
     //Decision Objects
     private DecisionManager decMan;
-
-    public FragmentDirector fDirector;
-    public static Utils utilities;
-    boolean showFAB = true;
-
     private int mDayNightMode = AppCompatDelegate.MODE_NIGHT_AUTO;
+    boolean showFAB = true;
+    public static Utils utilities;
+    public FragmentDirector fDirector;
+
+    static { System.loadLibrary("opencv_java3"); }
+
+    public void Initialize() {
+        bufMan = new BufferManager(this);
+
+        //Data Acquisition init
+        segSync = new SegmentSync(bufMan);
+        gpsSen = new GPSSensor(this, segSync);
+        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE),
+            segSync);
+
+        decMan = new DecisionManager(bufMan);
+    }
+
+    public void initBottomSheet() {
+        // Bottom Sheet
+
+        // To handle FAB animation upon entrance and exit
+        final Animation growAnimation = AnimationUtils.loadAnimation(this, R.anim.simple_grow);
+        final Animation shrinkAnimation = AnimationUtils.loadAnimation(this, R.anim.simple_shrink);
+
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.gmail_fab);
+
+        fab.setVisibility(View.VISIBLE);
+        fab.startAnimation(growAnimation);
+
+        shrinkAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override public void onAnimationEnd(Animation animation) {
+                fab.setVisibility(View.GONE);
+            }
+
+            @Override public void onAnimationRepeat(Animation animation) { }
+
+            @Override public void onAnimationStart(Animation animation) { }
+        });
+
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.grand_poobah);
+        View bottomSheet = coordinatorLayout.findViewById(R.id.g_bottom_sheet);
+
+        BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
+
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override public void onSlide(View bottomSheet, float slideOffset) { }
+
+            @Override public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+                switch (newState) {
+
+                    case BottomSheetBehavior.STATE_DRAGGING:
+                        if (showFAB) fab.startAnimation(shrinkAnimation);
+                        break;
+
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        showFAB = true;
+                        fab.setVisibility(View.VISIBLE);
+                        fab.startAnimation(growAnimation);
+                        break;
+
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        showFAB = false;
+                        break;
+                }
+            }
+        });
+    }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +143,75 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 //        printLogs.setVisibility(View.INVISIBLE);
 
         fDirector = new FragmentDirector().newInstance(getSupportFragmentManager());
+    }
+
+    protected void onPause() {
+        super.onPause();
+        if(mCameraView != null) {
+            mCarAnalyzer.pauseDetection();
+            mLaneAnalyzer.pauseDetection();
+        }
+
+        //Data Acquisition onPause
+        segSync.onPause();
+        gpsSen.onPause();
+        aSen.onPause();
+
+        //Buffer onPause
+        bufMan.onPause();
+
+        //Decision
+        decMan.onPause();
+    }
+
+    protected void onResume() {
+        super.onResume();
+
+        Utils.hideStatusBar(getWindow());
+        //        utilities.resumeAnimatable();
+        //        utilities.resumeNightMode(getResources());
+
+
+        if(mCameraView != null) {
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+            mCarAnalyzer.resumeDetection();
+            mLaneAnalyzer.resumeDetection();
+        }
+
+        //Data Acquisition onResume
+        segSync.onResume();
+        gpsSen.onResume();
+        aSen.onResume();
+
+        //Decision
+        decMan.onResume();
+    }
+
+    // Lane detector calls this method to set the lane positions
+    public void setCurrentFoundLanes(double[][] lanesCoord) {
+        this.mCameraPreview.setLinesToDraw(lanesCoord);
+    }
+
+    // Car detector calls this method to set the position of the car
+    public void setCurrentFoundRect(Mat m, Rect r) {
+        this.mCameraPreview.setRectToDraw(r);
+        HashMap<String, Object> data = new HashMap<String, Object>();
+
+        if (r != null) {
+            data.put(SegmentConstants.CAR_POS_X, r.x);
+            data.put(SegmentConstants.CAR_POS_Y, r.y);
+            data.put(SegmentConstants.CAR_POS_WIDTH, r.width);
+            data.put(SegmentConstants.CAR_POS_HEIGHT, r.height);
+        }
+        if (this.segSync.isRunning()) this.segSync.makeSegment(m, data);
+    }
+
+    // Feeds the frame into the analyzers
+    public void setCurrentFrame(Mat currentFrame) {
+        if(mCameraView != null) {
+            this.mCarAnalyzer.addFrameToAnalyze(currentFrame);
+            this.mLaneAnalyzer.addFrameToAnalyze(currentFrame);
+        }
     }
 
     // TODO: Move elsewhere
@@ -115,139 +243,6 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
             Detector laneDetector = new LaneDetector();
             mLaneAnalyzer = new FrameAnalyzer(laneDetector);
         }
-    }
-
-    public void Initialize() {
-        bufMan = new BufferManager(this);
-
-        //Data Acquisition init
-        segSync = new SegmentSync(bufMan);
-        gpsSen = new GPSSensor(this, segSync);
-        aSen = new AccelerometerSensor(this, (SensorManager) getSystemService(SENSOR_SERVICE),
-            segSync);
-
-        decMan = new DecisionManager(bufMan);
-    }
-
-    protected void onResume() {
-        super.onResume();
-
-        Utils.hideStatusBar(getWindow());
-        //        utilities.resumeAnimatable();
-        //        utilities.resumeNightMode(getResources());
-
-
-        if(mCameraView != null) {
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
-            mCarAnalyzer.resumeDetection();
-            mLaneAnalyzer.resumeDetection();
-        }
-
-        //Data Acquisition onResume
-        segSync.onResume();
-        gpsSen.onResume();
-        aSen.onResume();
-
-        //Decision
-        decMan.onResume();
-    }
-
-    protected void onPause() {
-        super.onPause();
-        if(mCameraView != null) {
-            mCarAnalyzer.pauseDetection();
-            mLaneAnalyzer.pauseDetection();
-        }
-
-        //Data Acquisition onPause
-        segSync.onPause();
-        gpsSen.onPause();
-        aSen.onPause();
-
-        //Buffer onPause
-        bufMan.onPause();
-
-        //Decision
-        decMan.onPause();
-    }
-
-    // Feeds the frame into the analyzers
-    public void setCurrentFrame(Mat currentFrame) {
-        if(mCameraView != null) {
-            this.mCarAnalyzer.addFrameToAnalyze(currentFrame);
-            this.mLaneAnalyzer.addFrameToAnalyze(currentFrame);
-        }
-    }
-
-    // Car detector calls this method to set the position of the car
-    public void setCurrentFoundRect(Mat m, Rect r) {
-        this.mCameraPreview.setRectToDraw(r);
-        HashMap<String, Object> data = new HashMap<String, Object>();
-
-        if (r != null) {
-            data.put(Constants.CAR_POS_X, r.x);
-            data.put(Constants.CAR_POS_Y, r.y);
-            data.put(Constants.CAR_POS_WIDTH, r.width);
-            data.put(Constants.CAR_POS_HEIGHT, r.height);
-        }
-        if (this.segSync.isRunning()) this.segSync.makeSegment(m, data);
-    }
-
-    // Lane detector calls this method to set the lane positions
-    public void setCurrentFoundLanes(double[][] lanesCoord) {
-        this.mCameraPreview.setLinesToDraw(lanesCoord);
-    }
-
-    public void initBottomSheet() {
-        // Bottom Sheet
-
-        // To handle FAB animation upon entrance and exit
-        final Animation growAnimation = AnimationUtils.loadAnimation(this, R.anim.simple_grow);
-        final Animation shrinkAnimation = AnimationUtils.loadAnimation(this, R.anim.simple_shrink);
-
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.gmail_fab);
-
-        fab.setVisibility(View.VISIBLE);
-        fab.startAnimation(growAnimation);
-
-        shrinkAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation animation) { }
-
-            @Override public void onAnimationEnd(Animation animation) {
-                fab.setVisibility(View.GONE);
-            }
-
-            @Override public void onAnimationRepeat(Animation animation) { }
-        });
-
-        CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.grand_poobah);
-        View bottomSheet = coordinatorLayout.findViewById(R.id.g_bottom_sheet);
-
-        BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
-
-        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override public void onStateChanged(@NonNull View bottomSheet, int newState) {
-
-                switch (newState) {
-
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                        if (showFAB) fab.startAnimation(shrinkAnimation);
-                        break;
-
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        showFAB = true;
-                        fab.setVisibility(View.VISIBLE);
-                        fab.startAnimation(growAnimation);
-                        break;
-
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                        showFAB = false;
-                        break;
-                }
-            }
-
-            @Override public void onSlide(View bottomSheet, float slideOffset) { }
-        });
     }
 
     //    @Override

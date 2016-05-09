@@ -23,6 +23,19 @@ android {
         // vectorDrawables.useSupportLibrary = true
     }
 
+    signingConfigs {
+        // Update storePW, keyAlias, keyPW, with appropriate values.
+        // They should either be stored in a local gradle.properties that is not uploaded or
+        // in a continuous integration build
+
+        release {
+            //storeFile "beep.brake.release"
+            //storePassword "replace_this_password_value"
+            //keyAlias "probably_replace_this_alias_value"
+            //keyPassword "replace_this_password_value"
+        }
+    }
+
     // Gradle Plugin 1.5
     // disable limited support for vector drawables fro Android Studio 1.4
     aaptOptions { additionalParameters "--no-version-vectors" }
@@ -73,19 +86,41 @@ android {
                     'clean'
         } else {
             commandLine "$ndkDir/ndk-build",
-                    '-C', file('src/main/jni').absolutePath, // Change src/main/jni the relative path to your jni source
+                    // Change src/main/jni the relative path to your jni source
+                    '-C', file('src/main/jni').absolutePath,
                     'clean'
         }
     }
     clean.dependsOn 'cleanNative'
-    tasks.withType(JavaCompile) { compileTask -> compileTask.dependsOn ndkLibsToJar  }
+    tasks.withType(JavaCompile) { compileTask -> compileTask.dependsOn ndkLibsToJar }
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     productFlavors {}
+
+    // Generate javadocs for any build variant
+
+    android.applicationVariants.all { variant ->
+        task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+            description "Generates Javadoc for $variant.name."
+            source = variant.javaCompile.source
+            ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+            classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+            options.links("http://docs.oracle.com/javase/7/docs/api/");
+            options.links("http://d.android.com/reference/");
+            exclude "**/BuildConfig.java"
+            exclude "**/R.java"
+        }
+    }
 }
 
 dependencies {

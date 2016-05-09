@@ -104,18 +104,8 @@ public class TempLogger {
         countLogs.get(markName).incrementAndGet();
     }
 
-
-    private static synchronized void validateLogLen() {
-        if (!LOGGING) return;
-
-        if (numLogs >= MAX_LOG_LEN) {
-            printLogs();
-            //clear logs
-            for (String key : storedLogs.keySet()) storedLogs.get(key).clear();
-
-            storedLogs.clear();
-            numLogs = 0;
-        }
+    public static boolean isPrintingLogs() {
+        return bPrintingLogs;
     }
 
     public static synchronized void printLogs() {
@@ -185,12 +175,6 @@ public class TempLogger {
         bPrintingLogs = false;
     }
 
-
-    public static boolean isPrintingLogs() {
-        return bPrintingLogs;
-    }
-
-
     public static void printMeasures(ArrayList<Long> durr) {
         if (!LOGGING) return;
 
@@ -212,5 +196,18 @@ public class TempLogger {
         Log.d(TAG, "Max: " + max);
         Log.d(TAG, "Med: " + med);
         Log.d(TAG, "Avg: " + avg);
+    }
+
+    private static synchronized void validateLogLen() {
+        if (!LOGGING) return;
+
+        if (numLogs >= MAX_LOG_LEN) {
+            printLogs();
+            //clear logs
+            for (String key : storedLogs.keySet()) storedLogs.get(key).clear();
+
+            storedLogs.clear();
+            numLogs = 0;
+        }
     }
 }
