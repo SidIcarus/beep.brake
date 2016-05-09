@@ -29,32 +29,6 @@ public class UploadThread implements Runnable {
         this.eventDir = eventDir;
     }
 
-    private boolean isValidZip(File file) {
-        try (ZipFile zFile = new ZipFile(file);
-             ZipInputStream zIS = new ZipInputStream(new FileInputStream(file))) {
-            ZipEntry zEntry = zIS.getNextEntry();
-
-            if (zEntry == null) return false;
-
-            while (zEntry != null) {
-                // if(throws exception fetching any of the following)file.is(CORRUPTED)
-                //noinspection resource
-                zFile.getInputStream(zEntry);
-                zEntry.getCrc();
-                zEntry.getCompressedSize();
-                zEntry.getName();
-                zEntry = zIS.getNextEntry();
-            }
-            return true;
-        }
-        // TODO: Add actual debugging statement
-        //@formatter:off
-        catch (FileNotFoundException ignored)   { return false; }
-        catch (ZipException ignored)            { return false; }
-        catch (IOException ignored)             { return false; }
-        //@formatter:on
-    }
-
     @Override public void run() {
         //scan for files in event dir
         ArrayList<File> fileList = new ArrayList<>();
@@ -172,5 +146,31 @@ public class UploadThread implements Runnable {
             Log.e("System.Web.Upload", e.getMessage());
             e.printStackTrace();
         } finally { if (connection != null) connection.disconnect(); }
+    }
+
+    private boolean isValidZip(File file) {
+        try (ZipFile zFile = new ZipFile(file);
+             ZipInputStream zIS = new ZipInputStream(new FileInputStream(file))) {
+            ZipEntry zEntry = zIS.getNextEntry();
+
+            if (zEntry == null) return false;
+
+            while (zEntry != null) {
+                // if(throws exception fetching any of the following)file.is(CORRUPTED)
+                //noinspection resource
+                zFile.getInputStream(zEntry);
+                zEntry.getCrc();
+                zEntry.getCompressedSize();
+                zEntry.getName();
+                zEntry = zIS.getNextEntry();
+            }
+            return true;
+        }
+        // TODO: Add actual debugging statement
+        //@formatter:off
+        catch (FileNotFoundException ignored)   { return false; }
+        catch (ZipException ignored)            { return false; }
+        catch (IOException ignored)             { return false; }
+        //@formatter:on
     }
 }

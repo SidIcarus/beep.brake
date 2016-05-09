@@ -51,7 +51,8 @@ public class LaunchScreenActivity extends AppCompatActivity {
 
     static { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO); }
 
-    @Override @SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 

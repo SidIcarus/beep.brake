@@ -26,6 +26,21 @@ public class WebManager extends BroadcastReceiver {
     private ConnectivityManager cManager;
     private final String logTag = "System.Web";
 
+    //Singleton implementation
+    WebManager() { }
+
+    public String getWriteDirectory() { return writeDirectory; }
+
+    public void setWriteDirectory(String writeDirectory) { this.writeDirectory = writeDirectory; }
+
+    public String getUploadURL() { return uploadURL; }
+
+    public void setUploadURL(String uploadURL) { this.uploadURL = uploadURL; }
+
+    public ConnectivityManager getConnectionManager() { return cManager; }
+    // This should only be set once instead being allocated on callback.
+    // public void setConnectionManager(ConnectivityManager cManager) { this.cManager = cManager; }
+
     //--------------------------------------------------------------------------------------------//
     // Lazy instantiation via private static inner class
     private static final class Lazy {
@@ -33,34 +48,7 @@ public class WebManager extends BroadcastReceiver {
         static boolean isRegistered = false;
     }
 
-    //Singleton implementation
-    WebManager() { }
-
-    public ConnectivityManager getConnectionManager() { return cManager; }
-
     public static WebManager getInstance() { return Lazy.instance; }
-
-    public String getUploadURL() { return uploadURL; }
-
-    public void setUploadURL(String uploadURL) { this.uploadURL = uploadURL; }
-    // This should only be set once instead being allocated on callback.
-    // public void setConnectionManager(ConnectivityManager cManager) { this.cManager = cManager; }
-
-    public String getWriteDirectory() { return writeDirectory; }
-
-    public void setWriteDirectory(String writeDirectory) { this.writeDirectory = writeDirectory; }
-
-    public boolean hasWifi() {
-        NetworkInfo activeNetwork = getConnectionManager().getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
-    }
-    //--------------------------------------------------------------------------------------------//
-
-    /** Callback function listening to wifi */
-    @Override public void onReceive(Context context, Intent intent) {
-        Log.d(logTag, "onReceive");
-        triggerUpload();
-    }
 
     @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
     public static void register(Context ctx, Preferences p) {
@@ -80,6 +68,18 @@ public class WebManager extends BroadcastReceiver {
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
             ctx.registerReceiver(instance, connectionIntent);
         }
+    }
+    //--------------------------------------------------------------------------------------------//
+
+    /** Callback function listening to wifi */
+    @Override public void onReceive(Context context, Intent intent) {
+        Log.d(logTag, "onReceive");
+        triggerUpload();
+    }
+
+    public boolean hasWifi() {
+        NetworkInfo activeNetwork = getConnectionManager().getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
     // TODO: Implement Producer / Consumer pattern here with Upload thread
