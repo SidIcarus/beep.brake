@@ -1,6 +1,9 @@
 package edu.rit.se.beepbrake;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
     private static final String TAG = "Main-Activity";
 
+    public static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
+
+
     // Image Analysis Stuff
     private BaseLoaderCallback mLoaderCallback;
     private JavaCameraView mCameraView;
@@ -62,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         setContentView(R.layout.camera_preview);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //keeps screen on
 
+        requestPermissionForCamera();
 
         Initialize(); // Ryan made for segment initialization.
 
@@ -219,5 +226,14 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
     public void setCurrentFoundLanes(double[][] lanesCoord){
         this.mCameraPreview.setLinesToDraw(lanesCoord);
     }
+
+
+    private void requestPermissionForCamera(){
+        int result = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+        }
+    }
+
 
 }
