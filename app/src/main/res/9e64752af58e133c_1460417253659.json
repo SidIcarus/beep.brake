@@ -1,0 +1,85 @@
+{
+  "device": {
+    "id": "9e64752af58e133c",
+    "hardware": "LMY47X.N910VVRU2BPA1",
+    "os_version": "5.1.1",
+    "app_version": "1.0",
+    "eventdata": 1460417253659,
+    "time_zone": "America/New_York",
+    "write_directory": "/storage/emulated/0/"
+  },
+  "configuration": {
+    "warning_time": 10
+  },
+  "segments": [{
+    "time": 1460417253659,
+    "imagename": "1460417253659/1460417253659.png",
+    "XYZ_acl": [-1.123279631137848, 8.004614459143745, 5.623713731765747]
+  }, {
+    "time": 1460417253785,
+    "imagename": "1460417253659/1460417253785.png",
+    "XYZ_acl": [-1.3036428689956665, 8.518569946289063, 4.1611223220825195]
+  }]
+}
+
+{
+  "deviceid": "9e64752af58e133c",
+  "hardware": "LMY47X.N910VVRU2BPA1",
+  "osversion": "5.1.1",
+  "appversion": "1.0",
+  "eventdata": 1460417253659,
+  "timezone": "America/New_York",
+  "configuration": {
+    "warningtime": 10
+  },
+  "segments": [{
+    "segtime": 1460417253659,
+    "sensordata": [{
+      "key": "imagename",
+      "value": "/storage/emulated/0/write_segments/1460417253659/1460417253659.png"
+    }, {
+      "key": "YAcl",
+      "value": 8.004614459143745
+    }, {
+      "key": "ZAcl",
+      "value": 5.623713731765747
+    }, {
+      "key": "XAcl",
+      "value": -1.123279631137848
+    }]
+  }, {
+    "segtime": 1460417253785,
+    "sensordata": [{
+      "key": "imagename",
+      "value": "/storage/emulated/0/write_segments/1460417253659/1460417253785.png"
+    }, {
+      "key": "YAcl",
+      "value": 8.518569946289063
+    }, {
+      "key": "ZAcl",
+      "value": 4.1611223220825195
+    }, {
+      "key": "XAcl",
+      "value": -1.3036428689956665
+    }]
+  }]
+}
+
+
+[{
+  "id": 912345678901,
+  "text": "How do I write JSON on Android?",
+  "geo": null,
+  "user": {
+    "name": "android_newb",
+    "followers_count": 41
+  }
+}, {
+  "id": 912345678902,
+  "text": "@android_newb just use android.util.JsonWriter!",
+  "geo": [50.454722, -104.606667],
+  "user": {
+    "name": "jesse",
+    "followers_count": 2
+  }
+}]

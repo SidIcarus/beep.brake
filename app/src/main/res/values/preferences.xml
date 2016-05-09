@@ -19,63 +19,6 @@
         <item>upload_paths</item>
     </string-array>
 
-    <!-- Info from android.os.Build -->
-    <string-array name="device">
-        <!-- Either a changelist number, or a label like "M4-rc20". -->
-        <item>id</item>
-
-        <!-- The current development codename, or the item "REL" if this is a release build.-->
-        <item>os_version</item>
-
-        <!-- The name of the underlying board, like "goldfish". -->
-        <item>board</item>
-
-        <!-- The system bootloader version number. -->
-        <item>bootloader</item>
-
-        <!-- The brand (e.g., carrier) the software is customized for, if any. -->
-        <item>brand</item>
-
-        <!-- The name of the instruction set (CPU type + ABI convention) of native code. -->
-        <!--<item>cpu_abi</item>-->
-
-        <!-- The name of the second instruction set (CPU type + ABI convention) of native code. -->
-        <!--<item>cpu_abi2</item>-->
-
-        <!-- The name of the industrial design. -->
-        <item>device</item>
-
-        <!-- A build ID item meant for displaying to the user -->
-        <item>display</item>
-
-        <!-- A item that uniquely identifies this build. -->
-        <item>fingerprint</item>
-
-        <!-- The name of the hardware (from the kernel command line or /proc). -->
-        <item>hardware</item>
-
-        <!-- The manufacturer of the product/hardware. -->
-        <item>manufacturer</item>
-
-        <!-- The end-user-visible name for the end product. -->
-        <item>model</item>
-
-        <!-- The name of the overall product. -->
-        <item>product</item>
-
-        <!-- The radio firmware version number. -->
-        <item>radio</item>
-
-        <!-- Comma-separated tags describing the build, like "unsigned,debug". -->
-        <item>tags</item>
-
-        <!-- The type of build, like "user" or "eng". -->
-        <item>type</item>
-
-        <!--  -->
-        <item>user</item>
-    </string-array>
-
     <integer name="warningtime">10</integer>
 
     <!-- Default values -->
