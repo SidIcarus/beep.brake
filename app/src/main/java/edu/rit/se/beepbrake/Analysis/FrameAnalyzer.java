@@ -19,7 +19,6 @@ import edu.rit.se.beepbrake.utils.TempLogger;
 public class FrameAnalyzer implements Runnable {
 
     private static final String TAG = "Frame Analyzer Thread";
-    static int numAnalyzer = 0;
     // haar classifier
     private static CascadeClassifier mCascadeClassifier;
     private volatile boolean bRunning;
@@ -31,6 +30,7 @@ public class FrameAnalyzer implements Runnable {
     private Detector mDetector;
     //for logging
     private int analyzerId = 0;
+    static int numAnalyzer = 0;
 
     /**
      * Constructor
@@ -43,22 +43,6 @@ public class FrameAnalyzer implements Runnable {
         bRunning = true;
         analyzerId = numAnalyzer;
         numAnalyzer++;
-    }
-
-    // Analyze the most recent frame
-    @Override
-    public void run() {
-        Log.d(TAG, "Started Running!");
-        while (bRunning) {
-            if (mCurrentFrame != null) {
-                mFrameLock.lock();
-                TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
-                mDetector.detect(mCurrentFrame);
-                mCurrentFrame = null;
-                mFrameLock.unlock();
-            }
-        }
-        Log.d(TAG, "Finished Running!");
     }
 
     // Analyze the most recent mat (current image)
@@ -78,6 +62,22 @@ public class FrameAnalyzer implements Runnable {
     public void resumeDetection() {
         bRunning = true;
         (new Thread(this)).start();
+    }
+
+    // Analyze the most recent frame
+    @Override
+    public void run() {
+        Log.d(TAG, "Started Running!");
+        while (bRunning) {
+            if (mCurrentFrame != null) {
+                mFrameLock.lock();
+                TempLogger.addMarkTime(TempLogger.SLACK_TIME + this.toString());
+                mDetector.detect(mCurrentFrame);
+                mCurrentFrame = null;
+                mFrameLock.unlock();
+            }
+        }
+        Log.d(TAG, "Finished Running!");
     }
 
     public String toString() {

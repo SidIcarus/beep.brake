@@ -13,27 +13,68 @@ import edu.rit.se.beepbrake.analysis.DetectorCallback;
 // Created by richykapadia on 1/19/16.
 public class CropLaneDetector implements Detector {
 
+    private Size totalSize;
+    private Rect cropSizeLeft;
+    private Rect cropSizeRight;
+    private boolean sizeSet = false;
+    private DetectorCallback callback;
     static final int CANNY_MIN = 25;                    // edge detector minimum hysteresis threshold
     static final int CANNY_MAX = 150;                // edge detector maximum hysteresis threshold
     static final int HOUGH_TRESHOLD = 40;            // line approval vote threshold
     static final int HOUGH_MIN_LINE_LENGTH = 10;        // remove lines shorter than this treshold
     static final int HOUGH_MAX_LINE_GAP = 25;        // join lines to one with smaller than this gaps
     static final int LINE_REJECT_DEGREES = 10;
-
     static final int ANGLE_THRESH = 2;                //angle between two paired edges of a lane
     static final int POSITION_THRESH = 15;            //width of the lane in pixels
-
     static final double THETA = (5 * Math.PI) / 180;
 
-    private Size totalSize;
-    private Rect cropSizeLeft;
-    private Rect cropSizeRight;
-
-    private boolean sizeSet = false;
-
-    private DetectorCallback callback;
-
     public CropLaneDetector(DetectorCallback callback) { this.callback = callback; }
+
+    @Override
+    public void detect(Mat m) {
+        setSize(m);
+        if (!this.sizeSet || m == null || m.empty()) return;
+
+        Mat copy = new Mat();
+        m.copyTo(copy);
+        //divide img in right/left half
+        Mat roiLeft = new Mat(copy, this.cropSizeLeft);
+        Mat roiRight = new Mat(copy, this.cropSizeRight);
+        //imgproc stuff
+        Mat leftLines = findLines(roiLeft);
+        Mat rightLines = findLines(roiRight);
+        //filter stuff
+        double[][] leftCoord = filterOutLines(leftLines);
+        double[][] rightCoord = filterOutLines(rightLines);
+
+        //calc offsets
+        int leftOffsetX = (int) (this.totalSize.width - (this.totalSize.width - this.cropSizeLeft.tl().x));
+        int leftOffsetY = (int) (this.totalSize.height - (this.totalSize.height - this.cropSizeLeft.tl().y));
+        int rightOffsetX = (int) (this.totalSize.width - (this.totalSize.width - this.cropSizeRight.tl().x));
+        int rightOffsetY = (int) (this.totalSize.height - (this.totalSize.height - this.cropSizeRight.tl().x));
+
+        //consolidate coordnates
+        int numLines = leftCoord.length + rightCoord.length;
+        double[][] results = new double[numLines][4];
+        int i = 0;
+        for (double[] data : leftCoord) {
+            data[0] += leftOffsetX;
+            data[1] += leftOffsetY;
+            data[2] += leftOffsetX;
+            data[3] += leftOffsetX;
+            results[i] = data;
+            i++;
+        }
+        for (double[] data : rightCoord) {
+            data[0] += rightOffsetX;
+            data[1] += rightOffsetY;
+            data[2] += rightOffsetX;
+            data[3] += rightOffsetX;
+            results[i] = data;
+            i++;
+        }
+        this.callback.setCurrentFoundLanes(results);
+    }
 
     private static double[][] filterOutLines(Mat lines) {
 
@@ -92,52 +133,6 @@ public class CropLaneDetector implements Detector {
             filteredLines[i] = (data[0] > data2[0] || data[2] > data2[2]) ? data : data2;
         }
         return filteredLines;
-    }
-
-    @Override
-    public void detect(Mat m) {
-        setSize(m);
-        if (!this.sizeSet || m == null || m.empty()) return;
-
-        Mat copy = new Mat();
-        m.copyTo(copy);
-        //divide img in right/left half
-        Mat roiLeft = new Mat(copy, this.cropSizeLeft);
-        Mat roiRight = new Mat(copy, this.cropSizeRight);
-        //imgproc stuff
-        Mat leftLines = findLines(roiLeft);
-        Mat rightLines = findLines(roiRight);
-        //filter stuff
-        double[][] leftCoord = filterOutLines(leftLines);
-        double[][] rightCoord = filterOutLines(rightLines);
-
-        //calc offsets
-        int leftOffsetX = (int) (this.totalSize.width - (this.totalSize.width - this.cropSizeLeft.tl().x));
-        int leftOffsetY = (int) (this.totalSize.height - (this.totalSize.height - this.cropSizeLeft.tl().y));
-        int rightOffsetX = (int) (this.totalSize.width - (this.totalSize.width - this.cropSizeRight.tl().x));
-        int rightOffsetY = (int) (this.totalSize.height - (this.totalSize.height - this.cropSizeRight.tl().x));
-
-        //consolidate coordnates
-        int numLines = leftCoord.length + rightCoord.length;
-        double[][] results = new double[numLines][4];
-        int i = 0;
-        for (double[] data : leftCoord) {
-            data[0] += leftOffsetX;
-            data[1] += leftOffsetY;
-            data[2] += leftOffsetX;
-            data[3] += leftOffsetX;
-            results[i] = data;
-            i++;
-        }
-        for (double[] data : rightCoord) {
-            data[0] += rightOffsetX;
-            data[1] += rightOffsetY;
-            data[2] += rightOffsetX;
-            data[3] += rightOffsetX;
-            results[i] = data;
-            i++;
-        }
-        this.callback.setCurrentFoundLanes(results);
     }
 
     /**

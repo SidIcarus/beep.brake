@@ -42,6 +42,9 @@ public class FragmentUserPreferences extends PreferenceFragment2
         return rootView;
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { }
+
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.preferences_toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_call_24dp);
@@ -53,8 +56,5 @@ public class FragmentUserPreferences extends PreferenceFragment2
         toolbar.inflateMenu(R.menu.dialog_toolbar_empty);
         toolbar.setTitle("Preferences");
     }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { }
 }
 // etc.

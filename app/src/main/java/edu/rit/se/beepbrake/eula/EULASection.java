@@ -7,21 +7,20 @@ public class EULASection {
 
     public EULASection() { }
 
-
-    /* Setters */
-    public void setID(int mID) { this.setID(Integer.toString(mID)); }
-
-    // Pad singles w/ preceding 0
-    public void setID(String mID) { this.mID = String.format("%02d", mID) + "."; }
-
-    public void setTitle(String mTitle) { this.mTitle = mTitle.toUpperCase() + "."; }
+    public String getContent() { return mContent; }
 
     public void setContent(String mContent) { this.mContent = mContent; }
 
     /* Getters */
     public String getID() { return mID; }
 
+    // Pad singles w/ preceding 0
+    public void setID(String mID) { this.mID = String.format("%02d", mID) + "."; }
+
     public String getTitle() { return mTitle; }
 
-    public String getContent() { return mContent; }
+    public void setTitle(String mTitle) { this.mTitle = mTitle.toUpperCase() + "."; }
+
+    /* Setters */
+    public void setID(int mID) { this.setID(Integer.toString(mID)); }
 }

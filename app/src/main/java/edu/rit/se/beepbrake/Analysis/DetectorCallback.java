@@ -6,9 +6,9 @@ import org.opencv.core.Rect;
 // Created by richykapadia on 4/11/16.
 public interface DetectorCallback {
 
-    void setCurrentFrame(Mat currentFrame);
+    void setCurrentFoundLanes(double[][] lanesCoord);
 
     void setCurrentFoundRect(Mat m, Rect r);
 
-    void setCurrentFoundLanes(double[][] lanesCoord);
+    void setCurrentFrame(Mat currentFrame);
 }

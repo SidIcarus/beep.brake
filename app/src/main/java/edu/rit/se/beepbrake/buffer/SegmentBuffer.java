@@ -1,31 +1,28 @@
 package edu.rit.se.beepbrake.buffer;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import edu.rit.se.beepbrake.constants.SegmentConstants;
+
 import edu.rit.se.beepbrake.segment.Segment;
 
 public class SegmentBuffer {
 
-    /** Max amount of time (in millis) between segments to allow before removing old ones */
-    private final int timediff = 6000;
-
-    /** Max length (in millis) of an event */
-    private final int maxtime = 20000;
-
     /** App context, used for getting file locations */
     private Context context;
 
-    /** The segment most recently added to the buffer */
-    private Segment newest;
+    /** The most recently added segment to the buffer */
+    @Nullable private Segment newestSeg;
 
     /** The oldest segment still in the buffer */
-    private Segment oldest;
+    @Nullable private Segment oldestSegment;
 
-    /** The timestamp of the last issued warning, for determining when to stop saving segs to disk*/
+    /** Timestamp of the last issued warning, for determining when to stop saving segs to disk */
     private long lastWarningTime;
 
     /** The timestamp of the first warning for this event */
@@ -37,16 +34,15 @@ public class SegmentBuffer {
     /** Tracking if we are currently saving segments to disk or not */
     private boolean activeWarning;
 
-    private DiskWriter activeWriter;
+    @Nullable private DiskWriter activeWriter;
 
-    /**
-     * Constructor
-     * Start with empty newest and oldest segments
-     */
-    public SegmentBuffer(Context con) {
-        this.context = con;
-        this.newest = null;
-        this.oldest = null;
+    private final String logTag = "System.Buffer";
+
+    /** Start with empty newestSeg and oldestSegment segments */
+    public SegmentBuffer(Context context) {
+        this.context = context;
+        this.newestSeg = null;
+        this.oldestSegment = null;
         activeWarning = false;
         activeWriter = null;
         bufferLock = new ReentrantLock();
@@ -60,65 +56,19 @@ public class SegmentBuffer {
      */
     public void addSegment(Segment seg) {
         bufferLock.lock();
-        if (newest == null) {
-            newest = seg;
-            oldest = seg;
-        } else {
-            newest.setNextSeg(seg);
-            seg.setPrevSeg(newest);
-            newest = seg;
-            prune();
-        }
-        bufferLock.unlock();
-    }
-
-    /**
-     * Get the latest segment from the buffer
-     *
-     * @return newest - the latest segment
-     */
-    public Segment getNewest() { return newest; }
-
-    /**
-     * A warning was triggered, so write event to disk
-     * Uses lock to ensure a segment is not pruned while the DiskWriter is being set up
-     */
-    public void triggerWarning() {
-        //Ignore warning if we don't have any segments yet
-        if (newest != null) {
-            bufferLock.lock();
-            lastWarningTime = newest.getCreatedAt();
-            if (!activeWarning) {
-                firstWarningTime = lastWarningTime;
-                activeWriter = new DiskWriter(oldest.getCreatedAt(), context);
-                activeWriter.start();
+        try {
+            if (newestSeg == null) {
+                newestSeg = seg;
+                oldestSegment = seg;
+            } else {
+                newestSeg.setNextSeg(seg);
+                seg.setPrevSeg(newestSeg);
+                newestSeg = seg;
+                prune();
             }
-            activeWarning = true;
-            bufferLock.unlock();
-        }
-    }
-
-    /**
-     * Go through the segments starting from the oldest and remove any that are not needed anymore
-     * If a warning is active, will send the pruned segments to the active diskwriter
-     */
-    private void prune() {
-        while (newest.getCreatedAt() - oldest.getCreatedAt() > timediff) {
-            bufferLock.lock();
-            if (activeWarning) {
-                //End the warning state if it's been long enough since the last warning segment, or is too long of an event
-                if (oldest.getCreatedAt() - lastWarningTime > timediff || oldest.getCreatedAt() - firstWarningTime > maxtime) {
-                    Log.d("bufer system", "Prune is ending the event: o: " + oldest.getCreatedAt() + " n: " + newest.getCreatedAt());
-                    activeWarning = false;
-                    activeWriter.signalEnd();
-                    activeWriter = null;
-                } else {
-                    activeWriter.addSegment(oldest);
-                }
-            }
-            //Remove the oldest segment from the list
-            oldest.getNextSeg().setPrevSeg(null);
-            oldest = oldest.getNextSeg();
+        } catch (RuntimeException e) {
+            e.printStackTrace(); //TODO: Add actual debugging statements
+        } finally {
             bufferLock.unlock();
         }
     }
@@ -126,23 +76,97 @@ public class SegmentBuffer {
     /** Clear the current buffer. Used to remove stale data when the app is paused. */
     public void clear() {
         bufferLock.lock();
-        if (activeWarning) {
-            //If a warning is active, flush the buffer into the DiskWriter, then close the event
-            while (oldest != newest) {
-                activeWriter.addSegment(oldest);
-                oldest = oldest.getNextSeg();
-                oldest.setPrevSeg(null);
-            }
-            //Send the last segment
-            activeWriter.addSegment(oldest);
-            activeWriter.signalEnd();
-            activeWarning = false;
-        }
+        try {
+            if (activeWarning && activeWriter != null) {
+                //If a warning is active, flush the buffer into the DiskWriter, then close the event
+                while (oldestSegment != newestSeg) {
 
-        //Reset values to defaults
-        oldest = null;
-        newest = null;
-        activeWriter = null;
-        bufferLock.unlock();
+                    activeWriter.addSegment(oldestSegment);
+                    oldestSegment = oldestSegment.getNextSeg();
+                    oldestSegment.setPrevSeg(null);
+                }
+                //Send the last segment
+                activeWriter.addSegment(oldestSegment);
+                activeWriter.signalEnd();
+                activeWarning = false;
+            }
+
+            //Reset values to defaults
+            oldestSegment = null;
+            newestSeg = null;
+            activeWriter = null;
+        } catch (RuntimeException e) {
+            e.printStackTrace(); //TODO: Add actual debugging statements
+        } finally { bufferLock.unlock(); }
+    }
+
+    /**
+     * Get the latest segment from the buffer
+     *
+     * @return newestSeg - the latest segment
+     */
+    public Segment getNewestSeg() { return newestSeg; }
+
+    /**
+     * Go through the segments starting from the oldestSegment and remove any that are not needed
+     * anymore
+     * If a warning is active, will send the pruned segments to the active diskwriter
+     */
+    private void prune() {
+        if (newestSeg != null && oldestSegment != null) {
+            // Declared for clarity, & declared outside of loop for better performance
+            long nCreated, oCreated;
+            while (newestSeg.getCreatedAt() - oldestSegment.getCreatedAt() >
+                SegmentConstants.timeDiff) {
+                bufferLock.lock();
+                try {
+                    nCreated = newestSeg.getCreatedAt();
+                    oCreated = oldestSegment.getCreatedAt();
+                    if (activeWarning && activeWriter != null) {
+                        //End the warning state if it's been long enough since the last warning
+                        // segment, or is too long of an event
+
+                        if (oCreated - lastWarningTime > SegmentConstants.timeDiff ||
+                            oCreated - firstWarningTime > SegmentConstants.maxTime)
+                        {
+                            Log.d(logTag,
+                                  "Prune is ending the event: o: " + oCreated + " n: " + nCreated);
+                            activeWarning = false;
+                            activeWriter.signalEnd();
+                            activeWriter = null;
+                        } else activeWriter.addSegment(oldestSegment);
+                    }
+                    //Remove the oldestSegment segment from the list
+                    oldestSegment.getNextSeg().setPrevSeg(null);
+                    oldestSegment = oldestSegment.getNextSeg();
+                } catch (RuntimeException e) {
+                    e.printStackTrace(); //TODO: Add actual debugging statements
+                } finally { bufferLock.unlock(); }
+            }
+        }
+    }
+
+    /**
+     * A warning was triggered, so write event to disk
+     * Uses lock to ensure a segment is not pruned while the DiskWriter is being set up
+     */
+    public void triggerWarning() {
+        //Ignore warning if we don't have any segments yet
+        if (newestSeg != null) {
+            bufferLock.lock();
+            try {
+                lastWarningTime = newestSeg.getCreatedAt();
+                if (!activeWarning) {
+                    firstWarningTime = lastWarningTime;
+                    if (oldestSegment != null) {
+                        activeWriter = new DiskWriter(oldestSegment.getCreatedAt(), context);
+                        activeWriter.start();
+                    }
+                }
+                activeWarning = true;
+            } catch (RuntimeException e) {
+                e.printStackTrace(); //TODO: Add actual debugging statements
+            } finally { bufferLock.unlock(); }
+        }
     }
 }

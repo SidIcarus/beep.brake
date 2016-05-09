@@ -26,6 +26,19 @@ public class DecisionManager {
 
     }
 
+    public void onPause() {
+        for (int i = 0; i < decisions.size(); i++) {
+            decisions.get(i).setRunning(false);
+        }
+    }
+
+    public void onResume() {
+        for (int i = 0; i < decisions.size(); i++) {
+            decisions.get(i).setRunning(true);
+            (new Thread(decisions.get(i))).start();
+        }
+    }
+
     // TODO: have the call to change the color of the square to red here
     public void warn() {
         Date curTime = new Date();
@@ -42,18 +55,5 @@ public class DecisionManager {
         }
         bufMan.warningTriggered();
         lastWarn = curTime;
-    }
-
-    public void onResume() {
-        for (int i = 0; i < decisions.size(); i++) {
-            decisions.get(i).setRunning(true);
-            (new Thread(decisions.get(i))).start();
-        }
-    }
-
-    public void onPause() {
-        for (int i = 0; i < decisions.size(); i++) {
-            decisions.get(i).setRunning(false);
-        }
     }
 }

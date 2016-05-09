@@ -37,47 +37,6 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
 
     public CameraPreview(DetectorCallback detectorCallback) { this.detectorCallback = detectorCallback; }
 
-    @Override
-    public void onCameraViewStarted(int width, int height) { }
-
-    @Override
-    public void onCameraViewStopped() { }
-
-    //Main loop that runs the application
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
-
-        this.detectorCallback.setCurrentFrame(inputFrame.gray());
-        //To show tracking on image
-        inputFrame.rgba().copyTo(display);
-        drawBox(display);
-        drawLines(display);
-        return display;
-    }
-
-    public void setRectToDraw(Rect r) {
-        drawLock.lock();
-        if (r != null) {
-            this.foundCar.x = r.x;
-            this.foundCar.y = r.y;
-            this.foundCar.height = r.height;
-            this.foundCar.width = r.width;
-        } else {
-            this.foundCar.x = 0;
-            this.foundCar.y = 0;
-            this.foundCar.height = 0;
-            this.foundCar.width = 0;
-        }
-        drawLock.unlock();
-    }
-
-    public void setLinesToDraw(double[][] lines) {
-        drawLock.lock();
-        foundLines = lines;
-        drawLock.unlock();
-    }
-
     private void drawBox(Mat rgb) {
         drawLock.lock();
         // Draw rectangle around found object
@@ -98,6 +57,47 @@ public class CameraPreview implements CameraBridgeViewBase.CvCameraViewListener2
                     Imgproc.line(rgb, linePoint1, linePoint2, lineColor, 2);
                 }
             }
+        }
+        drawLock.unlock();
+    }
+
+    //Main loop that runs the application
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        TempLogger.incrementCount(TempLogger.TOTAL_FRAMES);
+
+        this.detectorCallback.setCurrentFrame(inputFrame.gray());
+        //To show tracking on image
+        inputFrame.rgba().copyTo(display);
+        drawBox(display);
+        drawLines(display);
+        return display;
+    }
+
+    @Override
+    public void onCameraViewStarted(int width, int height) { }
+
+    @Override
+    public void onCameraViewStopped() { }
+
+    public void setLinesToDraw(double[][] lines) {
+        drawLock.lock();
+        foundLines = lines;
+        drawLock.unlock();
+    }
+
+    public void setRectToDraw(Rect r) {
+        drawLock.lock();
+        if (r != null) {
+            this.foundCar.x = r.x;
+            this.foundCar.y = r.y;
+            this.foundCar.height = r.height;
+            this.foundCar.width = r.width;
+        } else {
+            this.foundCar.x = 0;
+            this.foundCar.y = 0;
+            this.foundCar.height = 0;
+            this.foundCar.width = 0;
         }
         drawLock.unlock();
     }

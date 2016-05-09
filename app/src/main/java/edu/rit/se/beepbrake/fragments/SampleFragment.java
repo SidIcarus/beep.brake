@@ -19,9 +19,7 @@ public class SampleFragment extends Fragment implements View.OnClickListener {
     // Use `newInstance` instead as shown below
     public SampleFragment() { }
 
-    /**
-     * @return A new instance of fragment SampleFragment.
-     */
+    /** @return A new instance of fragment SampleFragment. */
     public static SampleFragment newInstance(String title) {
         SampleFragment fragment = new SampleFragment();
         Bundle args = new Bundle();
@@ -87,12 +85,12 @@ public class SampleFragment extends Fragment implements View.OnClickListener {
     public void onStart() { super.onStart(); }
 
     // FL 3.0: Resumed
-    // Allocate “expensive” resources such as registering for location, sensor updates, etc.
+    // Allocate "expensive" resources such as registering for location, sensor updates, etc.
     @Override
     public void onResume() { super.onResume(); }
 
     // FL 4.0: Paused
-    // Release “expensive” resources. Commit any changes.
+    // Release "expensive" resources. Commit any changes.
     @Override
     public void onPause() { super.onPause(); }
 

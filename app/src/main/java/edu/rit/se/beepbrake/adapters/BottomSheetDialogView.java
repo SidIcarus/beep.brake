@@ -15,6 +15,31 @@ public class BottomSheetDialogView {
 
     private static String[] sStringList;
 
+    private static class ViewHolder extends RecyclerView.ViewHolder {
+
+        private TextView mTextView;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            mTextView = (TextView) itemView.findViewById(R.id.list_item_text_view);
+        }
+    }
+
+    private static class SimpleAdapter extends RecyclerView.Adapter<ViewHolder> {
+
+        @Override public int getItemCount() { return sStringList.length; }
+
+        @Override public void onBindViewHolder(ViewHolder holder, int position) {
+            holder.mTextView.setText(sStringList[position]);
+        }
+
+        @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            View view = inflater.inflate(R.layout.list_item, null);
+            return new ViewHolder(view);
+        }
+    }
+
     static {
         sStringList = new String[25];
         StringBuilder stringBuilder = new StringBuilder();
@@ -47,30 +72,5 @@ public class BottomSheetDialogView {
 
     public static void show(Context context, int dayNightMode) {
         new BottomSheetDialogView(context, dayNightMode);
-    }
-
-    private static class ViewHolder extends RecyclerView.ViewHolder {
-
-        private TextView mTextView;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            mTextView = (TextView) itemView.findViewById(R.id.list_item_text_view);
-        }
-    }
-
-    private static class SimpleAdapter extends RecyclerView.Adapter<ViewHolder> {
-
-        @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            View view = inflater.inflate(R.layout.list_item, null);
-            return new ViewHolder(view);
-        }
-
-        @Override public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.mTextView.setText(sStringList[position]);
-        }
-
-        @Override public int getItemCount() { return sStringList.length; }
     }
 }

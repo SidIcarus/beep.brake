@@ -12,6 +12,25 @@ import edu.rit.se.beepbrake.R;
 
 public class FragmentDirector {
 
+    private FragmentManager fManager;
+    @AppFragments private int currentFragment;
+
+    public FragmentDirector() { }
+
+    protected void displayFragment(boolean hideFragment, @AppFragments Integer newFragment) {
+        int fragmentID = AppFragments.fragmentID.get(newFragment);
+    }
+
+    public int getCurrentFragmentID() { return AppFragments.fragmentID.get(currentFragment); }
+
+    public FragmentDirector newInstance(FragmentManager fManager) {
+        this.fManager = fManager;
+
+        this.currentFragment = AppFragments.FIRST_RUN;
+
+        return new FragmentDirector();
+    }
+
     @IntDef({AppFragments.FIRST_RUN, AppFragments.EULA, AppFragments.CAMERA})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AppFragments {
@@ -24,25 +43,5 @@ public class FragmentDirector {
             append(CAMERA, 0);
         }};
     }
-
-    private FragmentManager fManager;
-
-    @AppFragments private int currentFragment;
-
-    public FragmentDirector() { }
-
-    public FragmentDirector newInstance(FragmentManager fManager) {
-        this.fManager = fManager;
-
-        this.currentFragment = AppFragments.FIRST_RUN;
-
-        return new FragmentDirector();
-    }
-
-    protected void displayFragment(boolean hideFragment, @AppFragments Integer newFragment) {
-        int fragmentID = AppFragments.fragmentID.get(newFragment);
-    }
-
-    public int getCurrentFragmentID() { return AppFragments.fragmentID.get(currentFragment); }
 
 }

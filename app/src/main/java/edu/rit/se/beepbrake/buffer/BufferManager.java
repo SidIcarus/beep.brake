@@ -11,13 +11,6 @@ public class BufferManager {
     public BufferManager(Context context) { buffer = new SegmentBuffer(context); }
 
     /**
-     * Request the latest segment for analyzation (Called by DecisionMaker)
-     *
-     * @return segment - the most recent segment
-     */
-    public Segment getNewestSegment() { return buffer.getNewest(); }
-
-    /**
      * Add a segment (Sent from synchronizer)
      *
      * @param seg - new segment
@@ -25,12 +18,19 @@ public class BufferManager {
     public void addSegment(Segment seg) { buffer.addSegment(seg); }
 
     /**
+     * Request the latest segment for analyzation (Called by DecisionMaker)
+     *
+     * @return segment - the most recent segment
+     */
+    public Segment getNewestSegment() { return buffer.getNewestSeg(); }
+
+    /** Clear the buffer while the app is not in use */
+    public void onPause() { buffer.clear(); }
+
+    /**
      * A warning was triggered, so save the buffer to disk, and prepare to save again (need
      * before and after buffers)
      */
     public void warningTriggered() { buffer.triggerWarning(); }
-
-    /** Clear the buffer while the app is not in use */
-    public void onPause() { buffer.clear(); }
 
 }

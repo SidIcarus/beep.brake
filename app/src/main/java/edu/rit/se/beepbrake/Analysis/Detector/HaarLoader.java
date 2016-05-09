@@ -30,10 +30,28 @@ public class HaarLoader {
 
     private HaarLoader() { }
 
+    public int getFlag() {
+        return flag;
+    }
+
     public static HaarLoader getInstance() {
         if (instance == null) instance = new HaarLoader();
 
         return instance;
+    }
+
+    public int getMinNeighbor() {
+        return this.minNeighbor;
+    }
+
+    // Haar params when running
+
+    public double getScaleFactor() {
+        return this.scaleFactor;
+    }
+
+    public Size getTrainingSize() {
+        return this.trainingSize;
     }
 
     private static CascadeClassifier loadCascade(Context context, String xml, int resourceId) {
@@ -123,24 +141,6 @@ public class HaarLoader {
                 return null;
 
         }
-    }
-
-    // Haar params when running
-
-    public Size getTrainingSize() {
-        return this.trainingSize;
-    }
-
-    public int getMinNeighbor() {
-        return this.minNeighbor;
-    }
-
-    public double getScaleFactor() {
-        return this.scaleFactor;
-    }
-
-    public int getFlag() {
-        return flag;
     }
 
     public enum cascades {VISIONARY_CAR_TRUCK, OPENCV_FULLBODY, OPENCV_UPPERBODY, CAR_3}

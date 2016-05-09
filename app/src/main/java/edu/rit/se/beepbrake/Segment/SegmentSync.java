@@ -14,11 +14,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class SegmentSync {
-    ConcurrentHashMap<String, ArrayList<Object>> aggData;
-    ConcurrentHashMap<String, Object> singleData;
     private BufferManager buf;
     private ReentrantLock lock = new ReentrantLock();
     private boolean isRunning;
+    ConcurrentHashMap<String, ArrayList<Object>> aggData;
+    ConcurrentHashMap<String, Object> singleData;
 
     public SegmentSync(BufferManager bm) {
         buf = bm;
@@ -26,6 +26,39 @@ public class SegmentSync {
         singleData = new ConcurrentHashMap<String, Object>();
         isRunning = true;
     }
+
+    public void UpdateDataAgg(HashMap<String, Object> map) {
+        lock.lock();
+        Iterator it = map.entrySet().iterator();
+
+        //Iterate over all items to be added
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            if (aggData.containsKey(pair.getKey())) {
+                aggData.get(pair.getKey()).add(pair.getValue());
+            } else {
+                ArrayList<Object> a = new ArrayList<Object>();
+                a.add(pair.getValue());
+                aggData.put(pair.getKey().toString(), a);
+            }
+        }
+        lock.unlock();
+
+        //makeSegment(); Used for demonstration purposes with android sensors
+    }
+
+    public void UpdateDataSingle(HashMap<String, Object> map) {
+        lock.lock();
+        Iterator it = map.entrySet().iterator();
+
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            singleData.put(pair.getKey().toString(), pair.getValue());
+        }
+        lock.unlock();
+    }
+
+    public boolean isRunning() { return isRunning; }
 
     public synchronized void makeSegment(Mat img, HashMap<String, Object> camData) {
         this.lock.lock();
@@ -64,35 +97,10 @@ public class SegmentSync {
         lock.unlock();
     }
 
-    public void UpdateDataAgg(HashMap<String, Object> map) {
-        lock.lock();
-        Iterator it = map.entrySet().iterator();
-
-        //Iterate over all items to be added
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            if (aggData.containsKey(pair.getKey())) {
-                aggData.get(pair.getKey()).add(pair.getValue());
-            } else {
-                ArrayList<Object> a = new ArrayList<Object>();
-                a.add(pair.getValue());
-                aggData.put(pair.getKey().toString(), a);
-            }
-        }
-        lock.unlock();
-
-        //makeSegment(); Used for demonstration purposes with android sensors
-    }
-
-    public void UpdateDataSingle(HashMap<String, Object> map) {
-        lock.lock();
-        Iterator it = map.entrySet().iterator();
-
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            singleData.put(pair.getKey().toString(), pair.getValue());
-        }
-        lock.unlock();
+    public void onPause() {
+        isRunning = false;
+        aggData = null;
+        singleData = null;
     }
 
     public void onResume() {
@@ -100,12 +108,4 @@ public class SegmentSync {
         aggData = new ConcurrentHashMap<String, ArrayList<Object>>();
         singleData = new ConcurrentHashMap<String, Object>();
     }
-
-    public void onPause() {
-        isRunning = false;
-        aggData = null;
-        singleData = null;
-    }
-
-    public boolean isRunning() { return isRunning; }
 }

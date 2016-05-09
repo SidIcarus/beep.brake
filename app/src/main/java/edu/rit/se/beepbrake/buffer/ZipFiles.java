@@ -15,6 +15,8 @@ public class ZipFiles {
     private String[] _files;
     private String _zipFile;
 
+    public ZipFiles() { }
+
     public ZipFiles(String[] files, String zipFile) {
         _files = files;
         _zipFile = zipFile;

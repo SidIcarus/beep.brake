@@ -59,11 +59,43 @@ public class DiskWriter extends Thread {
         this.endReached = false;
     }
 
-    /** Signal that the event is over and all segments have been added */
-    public void signalEnd() { endReached = true; }
-
     /** Add a segment to the queue to be written to disk */
     public void addSegment(Segment seg) { segments.add(seg); }
+
+    // TODO: Get clarification on the OutputStreams / Writers
+    // I feel like I'm doing something redundantly
+    private byte[] getJsonBytes(ZipOutputStream zipOut, String appVersion, String androidID)
+        throws IOException, InterruptedException {
+        try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+             JsonWriter writer = new JsonWriter(new OutputStreamWriter(byteOut, "UTF-8"))) {
+
+            writer.setIndent("  ");
+            writer.beginObject();
+
+            writeDeviceInfo(writer, appVersion, androidID);
+            writeConfigObject(writer);
+            writeSegmentArray(writer, zipOut);
+
+            writer.endObject()
+                  .close();
+
+            byteOut.flush();
+            return byteOut.toByteArray();
+        }
+    }
+
+    private void imgToZip(ZipOutputStream zipOut, String imgName, String filepath, Mat img)
+        throws IOException {
+        Log.d(logTag, "Writing image to zip");
+        MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
+
+        Imgcodecs.imencode(filepath, img, mBuffer, param);
+
+        zipOut.putNextEntry(new ZipEntry(imgName));
+        if (mBuffer != null) zipOut.write(mBuffer.toArray());
+
+        Log.d(logTag, "Image written to zip.");
+    }
 
     /**
      * Starts the thread running a diskwriter
@@ -74,9 +106,9 @@ public class DiskWriter extends Thread {
         Log.d(logTag, "Commencing DiskWriter.run()");
         //File name format: 'androidID'_'eventID'
 
-        Preferences prefs = Preferences.getInstance();
+        Preferences p = Preferences.getInstance();
 
-        String androidID = prefs.getSetting("androidid", "42");
+        String androidID = p.getString("androidid");
         String appVersion = Utils.getAppVersion(context);
 
         String baseName = androidID + "_" + String.valueOf(eventID);
@@ -111,26 +143,16 @@ public class DiskWriter extends Thread {
         }
     }
 
-    // TODO: Get clarification on the OutputStreams / Writers
-    // I feel like I'm doing something redundantly
-    private byte[] getJsonBytes(ZipOutputStream zipOut, String appVersion, String androidID)
-        throws IOException, InterruptedException {
-        try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-             JsonWriter writer = new JsonWriter(new OutputStreamWriter(byteOut, "UTF-8"))) {
+    /** Signal that the event is over and all segments have been added */
+    public void signalEnd() { endReached = true; }
 
-            writer.setIndent("  ");
-            writer.beginObject();
-
-            writeDeviceInfo(writer, appVersion, androidID);
-            writeConfigObject(writer);
-            writeSegmentArray(writer, zipOut);
-
-            writer.endObject()
-                  .close();
-
-            byteOut.flush();
-            return byteOut.toByteArray();
-        }
+    private void writeConfigObject(JsonWriter writer) throws IOException {
+        Resources res = context.getResources();
+        int wtID = R.integer.warningtime;
+        writer.name("configuration").beginObject()
+              .name(Utils.resToName(res, wtID)).value(res.getInteger(wtID))
+              //TODO: add other configuration stuff here
+              .endObject();
     }
 
     private void writeDeviceInfo(JsonWriter writer, String appVer, String androidID)
@@ -141,15 +163,6 @@ public class DiskWriter extends Thread {
               .name("appversion").value(appVer)
               .name("eventdata").value(String.valueOf(eventID))
               .name("timezone").value(TimeZone.getDefault().getID());
-    }
-
-    private void writeConfigObject(JsonWriter writer) throws IOException {
-        Resources res = context.getResources();
-        int wtID = R.integer.warningtime;
-        writer.name("configuration").beginObject()
-              .name(Utils.resToName(res, wtID)).value(res.getInteger(wtID))
-              //TODO: add other configuration stuff here
-              .endObject();
     }
 
     private void writeSegmentArray(JsonWriter writer, ZipOutputStream zipOut)
@@ -218,18 +231,5 @@ public class DiskWriter extends Thread {
                   .endObject();
         }
         Log.d(logTag, "segmentObject complete");
-    }
-
-    private void imgToZip(ZipOutputStream zipOut, String imgName, String filepath, Mat img)
-        throws IOException {
-        Log.d(logTag, "Writing image to zip");
-        MatOfInt param = new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION);
-
-        Imgcodecs.imencode(filepath, img, mBuffer, param);
-
-        zipOut.putNextEntry(new ZipEntry(imgName));
-        if (mBuffer != null) zipOut.write(mBuffer.toArray());
-
-        Log.d(logTag, "Image written to zip.");
     }
 }

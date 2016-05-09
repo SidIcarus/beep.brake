@@ -59,6 +59,23 @@ public class CarDetector implements Detector {
         TempLogger.incrementCount(TempLogger.ANALYZED_FRAMES);
     }
 
+    private Rect filterLocationsFound(MatOfRect loc) {
+        // Pick Largest
+        double largest = 0;
+        Rect currRect = null;
+        for (Rect r : loc.toList()) {
+            //calc dist to mid pt
+            if (largest < r.area()) {
+                largest = r.area();
+                currRect = r;
+            }
+        }
+
+        if (currRect != null) Log.d(TAG, currRect.size().toString());
+
+        return currRect;
+    }
+
     /**
      * detect img
      * send points to draw to the UI Logic
@@ -92,22 +109,5 @@ public class CarDetector implements Detector {
 
         Rect r = this.filterLocationsFound(foundLocations);
         activity.setCurrentFoundRect(mat, r);
-    }
-
-    private Rect filterLocationsFound(MatOfRect loc) {
-        // Pick Largest
-        double largest = 0;
-        Rect currRect = null;
-        for (Rect r : loc.toList()) {
-            //calc dist to mid pt
-            if (largest < r.area()) {
-                largest = r.area();
-                currRect = r;
-            }
-        }
-
-        if (currRect != null) Log.d(TAG, currRect.size().toString());
-
-        return currRect;
     }
 }

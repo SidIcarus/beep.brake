@@ -7,7 +7,7 @@ import android.util.Log;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import edu.rit.se.beepbrake.segment.Constants;
+import edu.rit.se.beepbrake.constants.SegmentConstants;
 import edu.rit.se.beepbrake.buffer.BufferManager;
 
 public class CameraDecision extends Decision {
@@ -33,13 +33,15 @@ public class CameraDecision extends Decision {
 
             //Check for position data, lol maybe change json
             // TODO: "pos" : [x1,y1,x2,y2] (segment writes obj address)
-            if (curSeg.getDataObject(Constants.CAR_POS_X) != null && curSeg.getDataObject(Constants.CAR_POS_Y) != null &&
-                    curSeg.getDataObject(Constants.CAR_POS_WIDTH) != null && curSeg.getDataObject(Constants.CAR_POS_HEIGHT) != null) {
+            if (curSeg.getDataObject(SegmentConstants.CAR_POS_X) != null && curSeg.getDataObject(
+                SegmentConstants.CAR_POS_Y) != null &&
+                curSeg.getDataObject(SegmentConstants.CAR_POS_WIDTH) != null && curSeg.getDataObject(
+                SegmentConstants.CAR_POS_HEIGHT) != null) {
 
-                int x = (int) curSeg.getDataObject(Constants.CAR_POS_X);
-                int y = (int) curSeg.getDataObject(Constants.CAR_POS_Y);
-                int w = (int) curSeg.getDataObject(Constants.CAR_POS_WIDTH);
-                int h = (int) curSeg.getDataObject(Constants.CAR_POS_HEIGHT);
+                int x = (int) curSeg.getDataObject(SegmentConstants.CAR_POS_X);
+                int y = (int) curSeg.getDataObject(SegmentConstants.CAR_POS_Y);
+                int w = (int) curSeg.getDataObject(SegmentConstants.CAR_POS_WIDTH);
+                int h = (int) curSeg.getDataObject(SegmentConstants.CAR_POS_HEIGHT);
                 double[] data = new double[]{x, y, w, h};
                 curr.set(data);
 

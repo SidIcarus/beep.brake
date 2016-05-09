@@ -26,6 +26,10 @@ public class FirstRunFragment extends Fragment implements View.OnClickListener {
 
     }
 
+    @Override public void onClick(View v) {
+
+    }
+
     // FL 1.3: Created
     // Called soon after onCreateView() & ensures that the fragment's root view is non-null. Any
     // view setup should happen here. E.g., view object handles, attaching listeners.
@@ -36,9 +40,5 @@ public class FirstRunFragment extends Fragment implements View.OnClickListener {
         ctv.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { ctv.setChecked(!ctv.isChecked()); }
         });
-    }
-
-    @Override public void onClick(View v) {
-
     }
 }

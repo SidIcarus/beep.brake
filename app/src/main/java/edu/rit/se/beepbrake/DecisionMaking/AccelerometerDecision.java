@@ -3,8 +3,8 @@ package edu.rit.se.beepbrake.decisionMaking;
 // Created by Ryan on 3/3/16.
 import android.util.Log;
 
-import edu.rit.se.beepbrake.segment.Constants;
 import edu.rit.se.beepbrake.buffer.BufferManager;
+import edu.rit.se.beepbrake.constants.SegmentConstants;
 
 public class AccelerometerDecision extends Decision {
 
@@ -28,8 +28,8 @@ public class AccelerometerDecision extends Decision {
         while (running) {
             if (!requestSegment()) continue;
 
-            if (curSeg.getDataObject(Constants.ACCEL_Z) != null) {
-                zVal = (Double) curSeg.getDataObject(Constants.ACCEL_Z);
+            if (curSeg.getDataObject(SegmentConstants.ACCEL_Z) != null) {
+                zVal = (Double) curSeg.getDataObject(SegmentConstants.ACCEL_Z);
                 //oldzVal = (Double)curSeg.getPrevSeg().getDataObject(Constants.ACCEL_Z);
                 //diffzVal = oldzVal - zVal;
 

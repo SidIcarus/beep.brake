@@ -9,6 +9,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import edu.rit.se.beepbrake.constants.SegmentConstants;
+
 import java.util.HashMap;
 
 // Created by Bradley on 10/17/2015 or on 1/11/2016.
@@ -30,14 +32,16 @@ public class GPSSensor implements LocationListener {
         if (checkPermission()) locationManager.requestLocationUpdates(provider, 100, 0, this);
     }
 
-    public void send(Float spd, Double lat, Double lng) {
-        HashMap<String, Object> d = new HashMap<String, Object>();
+    private boolean checkPermission() {
+        PackageManager pm = context.getPackageManager();
+        int hasPermission = pm.checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, context.getPackageName());
+        if (hasPermission == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else if (hasPermission == PackageManager.PERMISSION_DENIED) {
+            //TODO warn the user GPS doesn't work
 
-        if (lat != null) d.put(Constants.GPS_LAT, lat);
-        if (lng != null) d.put(Constants.GPS_LNG, lng);
-        if (spd != null) d.put(Constants.GPS_SPD, spd);
-
-        segSync.UpdateDataAgg(d);
+            return false;
+        } else return false;
     }
 
     @Override
@@ -49,29 +53,27 @@ public class GPSSensor implements LocationListener {
         send(spd, lat, lng);
     }
 
-    public void onStatusChanged(String x, int y, Bundle bundle) { }
-
-    @Override
-    public void onProviderEnabled(String provider) { }
+    public void onPause() { if (checkPermission()) locationManager.removeUpdates(this); }
 
     @Override
     public void onProviderDisabled(String provider) { }
+
+    @Override
+    public void onProviderEnabled(String provider) { }
 
     public void onResume() {
         if (checkPermission()) locationManager.requestLocationUpdates(provider, 100, 0, this);
     }
 
-    public void onPause() { if (checkPermission()) locationManager.removeUpdates(this); }
+    public void onStatusChanged(String x, int y, Bundle bundle) { }
 
-    private boolean checkPermission() {
-        PackageManager pm = context.getPackageManager();
-        int hasPermission = pm.checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, context.getPackageName());
-        if (hasPermission == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else if (hasPermission == PackageManager.PERMISSION_DENIED) {
-            //TODO warn the user GPS doesn't work
+    public void send(Float spd, Double lat, Double lng) {
+        HashMap<String, Object> d = new HashMap<String, Object>();
 
-            return false;
-        } else return false;
+        if (lat != null) d.put(SegmentConstants.GPS_LAT, lat);
+        if (lng != null) d.put(SegmentConstants.GPS_LNG, lng);
+        if (spd != null) d.put(SegmentConstants.GPS_SPD, spd);
+
+        segSync.UpdateDataAgg(d);
     }
 }

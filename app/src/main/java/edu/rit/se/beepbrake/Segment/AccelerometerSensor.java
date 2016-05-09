@@ -1,6 +1,7 @@
 package edu.rit.se.beepbrake.segment;
 
 // Created by Bradley on 1/11/2016.
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -9,6 +10,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 import java.util.HashMap;
+
+import edu.rit.se.beepbrake.constants.SegmentConstants;
 
 public class AccelerometerSensor implements SensorEventListener {
 
@@ -28,24 +31,20 @@ public class AccelerometerSensor implements SensorEventListener {
         }
     }
 
-    public void send(Float x, Float y, Float z) {
-        HashMap<String, Object> data = new HashMap<String, Object>();
-
-        if (x != null)  data.put(Constants.ACCEL_X, x);
-
-        if (y != null) data.put(Constants.ACCEL_Y, y);
-
-        if (z != null) data.put(Constants.ACCEL_Z, z);
-
-        segSync.UpdateDataAgg(data);
+    private boolean checkAvailability() {
+        PackageManager pm = context.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER);
     }
 
-    public void onResume() {
-        if (checkAvailability()) manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    }
+    public void onAccuracyChanged(Sensor s, int i) { }
 
     public void onPause() {
         if (checkAvailability()) manager.unregisterListener(this);
+    }
+
+    public void onResume() {
+        if (checkAvailability())
+            manager.registerListener(this, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void onSensorChanged(SensorEvent event) {
@@ -56,10 +55,15 @@ public class AccelerometerSensor implements SensorEventListener {
         send(x, y, z);
     }
 
-    public void onAccuracyChanged(Sensor s, int i) { }
+    public void send(Float x, Float y, Float z) {
+        HashMap<String, Object> data = new HashMap<String, Object>();
 
-    private boolean checkAvailability() {
-        PackageManager pm = context.getPackageManager();
-        return pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER);
+        if (x != null) data.put(SegmentConstants.ACCEL_X, x);
+
+        if (y != null) data.put(SegmentConstants.ACCEL_Y, y);
+
+        if (z != null) data.put(SegmentConstants.ACCEL_Z, z);
+
+        segSync.UpdateDataAgg(data);
     }
 }
