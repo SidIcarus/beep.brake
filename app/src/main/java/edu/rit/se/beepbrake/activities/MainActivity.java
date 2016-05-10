@@ -1,11 +1,14 @@
 package edu.rit.se.beepbrake.activities;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.SurfaceView;
@@ -35,7 +38,9 @@ import edu.rit.se.beepbrake.utils.Utils;
 
 public class MainActivity extends AppCompatActivity implements DetectorCallback {
 
-    private static final String TAG = "Main-Activity";
+    private static final String logTag = "System.Main";
+
+    public static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
 
     static { System.loadLibrary("opencv_java3"); }
 
@@ -71,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
         Utils.hideStatusBar(getWindow());
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        requestPermissionForCamera();
 
         initBottomSheet();
 
@@ -249,6 +256,13 @@ public class MainActivity extends AppCompatActivity implements DetectorCallback 
 
             @Override public void onSlide(View bottomSheet, float slideOffset) { }
         });
+    }
+
+    private void requestPermissionForCamera(){
+        int result = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+        }
     }
 
     //    @Override
