@@ -19,8 +19,12 @@ public class LaunchScreenActivity extends AppCompatActivity {
 
     final long splashTIME = (long) getResources().getInteger(R.integer.SPLASH_TIME);
 
+
+    /**
+     *
+     */
     private class BackgroundTask extends AsyncTask {
-        Intent mIntent;
+        Intent mIntent = null;
 
         //BackgroundTask() {}
 

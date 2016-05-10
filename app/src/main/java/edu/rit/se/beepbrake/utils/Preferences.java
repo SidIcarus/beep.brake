@@ -24,12 +24,15 @@ import edu.rit.se.beepbrake.annotations.PreferenceType;
 import edu.rit.se.beepbrake.constants.PreferenceConstants;
 
 /*
-These are to be kept in mem until it has a chance to be written to SP. (the POST return #
-100/200/400) the only time it will be saving to the SP will be when the activity has to close and
+These are to be kept in mem until it has a chance to be written to SP. (the
+POST return #
+100/200/400) the only time it will be saving to the SP will be when the
+activity has to close and
  there has
 been a failure and or something that has not been uploaded yet so as to
 try it again when the app starts again
-TODO: SharedPreferences - save Array<Str> UploadUID This will be stored in memuntil it has a chance to be written to SP.
+TODO: SharedPreferences - save Array<Str> UploadUID This will be stored in
+memuntil it has a chance to be written to SP.
  */
 
 /**
@@ -40,15 +43,15 @@ TODO: SharedPreferences - save Array<Str> UploadUID This will be stored in memun
 @Keep
 public final class Preferences implements SharedPreferences {
 
-    private SharedPreferences mPreferences = null;
-    private HashMap<String, Preference> mMap = null;
+    private SharedPreferences           mPreferences = null;
+    private HashMap<String, Preference> mMap         = null;
 
     /** Lazy Singleton implementation */
     private static final class Lazy {
         @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
-        static volatile Preferences singleton = new Preferences();
-        static volatile Context mContext = null;
-        static boolean isInitialized = false;
+        static volatile Preferences singleton     = new Preferences();
+        static volatile Context     mContext      = null;
+        static          boolean     isInitialized = false;
     }
 
     /** Constructor */
@@ -70,51 +73,51 @@ public final class Preferences implements SharedPreferences {
      * @param type        {@link PreferenceType}
      * @param key         The name of the preference to retrieve.
      * @param defValue    Value to return if this preference does not exist.
-     * @param optDefValue Secondary Value to return if this preference does not exist.
-     *                    Currently only used for TimeZone
+     * @param optDefValue Optional secondary default value to return if this preference does not
+     *                    exist. Currently only used for TimeZone
      *
      * @return Returns the preference value if it exists, or defValue. Throws ClassCastException if
      * there is a preference with this name that is not of the passed type.
      */
-    @SuppressWarnings({
-                          "unchecked", "FieldRepeatedlyAccessedInMethod", "OverlyComplexMethod",
-                          "OverlyLongMethod", "AssignmentToMethodParameter"})
+    //@formatter:off
+    @SuppressWarnings({ "unchecked", "FieldRepeatedlyAccessedInMethod", "OverlyComplexMethod",
+                        "OverlyLongMethod", "AssignmentToMethodParameter"})
     private Object get(@PreferenceType int type, String key, Object defValue, Object optDefValue) {
+        SharedPreferences p = mPreferences;
         try {
+
             switch (type) {
-                //@formatter:off
-                case PreferenceType.ALL:    return mPreferences.getAll();
-                case PreferenceType.BOOL:   return mPreferences.getBoolean(key, (boolean) defValue);
-                case PreferenceType.FLOAT:  return mPreferences.getFloat(key, (float) defValue);
-                case PreferenceType.INT:    return mPreferences.getInt(key, (int) defValue);
-                case PreferenceType.LONG:   return mPreferences.getLong(key, (long) defValue);
-                case PreferenceType.STR:    return mPreferences.getString(key, (String) defValue);
+                case PreferenceType.ALL:        return p.getAll();
+                case PreferenceType.BOOL:       return p.getBoolean(key, (boolean) defValue);
+                case PreferenceType.FLOAT:      return p.getFloat(key, (float) defValue);
+                case PreferenceType.INT:        return p.getInt(key, (int) defValue);
+                case PreferenceType.LONG:       return p.getLong(key, (long) defValue);
+                case PreferenceType.STR:        return p.getString(key, (String) defValue);
+                case PreferenceType.STR_SET:    return p.getStringSet(key, (Set<String>) defValue);
+                case PreferenceType.TIME_ZONE:
+                    return p.getString(key + "_tZone", ((TimeZone) optDefValue).getID());
                 case PreferenceType.DATE:
-                    long time = mPreferences.getLong(key + "_time", ((Date)defValue).getTime());
-                    TimeZone zone = TimeZone.getTimeZone(
-                        mPreferences.getString(key + "_tZone",((TimeZone)optDefValue).getID()));
+                    long time = p.getLong(key + "_time", ((Date) defValue).getTime());
+                    TimeZone zone = TimeZone.getTimeZone( p.getString(key + "_tZone",((TimeZone)
+                        optDefValue).getID()));
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(time);
                     calendar.setTimeZone(zone);
 
                     return calendar.getTime();
-                case PreferenceType.STR_SET:
-                    return mPreferences.getStringSet(key, (Set<String>) defValue);
-                case PreferenceType.TIME_ZONE:
-                    return mPreferences.getString(key +"_tZone", ((TimeZone)optDefValue).getID());
-                case PreferenceType.INVALID:break; // TODO: Prefs.get INVALID action
-                case PreferenceType.NULL:   break; // TODO: Prefs.get NULL action
-
-                default: break; // TODO: Prefs.get default action
-                //@formatter:on
+                case PreferenceType.INVALID:    break; // TODO: Prefs.get INVALID
+                case PreferenceType.NULL:       break; // TODO: Prefs.get NULL
+                default:                        break; // TODO: Prefs.get default action
             }
         } catch (ClassCastException e) {
             if (BuildConfig.DEBUG) {
                 @SuppressLint("DefaultLocale")
                 String paramsToString =
-                    String.format("type:%1d, name:%1s, defValue:%1s, optDefValue:%1s", type, key,
-                                  defValue != null ? defValue.toString() : null,
-                                  optDefValue != null ? optDefValue.toString() : null);
+                    String.format(
+                        "type:%1d, name:%1s, defValue:%1s, optDefValue:%1s",
+                        type, key,
+                        defValue != null ? defValue.toString() : null,
+                        optDefValue != null ? optDefValue.toString() : null);
 
                 Log.w(PreferenceConstants.logTAG, e);
                 Log.d(PreferenceConstants.logTAG, paramsToString);
@@ -154,10 +157,13 @@ public final class Preferences implements SharedPreferences {
      *
      * @return Returns the preference value if it exists, or the predefined default value.
      */
-    public boolean getBoolean(String key) { return getBoolean(key, getBoolDef(key)); }
+    public boolean getBoolean(String key) {
+        return getBoolean(key, getBoolDef(key));
+    }
 
     /** @return The context held. Should be the AppContext. */
-    @SuppressWarnings("MethodMayBeStatic") private Context getContext() { return Lazy.mContext; }
+    @SuppressWarnings("MethodMayBeStatic")
+    private Context getContext() { return Lazy.mContext; }
 
     /**
      * Retrieve an Date value from the preferences.
@@ -187,8 +193,7 @@ public final class Preferences implements SharedPreferences {
      *
      * @return Returns the preference value if it exists, or default value.
      */
-    @SuppressWarnings("MethodMayBeStatic")
-    private Date getDateDef(String key) { return Utils.getNow(); }
+    private Date getDateDef(String key) {return (Date) getDefault(PreferenceType.DATE, key, false);}
 
     /**
      * Retrieves the default value as defined by the given fallback, a resource, or an annotation
@@ -203,24 +208,26 @@ public final class Preferences implements SharedPreferences {
     private Object getDefault(@PreferenceType int type, String key, Object fallback) {
         Preference annotation = mMap.get(key);
         if (annotation == null || !annotation.hasDefault()) return fallback;
-        int resId = annotation.defaultResource();
-        boolean hasRes = resId != 0;
-        Resources r = getContext().getResources();
-        Object rtn;
+
+        int       resId  = annotation.defaultResource();
+        boolean   hasRes = resId != 0;
+        Object    rtn;
+        Resources res    = getContext().getResources();
+
         switch (type) {
-            //@formatter:off
+        //@formatter:off
             case PreferenceType.BOOL:
-                rtn = hasRes ? r.getBoolean(resId) : annotation.defaultBoolean(); break;
+                rtn = hasRes ? res.getBoolean(resId) : annotation.defaultBoolean();       break;
             case PreferenceType.INT:
-                rtn = hasRes ? r.getInteger(resId) : annotation.defaultInt(); break;
+                rtn = hasRes ? res.getInteger(resId) : annotation.defaultInt();           break;
             case PreferenceType.FLOAT:
-                rtn = hasRes ? (float) r.getInteger(resId) : annotation.defaultFloat(); break;
+                rtn = hasRes ? (float) res.getInteger(resId) : annotation.defaultFloat(); break;
             case PreferenceType.STR:
-                rtn = hasRes ? r.getString(resId) : annotation.defaultString(); break;
+                rtn = hasRes ? res.getString(resId) : annotation.defaultString();         break;
             case PreferenceType.LONG:
-                rtn = hasRes ? (long) r.getInteger(resId) : annotation.defaultLong(); break;
+                rtn = hasRes ? (long) res.getInteger(resId) : annotation.defaultLong();   break;
+            case PreferenceType.DATE: rtn = Utils.getNow();                             break;
             case PreferenceType.ALL:
-            case PreferenceType.DATE:
             case PreferenceType.INVALID:
             case PreferenceType.NULL:
             case PreferenceType.STR_SET:
@@ -241,12 +248,14 @@ public final class Preferences implements SharedPreferences {
      *
      * @return The default value: either the given fallback, resource defined, or annotation defined
      */
-    private Object getDefault(String key, Object fallback, Method getRes, Method aNote) {
+    private Object getDefault(String key, Object fallback, Method getRes,
+        Method aNote) {
         try {
             Preference annotation = mMap.get(key);
             if (annotation == null || !annotation.hasDefault()) return fallback;
             int resId = annotation.defaultResource();
-            if (resId != 0) return getRes.invoke(getContext().getResources(), resId);
+            if (resId != 0)
+                return getRes.invoke(getContext().getResources(), resId);
             return aNote.invoke(annotation);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
@@ -266,7 +275,9 @@ public final class Preferences implements SharedPreferences {
      *
      * @return Returns the preference value if it exists, or the predefined default value.
      */
-    public float getFloat(String key) { return getFloat(key, getFloatDef(key)); }
+    public float getFloat(String key) {
+        return getFloat(key, getFloatDef(key));
+    }
 
     /**
      * Retrieve the default float value from the preferences. See {@link Preference}
@@ -316,7 +327,9 @@ public final class Preferences implements SharedPreferences {
      *
      * @return Returns the preference value if it exists, or defValue.
      */
-    private int getIntDef(String key) { return (int) getDefault(PreferenceType.INT, key, 0); }
+    private int getIntDef(String key) {
+        return (int) getDefault(PreferenceType.INT, key, 0);
+    }
 
     @Override
     public long getLong(String key, long defValue) {
@@ -328,7 +341,8 @@ public final class Preferences implements SharedPreferences {
      *
      * @param key The name of the preference to retrieve.
      *
-     * @return Returns the preference value if it exists, or the predefined default value.
+     * @return Returns the preference value if it exists, or the predefined
+     * default value.
      */
     public long getLong(String key) {
         return (long) get(PreferenceType.LONG, key, getLongDef(key), null);
@@ -341,7 +355,9 @@ public final class Preferences implements SharedPreferences {
      *
      * @return Returns the preference value if it exists, or default value.
      */
-    private long getLongDef(String key) { return (long) getDefault(PreferenceType.LONG, key, 0L); }
+    private long getLongDef(String key) {
+        return (long) getDefault(PreferenceType.LONG, key, 0L);
+    }
 
     /** @return Le map. */
     private HashMap<String, Preference> getMap() { return mMap; }
@@ -351,7 +367,9 @@ public final class Preferences implements SharedPreferences {
      *
      * @param map The map it was destined to be.
      */
-    private void setMap(HashMap<String, Preference> map) { if (mMap == null) mMap = map; }
+    private void setMap(HashMap<String, Preference> map) {
+        if (mMap == null) mMap = map;
+    }
 
     @Override
     public String getString(String key, String defValue) {
@@ -391,7 +409,9 @@ public final class Preferences implements SharedPreferences {
      *
      * @return Returns the preference value if it exists, or the predefined default value.
      */
-    public Set<String> getStringSet(String key) { return getStringSet(key, getStringSetDef(key)); }
+    public Set<String> getStringSet(String key) {
+        return getStringSet(key, getStringSetDef(key));
+    }
 
     /**
      * Retrieve the default int value from the preferences. See {@link Preference}
@@ -409,22 +429,24 @@ public final class Preferences implements SharedPreferences {
      * @param key      The name of the preference to retrieve.
      * @param defValue Value to return if this preference does not exist.
      *
-     * @return Returns the preference value if it exists, or defValue.  Throws
-     * ClassCastException if there is a preference with this name that is not
-     * a long.
+     * @return Returns the preference value if it exists, or defValue.  Throws ClassCastException if
+     * there is a preference with this name that is not a long.
      */
     public TimeZone getTimeZone(String key, TimeZone defValue) {
         return (TimeZone) get(PreferenceType.TIME_ZONE, key, defValue, null);
     }
 
     /**
-     * Alias's {@link #getTimeZone(String, TimeZone)} w/ defValue = {@link #getTimeZoneDef(String)}.
+     * Alias's {@link #getTimeZone(String, TimeZone)} w/ defValue = {@link
+     * #getTimeZoneDef(String)}.
      *
      * @param key The name of the preference to retrieve.
      *
      * @return Returns the preference value if it exists, or the predefined default value.
      */
-    public TimeZone getTimeZone(String key) { return getTimeZone(key, getTimeZoneDef(key)); }
+    public TimeZone getTimeZone(String key) {
+        return getTimeZone(key, getTimeZoneDef(key));
+    }
 
     /**
      * Retrieve the default TimeZone value from the preferences. See {@link Preference}
@@ -452,13 +474,16 @@ public final class Preferences implements SharedPreferences {
                     if (pref == null) continue;
                     try {
                         map.put((String) field.get(null), pref);
-                    } catch (IllegalAccessException | IllegalArgumentException e) {
+                    } catch (IllegalAccessException |
+                        IllegalArgumentException e) {
                         if (BuildConfig.DEBUG)
-                            Log.d(PreferenceConstants.logTAG, "initialize: " + e.getMessage());
+                            Log.d(PreferenceConstants.logTAG,
+                                  "initialize: " + e.getMessage());
                         e.printStackTrace();
                     } catch (RuntimeException ignore) { }
                 }
-                // TODO: still set it if it has erred? How to verify Map integrity
+                // TODO: still set it if it has erred? How to verify Map
+                // integrity
                 p.setMap(map);
             } catch (RuntimeException e) {
                 e.printStackTrace();
@@ -480,8 +505,7 @@ public final class Preferences implements SharedPreferences {
         mPreferences.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
-    /*
-    private interface SharedPreferencesProcessStrategy {
+    /*private interface SharedPreferencesProcessStrategy {
         boolean importValue(JsonParser jsonParser, String key, SharedPreferences.Editor editor)
             throws IOException;
         boolean exportValue(JsonGenerator jsonGenerator, String key, SharedPreferences preferences)
@@ -494,18 +518,20 @@ public final class Preferences implements SharedPreferences {
         @NonNull final SharedPreferencesProcessStrategy strategy) throws IOException {
         final ZipEntry entry = zipFile.getEntry(entryName);
         if (entry == null) return;
+
         final JsonParser jsonParser =
-            LoganSquare.JSON_FACTORY.createParser(zipFile.getInputStream(entry));
-        if (jsonParser.getCurrentToken() == null) {
-            jsonParser.nextToken();
-        }
+            LoganSquare.JSON_FACTORY.createParser(zipFile.getInputStream (entry));
+        if (jsonParser.getCurrentToken() == null) jsonParser.nextToken();
+
         if (jsonParser.getCurrentToken() != JsonToken.START_OBJECT) {
             jsonParser.skipChildren();
             return;
         }
         final SharedPreferences preferences =
             context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
+
         final SharedPreferences.Editor editor = preferences.edit();
+
         while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
             String key = jsonParser.getCurrentName();
             strategy.importValue(jsonParser, key, editor);
@@ -514,22 +540,25 @@ public final class Preferences implements SharedPreferences {
     }
 
     private static void exportSharedPreferencesData(@NonNull final ZipOutputStream zos,
-        final Context context,
-        @NonNull final String preferencesName, @NonNull final String entryName,
-        @NonNull final SharedPreferencesProcessStrategy strategy) throws IOException {
+        final Context context, @NonNull final String preferencesName,
+        @NonNull final String entryName, @NonNull final SharedPreferencesProcessStrategy strategy)
+        throws IOException {
+
         final SharedPreferences preferences =
             context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
         final Map<String, ?> map = preferences.getAll();
+
         zos.putNextEntry(new ZipEntry(entryName));
+
         final JsonGenerator jsonGenerator = LoganSquare.JSON_FACTORY.createGenerator(zos);
+
         jsonGenerator.writeStartObject();
-        for (String key : map.keySet()) {
-            strategy.exportValue(jsonGenerator, key, preferences);
-        }
+
+        for (String key : map.keySet()) strategy.exportValue(jsonGenerator, key, preferences);
+
         jsonGenerator.writeEndObject();
         jsonGenerator.flush();
         zos.closeEntry();
-    }
-    */
+    }*/
 }
 

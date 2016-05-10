@@ -1,5 +1,6 @@
 package edu.rit.se.beepbrake.utils;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -12,6 +13,8 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
@@ -31,23 +34,24 @@ import edu.rit.se.beepbrake.R;
 
 public class Utils {
 
-    public static TextView mStatusTextView;
+    public static TextView  mStatusTextView;
     public static ImageView mCpuAniImageView;
     public static int mDayNightMode = AppCompatDelegate.MODE_NIGHT_AUTO;
 
     public static Resources mResources;
     public static boolean isStatusBarHidden = false;
-    public static boolean isToolbarHidden = false;
-    public static int mSDKVersion = Build.VERSION.SDK_INT;
-    public static boolean isOlderThan16 = mSDKVersion < Build.VERSION_CODES.JELLY_BEAN;
-    public static boolean isOlderThan21 = mSDKVersion < Build.VERSION_CODES.LOLLIPOP;
-    public static int OLD_OS_SBAR_HIDE = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-    public static int NEW_OS_SBAR_HIDE =
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                    View.SYSTEM_UI_FLAG_FULLSCREEN;
+    public static boolean isToolbarHidden   = false;
+    public static int     mSDKVersion       = Build.VERSION.SDK_INT;
+    public static boolean isOlderThan16     = mSDKVersion < Build.VERSION_CODES.JELLY_BEAN;
+    public static boolean isOlderThan21     = mSDKVersion < Build.VERSION_CODES.LOLLIPOP;
+    public static int     OLD_OS_SBAR_HIDE  = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+    public static int     NEW_OS_SBAR_HIDE  =
+        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+        View.SYSTEM_UI_FLAG_FULLSCREEN;
 
-    public static int OLD_OS_SBAR_SHOW = 0; //don't know what it is
-    public static int NEW_OS_SBAR_SHOW = 0;// don't know what it is
+    public static       int OLD_OS_SBAR_SHOW               = 0; //don't know what it is
+    public static       int NEW_OS_SBAR_SHOW               = 0;// don't know what it is
+    public static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
     /*
     View.getContext(): Returns the context the view is currently running in. Usually the
     currently active Activity.
@@ -70,12 +74,12 @@ public class Utils {
         // BEGIN_INCLUDE (get_current_ui_flags)
         // The UI options currently enabled are represented by a bitfield.
         // getSystemUiVisibility() gives us that bitfield.
-        int uiOptions = decorView.getSystemUiVisibility();
+        int uiOptions    = decorView.getSystemUiVisibility();
         int newUiOptions = uiOptions;
         // END_INCLUDE (get_current_ui_flags)
         // BEGIN_INCLUDE (toggle_ui_flags)
         boolean isImmersiveModeEnabled =
-                ((uiOptions | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) == uiOptions);
+            ((uiOptions | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) == uiOptions);
         // String isImmersiveModeEnabledStr = "Turning immersive mode mode ";
         // isImmersiveModeEnabledStr += (isImmersiveModeEnabled) ? "off." : "on.";
         // Log.i(TAG, isImmersiveModeEnabledStr);
@@ -137,7 +141,7 @@ public class Utils {
     // needs a check to see if it is currently visible
     public static void resumeNightMode(Resources res) {
 
-        int uiMode = res.getConfiguration().uiMode;
+        int uiMode         = res.getConfiguration().uiMode;
         int dayNightUiMode = uiMode & Configuration.UI_MODE_NIGHT_MASK;
 
         if (dayNightUiMode == Configuration.UI_MODE_NIGHT_NO) {
@@ -154,7 +158,7 @@ public class Utils {
 
     public static int getToolbarHeight(Context context) {
         int height = (int) context.getResources()
-                .getDimension(R.dimen.abc_action_bar_default_height_material);
+                                  .getDimension(R.dimen.abc_action_bar_default_height_material);
         return height;
     }
 
@@ -174,7 +178,7 @@ public class Utils {
         String appVersion = "0.0.0";
         try {
             appVersion = ctx.getPackageManager().getPackageInfo(
-                    ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS).versionName;
+                ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS).versionName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -185,7 +189,7 @@ public class Utils {
         // Transparent Status Bar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             activity.getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
     }
@@ -193,11 +197,11 @@ public class Utils {
     public static String resToName(Resources res, int id) { return res.getResourceEntryName(id); }
 
     public static String getWritePath(Context ctx) {
-        Preferences p = Preferences.getInstance();
-        int wDirID = R.string.write_directory;
-        String wDirName = resToName(ctx.getResources(), wDirID);
+        Preferences p        = Preferences.getInstance();
+        int         wDirID   = R.string.write_directory;
+        String      wDirName = resToName(ctx.getResources(), wDirID);
 
-        String wDir = p.getString(wDirName);
+        String wDir  = p.getString(wDirName);
         String wPath = p.getString("write_path", ctx.getFilesDir().getPath());
 
         return wPath + wDir;
@@ -208,8 +212,8 @@ public class Utils {
     // I think i can delete this
     public static void closeQuietly(Closeable input) {
         try {
-            if (input!= null ) { input.close(); }
-        } catch(IOException ioe) {
+            if (input != null) { input.close(); }
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
     }
@@ -253,4 +257,16 @@ public class Utils {
     }
 
     public static Date getNow() { return new Date(System.currentTimeMillis()); }
+
+    public static void requestPermissionForCamera(Context context, Activity activity) {
+        requestPermissionFor(context, activity, Manifest.permission.CAMERA, CAMERA_PERMISSION_REQUEST_CODE);
+    }
+
+    private static void requestPermissionFor(Context context, Activity activity, String permission,
+        int reqCode) {
+        int result = ContextCompat.checkSelfPermission(context, permission);
+        if (result != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(activity, new String[]{permission}, reqCode);
+    }
+
 }
